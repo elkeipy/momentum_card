@@ -1,3 +1,37 @@
+# Momentum Card
+1. 프로젝트 생성
+- npx create-react-app my-project --template typescript
+  > npm install react react-dom @types/react @types/react-dom
+- cd my-project
+
+2. Tailwind CSS 설치
+- npm install -D tailwindcss postcss autoprefixer
+- npx tailwindcss init -p
+
+3.  Tailwind CSS 설정
+``` json
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+4. CSS 파일에 Tailwind 지시어 추가 (index.css)
+``` css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+5. 프로젝트 실행
+- npm start
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -44,36 +78,3 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
-
-
-1. 프로젝트 생성
-npx create-react-app my-project --template typescript
-cd my-project
-
-2. Tailwind CSS 설치
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-
-3.  Tailwind CSS 설정
-``` json
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-```
-
-4. CSS 파일에 Tailwind 지시어 추가
-: ex) index.css
-``` css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-5. 프로젝트 실행
-npm start
