@@ -34,6 +34,8 @@ module.exports = {
 6. 프로젝트 실행
 - npm start
 
+## 샘플
+> https://github.com/sbjang123456/react-draggable-resize-modal/tree/main
 
 # Getting Started with Create React App
 
