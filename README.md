@@ -28,7 +28,10 @@ module.exports = {
 @tailwind utilities;
 ```
 
-5. 프로젝트 실행
+5. web-vitals 설치
+- npm install --save-dev web-vitals
+
+6. 프로젝트 실행
 - npm start
 
 
