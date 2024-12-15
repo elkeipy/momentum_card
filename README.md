@@ -1,7 +1,9 @@
 # Momentum Card
 1. 프로젝트 생성
 - npx create-react-app my-project --template typescript
-  > npm install react react-dom @types/react @types/react-dom
+- `create-react-app` 명령어로 생성하지 않고 따로 `React` 설치
+  - npm install react react-dom @types/react @types/react-dom
+> `create-react-app` 명령어로 프로젝트 생성시 `babel` 이 자동설치되어 `.tsx` 를 브라우저가 인식할 수 있는 코드로 자동 변환
 - cd my-project
 
 2. Tailwind CSS 설치
