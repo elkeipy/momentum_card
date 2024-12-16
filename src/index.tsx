@@ -4,29 +4,29 @@ import './css/index.css';
 import App from './App';
 //import reportWebVitals from './reportWebVitals';
 
-const Title = (
-  <h3 id='title' onMouseDown={() => console.log('MouseDown')}>
-    Hello React
-  </h3>
-);
-
-const btn = (
-  <button style={{backgroundColor: "tomato"}} onClick={() => console.log('Push Push Baby!')}>
-    Push Me!
-  </button>
-)
-
-const container = React.createElement('div', null, [Title, btn]);
+function TestApp() {
+  const [counter, setCounter] = React.useState(0);
+  const onClick = () => {
+    setCounter(counter + 1);
+    console.log(counter);
+    //root.render(<TestApp/>);
+  }
+  
+  return (
+    <div>
+      <h3 id='title' onMouseDown={() => console.log('MouseDown')}>
+        Total Click: {counter}
+      </h3>
+      <button onClick={onClick}>Click Click</button>
+    </div>
+  )
+}
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-function funcEnter() {
-  console.log('Entering');
-}
-
-root.render(container);
+root.render(<TestApp/>);
 
 //root.render(
 //  <React.StrictMode>
