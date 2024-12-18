@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import ReactDOM from 'react-dom/client';
 import './css/index.css';
 import App from './App';
@@ -7,13 +7,27 @@ import App from './App';
 function TestApp() {
   const [counter, setCounter] = React.useState(0);
   const onClick = () => {
-    setCounter(counter + 1);
+    //setCounter(counter + 1);
+    setCounter((current) => current! + 1);
     console.log(counter);
-    //root.render(<TestApp/>);
-  }
+  };
+
+  const [minutes, setMinutes] = React.useState(0);
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value);
+    setMinutes(parseInt(event.target.value, 10));
+  };
   
   return (
     <div>
+      <h1>Time Converter</h1>
+      <label htmlFor='minutes'>Minutes</label>
+      <input value={minutes} id='minutes' type="number" placeholder='Minutes' 
+      onChange={onChange}/>
+      <h4>You want to convert {minutes}</h4>
+      <label htmlFor='hours'>Hours</label>
+      <input value={minutes / 60} id='hours' type="number" placeholder='Hours' />
+      <button onClick={() => {setMinutes(0)}}>Reset</button>
       <h3 id='title' onMouseDown={() => console.log('MouseDown')}>
         Total Click: {counter}
       </h3>
