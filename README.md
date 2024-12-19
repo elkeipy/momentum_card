@@ -38,6 +38,7 @@ module.exports = {
 
 ## 샘플
 > https://github.com/sbjang123456/react-draggable-resize-modal/tree/main
+***
 
 # Getting Started with Create React App
 
