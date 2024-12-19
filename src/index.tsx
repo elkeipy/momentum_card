@@ -12,22 +12,29 @@ function TestApp() {
     console.log(counter);
   };
 
-  const [minutes, setMinutes] = React.useState(0);
+  const [amount, setAmount] = React.useState(0);
+  const [flipped, setFlipped] = React.useState(false);
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value);
-    setMinutes(parseInt(event.target.value, 10));
+    setAmount(parseInt(event.target.value, 10));
   };
+  const onFlip = () => {
+    setAmount(0);
+    setFlipped(current => !current);
+  }
   
   return (
     <div>
       <h1>Time Converter</h1>
       <label htmlFor='minutes'>Minutes</label>
-      <input value={minutes} id='minutes' type="number" placeholder='Minutes' 
-      onChange={onChange}/>
-      <h4>You want to convert {minutes}</h4>
+      <input value={flipped ? amount * 60 : amount} id='minutes' type="number" placeholder='Minutes' disabled={flipped}
+        onChange={onChange}/>
+      <h4>You want to convert {amount}</h4>
       <label htmlFor='hours'>Hours</label>
-      <input value={minutes / 60} id='hours' type="number" placeholder='Hours' />
-      <button onClick={() => {setMinutes(0)}}>Reset</button>
+      <input value={flipped ? amount : amount / 60} id='hours' type="number" placeholder='Hours' disabled={!flipped}
+        onChange={onChange}/>
+      <button onClick={() => {setAmount(0)}}>Reset</button>
+      <button onClick={onFlip}>Flip</button>
       <h3 id='title' onMouseDown={() => console.log('MouseDown')}>
         Total Click: {counter}
       </h3>
