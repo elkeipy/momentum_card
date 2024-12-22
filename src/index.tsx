@@ -1,9 +1,11 @@
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './css/index.css';
 import App from './App';
 //import reportWebVitals from './reportWebVitals';
 import PropTypes from 'prop-types'
+
+import Button from './Button';
 
 interface BtnProps {
   label: string;
@@ -43,6 +45,7 @@ function TestApp() {
     <div>
       <MemorizedBtn label={value} onClick={() => setValue("Revert Save Change")} fontSize={16} />
       <MemorizedBtn label={value} onClick={() => setValue("Revert Load Change")} />
+      <Button text='Continue'></Button>
     </div>
   )
 }
