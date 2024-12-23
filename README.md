@@ -30,7 +30,7 @@ module.exports = {
 @tailwind utilities;
 ```
 
-5. web-vitals 설치
+5. web-vitals 설치 (미사용)
 - npm install --save-dev web-vitals
 
 6. 프로젝트 실행
@@ -38,6 +38,10 @@ module.exports = {
 
 ## 샘플
 > https://github.com/sbjang123456/react-draggable-resize-modal/tree/main
+
+## React Overview/API Reference (한글)
+> https://ko.react.dev/  
+> https://ko.react.dev/reference/reacts
 
 ### React 정리
 * useState 변경된것만 다시 그려줌 (reRender)
