@@ -42,6 +42,11 @@ const MemorizedBtn = React.memo(Btn);
 function TestApp() {
   const [value, setValue] = React.useState("Save Change");
   const changeValue = () => setValue("Revert Change");
+  console.log("I run all the time");
+  const iRunOnlyOnce = () => {
+    console.log("I run only once");
+  }
+  React.useEffect(iRunOnlyOnce, []);
   return (
     <div>
       <h1 className={styles.title}>Welcom back!!!</h1>
