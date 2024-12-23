@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './css/index.css';
 import App from './App';
+import styles from './css/App.module.css';
 //import reportWebVitals from './reportWebVitals';
 import PropTypes from 'prop-types'
 
@@ -43,6 +44,7 @@ function TestApp() {
   const changeValue = () => setValue("Revert Change");
   return (
     <div>
+      <h1 className={styles.title}>Welcom back!!!</h1>
       <MemorizedBtn label={value} onClick={() => setValue("Revert Save Change")} fontSize={16} />
       <MemorizedBtn label={value} onClick={() => setValue("Revert Load Change")} />
       <Button text='Continue'></Button>

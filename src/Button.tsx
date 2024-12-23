@@ -1,12 +1,16 @@
 import React from 'react';
-import styled from './css/Button.module.css';
+import PropTypes from 'prop-types';
+import styles from './css/Button.module.css';
 
 interface ButtonProps {
     text?: string;
 }
+Button.propTypes = {
+    text: PropTypes.string.isRequired,
+}
 function Button(props: ButtonProps) {
     return (
-        <button className={styled.btn}>{props.text}</button>
+        <button className={styles.btn}>{props.text}</button>
     )
 }
 
