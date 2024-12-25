@@ -53,7 +53,10 @@ module.exports = {
   }
   const MemorizedBtn = React.memo(Btn);
   ```
-* useEffect : 한번만 실행
+* useEffect
+  - 한번만 실행 []
+  - dependencies 를 주어 원할때만 실행 [counter]
+  - cleanup : 함수에서 return 할때의 함수, 소멸자 느낌?
 ***
 
 # Getting Started with Create React App
