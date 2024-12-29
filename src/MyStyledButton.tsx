@@ -2,16 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './css/Button.module.css';
 
-interface ButtonProps {
+interface MyStyledButtonProps {
     text?: string;
 }
-Button.propTypes = {
+MyStyledButton.propTypes = {
     text: PropTypes.string.isRequired,
 }
-function Button(props: ButtonProps) {
+function MyStyledButton(props: MyStyledButtonProps) {
     return (
         <button className={styles.btn}>{props.text}</button>
     )
 }
 
-export default Button;
+export default MyStyledButton;

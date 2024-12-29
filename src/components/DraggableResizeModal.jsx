@@ -21,7 +21,7 @@ import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
 import PropTypes from "prop-types";
 
-const styles = (theme) => ({
+const styles = (theme: any) => ({
     root: {
         margin: 0,
         padding: theme.spacing(2),
@@ -47,7 +47,7 @@ const styles = (theme) => ({
 });
 
 // modal 의 타이틀과 최소화 및 닫기버튼 구성
-const ModalTitle = withStyles(styles)((props) => {
+const ModalTitle = withStyles(style: StylesType)((props) => {
     const { children, classes, width, isMinimized, onMinimized, onClose, ...other } = props;
     return (
         <div className={classes.root} {...other} style={{width}}>

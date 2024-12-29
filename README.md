@@ -44,16 +44,17 @@ module.exports = {
 > https://ko.react.dev/reference/reacts
 
 ### React 정리
-* useState : 변경된것만 다시 그려줌 (reRender)
-  * 하지만 컴포넌트의 state 를 변경하면 모든 자식 컴포넌트도 reRender 를 진행하게됨
-  * 그때 사용하는것이 useMemo (memorized) : MemorizedBtn 참고
+- useState : 변경된것만 다시 그려줌 (reRender)
+  - 하지만 컴포넌트의 state 를 변경하면 모든 자식 컴포넌트도 reRender 를 진행하게됨
+  - 그때 사용하는것이 useMemo (memorized) : MemorizedBtn 참고
   ```tsx
   function Btn(props: any) {
     ...
   }
   const MemorizedBtn = React.memo(Btn);
   ```
-* useEffect
+  - let 변수를 사용하지 않고 useState 를 사용하는 본질은 React 가 UI 를 자동 업데이트 하냐는것!
+- useEffect
   - 한번만 실행 []
   - dependencies 를 주어 원할때만 실행 [counter]
   - cleanup : 함수에서 return 할때의 함수, 소멸자 느낌?

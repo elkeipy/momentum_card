@@ -1,58 +1,44 @@
-import React from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import './css/index.css';
-import App from './App';
-import styles from './css/App.module.css';
+//import './css/index.css';
+//import App from './App';
+//import styles from './css/App.module.css';
 //import reportWebVitals from './reportWebVitals';
-import PropTypes from 'prop-types'
+import { Button, Input, Typography } from '@mui/material';
+//import { Typography } from '@material-tailwind/react';
 
-import Button from './Button';
-
-interface BtnProps {
-  label: string;
-  fontSize?: number;
-  onClick?: () => void;
-}
-
-Btn.propsType = {
-  label: PropTypes.string.isRequired,
-  fontSize: PropTypes.number,
-  onClick: PropTypes.func
-};
-
-function Btn(props: BtnProps) {
-  console.log(props.label + ' was rerendered');
-  return (
-    <button style={{
-      backgroundColor:"tomato",
-      color: "white",
-      padding: "20px 20px",
-      border: 0,
-      borderRadius: 10,
-      fontSize: props.fontSize,
-    }}
-    onClick={props.onClick}>
-      {props.label}
-    </button>
-  );
-}
-
-const MemorizedBtn = React.memo(Btn);
-
-function TestApp() {
-  const [value, setValue] = React.useState("Save Change");
-  const changeValue = () => setValue("Revert Change");
-  console.log("I run all the time");
-  const iRunOnlyOnce = () => {
-    console.log("I run only once");
+interface Coin {
+  id: string;
+  name: string;
+  symbol: string;
+  quotes: {
+    USD: {
+      price: number;
+    }
   }
-  React.useEffect(iRunOnlyOnce, []);
+}
+function TestApp() {
+  const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState<Coin[]>([]);
+  useEffect(() => {
+    fetch("https://api.coinpaprika.com/v1/tickers")
+      .then((response) => response.json())
+      .then((json) => {
+        console.log(json);
+        setCoins(json);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div>
-      <h1 className={styles.title}>Welcom back!!!</h1>
-      <MemorizedBtn label={value} onClick={() => setValue("Revert Save Change")} fontSize={16} />
-      <MemorizedBtn label={value} onClick={() => setValue("Revert Load Change")} />
-      <Button text='Continue'></Button>
+      {/* <Typography variant="h3" component="h3">My To Dos ({toDos.length})</Typography> */}
+      {/* <Button onClick={onClickAddToDo} variant="contained" color="primary">Add to do</Button> */}
+      <Typography variant="h3" component="h3">The Coins!({coins.length})</Typography>
+      {loading ? <strong>Loading</strong> : null}
+      <ul>
+        {coins.map((coin, id) => <li key={id}>{coin.name}({coin.symbol}) : {coin.quotes.USD.price}</li>)}
+      </ul>
     </div>
   )
 }
