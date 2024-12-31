@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from './css/Button.module.css';
+import styles from './css/MyStyledButton.module.css';
 
 interface MyStyledButtonProps {
     text?: string;
