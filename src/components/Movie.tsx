@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import PropTypes from 'prop-types';
 
-interface Movies {
+export interface MovieProps {
     id: number;
     title: string;
     year?: number;
@@ -18,14 +18,14 @@ Movie.propsType = {
     rating: PropTypes.number,
     runtime: PropTypes.number,
     summary: PropTypes.string,
-    //genres?: PropTypes.array,
-    medium_cover_image: PropTypes.string,
+    genres: PropTypes.arrayOf(PropTypes.string),
+    mediumCoverImage: PropTypes.string,
 }
 
-function Movie(props: Movies) {
+function Movie(props: MovieProps) {
     return (
         <div>
-            <img src={props.medium_cover_image} alt={props.medium_cover_image}/>
+            <img src={props.medium_cover_image} alt={props.title}/>
             <h2>{props.title}</h2>
             <p>{props.summary}</p>
             <p>Rating : {props.rating}</p>

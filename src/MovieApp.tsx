@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from "react"
-import Movie from "./components/Movie";
+import Movie, { MovieProps } from "./components/Movie";
 //import { Button, Input, Typography } from '@mui/material';
 
-interface Movies {
-    id: number;
-    title: string;
-    year: number;
-    rating: number;
-    runtime: number;
-    summary: string;
-    genres: string[];
-    medium_cover_image: string;
-}
 function MovieApp() {
     const [loading, setLoading] = useState(true);
-    const [movies, setMovies] = useState<Movies[]>([]);
+    const [movies, setMovies] = useState<MovieProps[]>([]);
     const getMovies = async() => {
         const json = await (
             await fetch('https://yts.mx/api/v2/list_movies.json?minimum_rating=8.8&sort_by=rating')
