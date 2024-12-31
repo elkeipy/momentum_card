@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import PropTypes from 'prop-types';
+import { Link } from "react-router-dom"
 
 export interface MovieProps {
     id: number;
@@ -19,20 +20,22 @@ Movie.propsType = {
     runtime: PropTypes.number,
     summary: PropTypes.string,
     genres: PropTypes.arrayOf(PropTypes.string),
-    mediumCoverImage: PropTypes.string,
+    medium_cover_image: PropTypes.string,
 }
 
 function Movie(props: MovieProps) {
     return (
         <div>
             <img src={props.medium_cover_image} alt={props.title}/>
-            <h2>{props.title}</h2>
+            <h2>
+                <Link to={`/detail/${props.id}`}>{props.title}</Link>
+            </h2>
             <p>{props.summary}</p>
             <p>Rating : {props.rating}</p>
             <p>Runtime : {props.runtime}(min)</p>
-            {/* <ul>
-                {Movies.genres.map(genre => <li key={genre}>{genre}</li>)}
-            </ul> */}
+            <ul>
+                {props.genres?.map(genre => <li key={genre}>{genre}</li>)}
+            </ul>
             <hr/>
         </div>
     );
