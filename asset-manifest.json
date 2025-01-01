@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/momentum_card/static/js/main.db2b0fcf.js",
+    "index.html": "/momentum_card/index.html",
+    "main.db2b0fcf.js.map": "/momentum_card/static/js/main.db2b0fcf.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.db2b0fcf.js"
+  ]
+}
