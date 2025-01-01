@@ -4,10 +4,10 @@ import Home from "./routes/Home";
 import Detail from "./routes/Detail";
 
 function MovieApp() {
-    return <Router>
+    return <Router basename = {process.env.PUBLIC_URL}>
         <Routes>
-            <Route path={`${process.env.PUBLIC_URL}/`} element={<Home />} />
-            <Route path={`${process.env.PUBLIC_URL}/detail/:id`} element={<Detail />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/detail/:id" element={<Detail />} />
         </Routes>
     </Router>;
 }
