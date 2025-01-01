@@ -23,7 +23,7 @@ module.exports = {
 }
 ```
 
-4. CSS 파일에 Tailwind 지시어 추가 (index.css)
+4. CSS 파일에 Tailwind 지시어 추가 (index.css) : 아직 미적용
 ``` css
 @tailwind base;
 @tailwind components;
@@ -59,6 +59,24 @@ module.exports = {
   - dependencies 를 주어 원할때만 실행 [counter]
   - cleanup : 함수에서 return 할때의 함수, 소멸자 느낌?
 ***
+
+## 배포 (gh-pages)
+github 에서 간략한 웹퍼브리싱을 지원하는 도구?
+### 설치
+`npm i gh-pages`
+### 설정(package.json)
+```
+"scripts": {
+    ...
+    "deploy": "gh-pages -d build",
+    "predeploy": "npm run build"
+  },
+"homepage": "https://elkeipy.github.io/momentum_card"
+```
+> npm run build : build 폴더가 생성되며 압축 및 최적화
+
+### 실행(배포)
+`npm run deploy`
 
 # Getting Started with Create React App
 
