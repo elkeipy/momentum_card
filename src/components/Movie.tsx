@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import PropTypes from 'prop-types';
 import { Link } from "react-router-dom"
+import styles from "../css/Movie.module.css"
 
 export interface MovieProps {
     id: number;
@@ -25,18 +26,19 @@ Movie.propsType = {
 
 function Movie(props: MovieProps) {
     return (
-        <div>
-            <img src={props.medium_cover_image} alt={props.title}/>
-            <h2>
-                <Link to={`/detail/${props.id}`}>{props.title}</Link>
-            </h2>
-            <p>{props.summary}</p>
-            <p>Rating : {props.rating}</p>
-            <p>Runtime : {props.runtime}(min)</p>
-            <ul>
-                {props.genres?.map(genre => <li key={genre}>{genre}</li>)}
-            </ul>
-            <hr/>
+        <div className={styles.movie}>
+            <img className={styles.movie__img} src={props.medium_cover_image} alt={props.title}/>
+            <div>
+                <h2 className={styles.movie__title}>
+                    <Link to={`/detail/${props.id}`}>{props.title}</Link>
+                </h2>
+                <p>{props.summary && props.summary.length > 200 ? `${props.summary.slice(0, 200)}...` : props.summary}</p>
+                <p>Rating : {props.rating}</p>
+                <p>Runtime : {props.runtime}(min)</p>
+                <ul className={styles.movie__genres}>
+                    {props.genres?.map(genre => <li key={genre}>{genre}</li>)}
+                </ul>
+            </div>
         </div>
     );
 }

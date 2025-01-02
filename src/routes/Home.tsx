@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import Movie, { MovieProps } from "../components/Movie";
 //import { Button, Input, Typography } from '@mui/material';
+import styles from "../css/Home.module.css"
 
 function Home() {
     const [loading, setLoading] = useState(true);
@@ -15,22 +16,26 @@ function Home() {
     useEffect(() => {
         getMovies();
     }, []);
-
-    console.log(movies);
     
     return (
-        <div>
-            <h1>The Movies!({movies.length})</h1>
-            {loading ? <h1>Loading...</h1> : null}
-        
-            {movies.map((movie) => (
-                <Movie medium_cover_image={movie.medium_cover_image} 
-                    id={movie.id} 
-                    title={movie.title}
-                    summary={movie.summary}
-                    rating={movie.rating}
-                    runtime={movie.runtime} />
-            ))}
+        <div className={styles.container}>
+            {loading ? (
+                <div className={styles.loader}>
+                    <span>Loading...</span>
+                </div>
+            ) : (        
+                <div className={styles.movies}>
+                    {movies.map((movie) => (
+                        <Movie medium_cover_image={movie.medium_cover_image} 
+                            id={movie.id} 
+                            title={movie.title}
+                            summary={movie.summary}
+                            rating={movie.rating}
+                            runtime={movie.runtime}
+                            genres={movie.genres} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
