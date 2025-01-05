@@ -33,8 +33,8 @@ function Movie(props: MovieProps) {
                     <Link to={`/detail/${props.id}`}>{props.title}</Link>
                 </h2>
                 <p>{props.summary && props.summary.length > 200 ? `${props.summary.slice(0, 200)}...` : props.summary}</p>
-                <p>Rating : {props.rating}</p>
-                <p>Runtime : {props.runtime}(min)</p>
+                <p className={styles.movie__info}>Rating : {props.rating}</p>
+                <p className={styles.movie__info}>Runtime : {props.runtime}(min)</p>
                 <ul className={styles.movie__genres}>
                     {props.genres?.map(genre => <li key={genre}>{genre}</li>)}
                 </ul>
