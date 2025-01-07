@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import MovieApp from './MovieApp';
-import Clock from './Clock';
+import Clock from './components/Clock';
+import Weather from './components/Weather';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -9,6 +10,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
+    <Weather />
     <Clock />
     <MovieApp />
   </React.StrictMode>
