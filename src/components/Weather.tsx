@@ -54,7 +54,7 @@ function Weather() {
     }, [weatherInfo]);
 
     return (
-        <div id="weather">
+        <div>
             <span className="spanMarginRight">{`🌡️${weatherInfo?.main.temp} `}</span>
             <span>@{weatherInfo?.name}</span>
             <span><img src={`https://openweathermap.org/img/wn/${weatherInfo?.weather[0].icon}.png`} /></span>
