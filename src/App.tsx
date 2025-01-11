@@ -12,7 +12,9 @@ function App() {
     setOpen(!open);
   };
 
-  const handleOpenResizeToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenResizeToggle = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setResizeOpen(!resizeOpen);
   };
 
@@ -38,22 +40,22 @@ function App() {
           Open Draggable(+resize) Modal
         </button>
         <DraggableResizeModal
-                title={'모달 테스트1'}
-                open={open}
-                width={450}
-                height={450}
-                onClose={handleOpenToggle}
-            >
+          title={'모달 테스트1'}
+          open={open}
+          width={450}
+          height={450}
+          onClose={handleOpenToggle}
+        >
           test1
         </DraggableResizeModal>
         <DraggableResizeModal
-                title={'모달 테스트2'}
-                open={resizeOpen}
-                isResize={true}
-                width={450}
-                height={450}
-                onClose={handleOpenResizeToggle}
-            >
+          title={'모달 테스트2'}
+          open={resizeOpen}
+          isResize={true}
+          width={450}
+          height={450}
+          onClose={handleOpenResizeToggle}
+        >
           test2
         </DraggableResizeModal>
       </header>
