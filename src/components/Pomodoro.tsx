@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
-import { PomodoroTimer } from '../PomodoroTimer';
+import React, {useState, useEffect} from 'react';
+import {PomodoroTimer} from '../PomodoroTimer';
 
 function Pomodoro() {
-  const [startStopButtonText, setStartStopButtonText] = useState('');
-  const pomodoroTimer = new PomodoroTimer();
+  const [timerText, setTimerText] = useState('00:00');
+  const [focusIndex, setFocusIndex] = useState(1);
+  const [startStopButtonText, setStartStopButtonText] = useState('Start');
+  const [pomodoroTimer, setPomodoroTimer] = useState<PomodoroTimer | null>(null);
+  useEffect(() => {
+    if (!pomodoroTimer) {
+      const pomodoroTimer = new PomodoroTimer({
+        setTimerText,
+        setFocusIndex,
+        setStartStopButtonText
+      });
+      setPomodoroTimer(pomodoroTimer);
+      console.log('new pomodoroTimer');
+    }
+  }, [pomodoroTimer]);
 
   return (
     <div id="timer-div">
-      <h1 id="timer">00:00</h1>
-      <h3 id="focusIndex">#1</h3>
+      <h1 id="timer">{timerText}</h1>
+      <h3 id="focusIndex">#{focusIndex}</h3>
       <div>
         <span>
-          <button id="btnStart" onClick={() => console.log('onClick')}>
-            Start
+          <button id="btnStart" onClick={() => pomodoroTimer?.startStop()}>
+            {startStopButtonText}
           </button>
         </span>
         <span>

@@ -1,3 +1,9 @@
+interface PomodoroTimerProps {
+  setTimerText: (timer: string) => void;
+  setFocusIndex: (index: number) => void;
+  setStartStopButtonText: (text: string) => void;
+}
+
 export class PomodoroTimer {
   //private timer: HTMLElement;
   //private focusIndex: HTMLElement;
@@ -19,20 +25,8 @@ export class PomodoroTimer {
   private _startDate: Date | null = null;
   private _currentTimerMin: number = 25;
   private _focusCount: number = 1;
-  public get focusCount(): number {
-    return this._focusCount;
-  }
-  public set focusCount(value: number) {
-    this._focusCount = value;
-  }
   private _isFocused: boolean = false;
-  public get isFocused(): boolean {
-    return this._isFocused;
-  }
-  public set isFocused(value: boolean) {
-    this._isFocused = value;
-  }
-
+  
   private readonly FOCUS_MIN: number = 25;
   private readonly SHORT_BREAK_MIN: number = 5;
   private readonly LONG_BREAK_MIN: number = 15;
@@ -52,7 +46,11 @@ export class PomodoroTimer {
     longBreakInterval: number;
   };
 
-  constructor() {
+  private setTimerText: (timer: string) => void;
+  private setFocusIndex: (index: number) => void;
+  private setStartStopButtonText: (text: string) => void;
+
+  constructor({setTimerText, setFocusIndex, setStartStopButtonText} : PomodoroTimerProps) {
     //this.timer = document.querySelector("h1#timer")!;
     //this.focusIndex = document.querySelector("h3#focusIndex")!;
     //this.btnStart = document.querySelector("#btnStart")!;
@@ -67,6 +65,10 @@ export class PomodoroTimer {
     //this.inputLongBreak = document.querySelector('#long-break')!;
     //this.longBreakInterval = document.querySelector('#long-break-interval')!;
 
+    this.setTimerText = setTimerText;
+    this.setFocusIndex = setFocusIndex;
+    this.setStartStopButtonText = setStartStopButtonText;
+
     this.audio = new Audio('alarmSound.mp3');
 
     this.init();
@@ -78,8 +80,6 @@ export class PomodoroTimer {
     );
     this.loadSettings();
     this._currentTimerMin = this.getNextTimerMinutes(this._focusCount);
-
-    //this.changeFocusIndexText();
 
     //this.btnShowSettings.addEventListener('click', this.applySettingsToDialog.bind(this));
     //this.overlay.addEventListener('click', this.modalControl.bind(this));
@@ -144,18 +144,9 @@ export class PomodoroTimer {
     this._timerID = setInterval(this.getTimer.bind(this), 300);
   }
 
-  //private changeStartStopButtonText() {
-  //    this.btnStart.innerText = this.btnStart.innerText === this.BTN_START_TEXT ? this.BTN_STOP_TEXT : this.BTN_START_TEXT;
-  //}
-
   // 집중 상태에 따른 타이머 컬러설정
   //private changeTimerTextColorByFocused() {
   //    this.timer.style.color = this._isFocused ? this.COLOR_FOCUS : this.COLOR_BREAK;
-  //}
-
-  // focusIndex
-  //private changeFocusIndexText() {
-  //    this.focusIndex.innerText = `#${this._focusCount}`;
   //}
 
   private getTimer() {
@@ -179,13 +170,10 @@ export class PomodoroTimer {
           ),
           focusCount: this._focusCount,
         };
-        this.saveLocalStorageFocusData(
-          this.PomodoroFocusLocalStorageKey,
-          saveData
-        );
+        this.saveLocalStorageFocusData(this.PomodoroFocusLocalStorageKey, saveData);
       }
-      //this.changeStartStopButtonText();
-      //this.changeFocusIndexText();
+      this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
+      this.setFocusIndex(this._focusCount);
       //this.changeTimerTextColorByFocused();
       this.reset();
       return;
@@ -194,7 +182,7 @@ export class PomodoroTimer {
     const min = String(result.minutes).padStart(2, '0');
     const sec = String(result.seconds).padStart(2, '0');
 
-    //this.timer.innerText = `${min}:${sec}`;
+    this.setTimerText(`${min}:${sec}`);
   }
 
   private playAlarmSound() {
@@ -213,14 +201,14 @@ export class PomodoroTimer {
     }
   }
 
-  private startStop() {
+  public startStop() {
     if (this.isTimerRunning()) {
       this.stop();
     } else {
       this.reset();
       this.startTimerInterval();
     }
-    //this.changeStartStopButtonText();
+    this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
     //this.changeTimerTextColorByFocused();
     this.stopAudio();
   }
@@ -280,6 +268,7 @@ export class PomodoroTimer {
     this._startDate = null;
     const min = String(this._currentTimerMin).padStart(2, '0');
     //this.timer.innerText = `${min}:00`;
+    this.setTimerText(`${min}:00`);
   }
 
   private convertSecondToTime(sec: number) {

@@ -78,6 +78,15 @@ github 에서 간략한 웹퍼브리싱을 지원하는 도구?
 ### 실행(배포)
 `npm run deploy`
 
+### 참고
+Lorem Picsum
+```
+Easy to use, stylish placeholders
+Just add your desired image size (width & height) after our URL, and you'll get a random image.
+
+https://picsum.photos/200/300
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
