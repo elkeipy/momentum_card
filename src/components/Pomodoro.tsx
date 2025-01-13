@@ -6,12 +6,14 @@ function Pomodoro() {
   const [focusIndex, setFocusIndex] = useState(1);
   const [startStopButtonText, setStartStopButtonText] = useState('Start');
   const [pomodoroTimer, setPomodoroTimer] = useState<PomodoroTimer | null>(null);
+  const [timerTextColor, setTimerTextColor] = useState('black');
   useEffect(() => {
     if (!pomodoroTimer) {
       const pomodoroTimer = new PomodoroTimer({
         setTimerText,
         setFocusIndex,
-        setStartStopButtonText
+        setStartStopButtonText,
+        setTimerTextColor
       });
       setPomodoroTimer(pomodoroTimer);
       console.log('new pomodoroTimer');
@@ -20,7 +22,7 @@ function Pomodoro() {
 
   return (
     <div id="timer-div">
-      <h1 id="timer">{timerText}</h1>
+      <h1 id="timer" style={{color: timerTextColor}}>{timerText}</h1>
       <h3 id="focusIndex">#{focusIndex}</h3>
       <div>
         <span>

@@ -2,6 +2,7 @@ interface PomodoroTimerProps {
   setTimerText: (timer: string) => void;
   setFocusIndex: (index: number) => void;
   setStartStopButtonText: (text: string) => void;
+  setTimerTextColor: (color: string) => void;
 }
 
 export class PomodoroTimer {
@@ -27,8 +28,8 @@ export class PomodoroTimer {
   private _focusCount: number = 1;
   private _isFocused: boolean = false;
   
-  private readonly FOCUS_MIN: number = 25;
-  private readonly SHORT_BREAK_MIN: number = 5;
+  private readonly FOCUS_MIN: number = 1;//25;
+  private readonly SHORT_BREAK_MIN: number = 1;//5;
   private readonly LONG_BREAK_MIN: number = 15;
   private readonly LONG_BREAK_INTERVAL: number = 4;
   private readonly BTN_START_TEXT: string = 'Start';
@@ -49,8 +50,9 @@ export class PomodoroTimer {
   private setTimerText: (timer: string) => void;
   private setFocusIndex: (index: number) => void;
   private setStartStopButtonText: (text: string) => void;
+  private setTimerTextColor: (color: string) => void;
 
-  constructor({setTimerText, setFocusIndex, setStartStopButtonText} : PomodoroTimerProps) {
+  constructor({setTimerText, setFocusIndex, setStartStopButtonText, setTimerTextColor} : PomodoroTimerProps) {
     //this.timer = document.querySelector("h1#timer")!;
     //this.focusIndex = document.querySelector("h3#focusIndex")!;
     //this.btnStart = document.querySelector("#btnStart")!;
@@ -68,8 +70,9 @@ export class PomodoroTimer {
     this.setTimerText = setTimerText;
     this.setFocusIndex = setFocusIndex;
     this.setStartStopButtonText = setStartStopButtonText;
+    this.setTimerTextColor = setTimerTextColor;
 
-    this.audio = new Audio('alarmSound.mp3');
+    this.audio = new Audio('../alarmSound.mp3');
 
     this.init();
   }
@@ -145,9 +148,9 @@ export class PomodoroTimer {
   }
 
   // 집중 상태에 따른 타이머 컬러설정
-  //private changeTimerTextColorByFocused() {
-  //    this.timer.style.color = this._isFocused ? this.COLOR_FOCUS : this.COLOR_BREAK;
-  //}
+  private changeTimerTextColorByFocused() {
+    this.setTimerTextColor(this._isFocused ? this.COLOR_FOCUS : this.COLOR_BREAK);
+  }
 
   private getTimer() {
     if (this._startDate == null) {
@@ -174,7 +177,7 @@ export class PomodoroTimer {
       }
       this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
       this.setFocusIndex(this._focusCount);
-      //this.changeTimerTextColorByFocused();
+      this.changeTimerTextColorByFocused();
       this.reset();
       return;
     }
@@ -202,6 +205,7 @@ export class PomodoroTimer {
   }
 
   public startStop() {
+    this.playAlarmSound();
     if (this.isTimerRunning()) {
       this.stop();
     } else {
@@ -209,7 +213,7 @@ export class PomodoroTimer {
       this.startTimerInterval();
     }
     this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
-    //this.changeTimerTextColorByFocused();
+    this.changeTimerTextColorByFocused();
     this.stopAudio();
   }
 
