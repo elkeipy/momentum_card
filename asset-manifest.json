@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.js": "/static/js/main.2b17b9a1.js",
-    "index.html": "/index.html",
-    "main.2b17b9a1.js.map": "/static/js/main.2b17b9a1.js.map"
+    "main.js": "/momentum_card/static/js/main.2b17b9a1.js",
+    "index.html": "/momentum_card/index.html",
+    "main.2b17b9a1.js.map": "/momentum_card/static/js/main.2b17b9a1.js.map"
   },
   "entrypoints": [
     "static/js/main.2b17b9a1.js"
