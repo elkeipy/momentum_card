@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {PomodoroTimer} from '../PomodoroTimer';
+import PomodoroTimer from '../PomodoroTimer';
+import styles from '../css/Pomodoro.module.css';
 
 function Pomodoro() {
   const [timerText, setTimerText] = useState('00:00');
@@ -22,16 +23,24 @@ function Pomodoro() {
 
   return (
     <div id="timer-div">
-      <h1 id="timer" style={{color: timerTextColor}}>{timerText}</h1>
+      <h1
+        id="timer"
+        className="text-3xl font-bold underline"
+        style={{color: timerTextColor}}
+      >
+        {timerText}
+      </h1>
       <h3 id="focusIndex">#{focusIndex}</h3>
       <div>
         <span>
-          <button id="btnStart" onClick={() => pomodoroTimer?.startStop()}>
+          <button className={styles.btn__primary} onClick={() => pomodoroTimer?.startStop()}>
             {startStopButtonText}
           </button>
         </span>
         <span>
-          <button id="btnStopAudio">Stop Alarm</button>
+          <button className={styles.btn__secondary} onClick={() => pomodoroTimer?.stopAudio()}>
+            Stop Alarm
+          </button>
         </span>
       </div>
     </div>

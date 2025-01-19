@@ -29,14 +29,14 @@ function Clock() {
     return () => clearInterval(intervalId);
   }, []);
   return (
-    <div className="container">
+    <div>
       <span className="spanMarginRight">
-        <h2>{time}</h2>
+        <h2 className="text-2xl font-bold">{time}</h2>
       </span>
       <span>
         <button
           id="btnTimerSettings"
-          className="imgOnlyButton infiniteLotateAnimation"
+          className="btn btn--primary"
         >
           ⚙️
         </button>

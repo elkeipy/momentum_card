@@ -4,6 +4,7 @@ import Clock from './components/Clock';
 import Weather from './components/Weather';
 import Pomodoro from './components/Pomodoro';
 //import MovieApp from './MovieApp';
+import './index.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

@@ -5,7 +5,7 @@ interface PomodoroTimerProps {
   setTimerTextColor: (color: string) => void;
 }
 
-export class PomodoroTimer {
+class PomodoroTimer {
   //private timer: HTMLElement;
   //private focusIndex: HTMLElement;
   //private btnStart: HTMLElement;
@@ -72,7 +72,7 @@ export class PomodoroTimer {
     this.setStartStopButtonText = setStartStopButtonText;
     this.setTimerTextColor = setTimerTextColor;
 
-    this.audio = new Audio('../alarmSound.mp3');
+    this.audio = new Audio(`${process.env.PUBLIC_URL}/alarmSound.mp3`);
 
     this.init();
   }
@@ -205,7 +205,6 @@ export class PomodoroTimer {
   }
 
   public startStop() {
-    this.playAlarmSound();
     if (this.isTimerRunning()) {
       this.stop();
     } else {
@@ -222,7 +221,7 @@ export class PomodoroTimer {
     this._startDate = null;
   }
 
-  private stopAudio() {
+  public stopAudio() {
     this.audio.pause();
     this.audio.currentTime = 0;
   }
@@ -271,7 +270,6 @@ export class PomodoroTimer {
     this.clearTimerInterval();
     this._startDate = null;
     const min = String(this._currentTimerMin).padStart(2, '0');
-    //this.timer.innerText = `${min}:00`;
     this.setTimerText(`${min}:00`);
   }
 
@@ -283,7 +281,7 @@ export class PomodoroTimer {
   }
 }
 
-//export default PomodoroTimer;
+export default PomodoroTimer;
 
 // 인스턴스 생성 및 초기화
 //const pomodoroTimer = new PomodoroTimer();
