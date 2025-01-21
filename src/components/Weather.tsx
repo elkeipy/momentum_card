@@ -55,12 +55,12 @@ function Weather() {
   }, [weatherInfo]);
 
   return (
-    <div className="p-3 bg-white shadow rounded-lg">
-      <h3>{`🌡️${weatherInfo?.main.temp} `} @{weatherInfo?.name} 
+    <div className="flex justify-center items-center h-10 w-auto bg-orange-200 shadow rounded">
+      <h3>{`🌡️${weatherInfo?.main.temp} `} @{weatherInfo?.name}</h3>
       <img
           src={`https://openweathermap.org/img/wn/${weatherInfo?.weather[0].icon}.png`}
         />
-      </h3>
+      
     </div>
   );
 }

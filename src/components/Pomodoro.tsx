@@ -22,26 +22,34 @@ function Pomodoro() {
   }, [pomodoroTimer]);
 
   return (
-    <div id="timer-div">
-      <h1
-        id="timer"
-        className="text-3xl font-bold underline"
-        style={{color: timerTextColor}}
-      >
-        {timerText}
-      </h1>
-      <h3 id="focusIndex">#{focusIndex}</h3>
-      <div>
-        <span>
-          <button className={styles.btn__primary} onClick={() => pomodoroTimer?.startStop()}>
-            {startStopButtonText}
-          </button>
-        </span>
-        <span>
-          <button className={styles.btn__secondary} onClick={() => pomodoroTimer?.stopAudio()}>
-            Stop Alarm
-          </button>
-        </span>
+    <div className="flex justify-center items-center w-screen">
+      <div id="timer-div" className="space-y-4 h-60 w-80 bg-slate-300 shadow-lg rounded-2xl">
+        <h1
+          id="timer"
+          className="flex justify-center text-8xl font-semibold font-sans"
+          style={{color: timerTextColor}}
+        >
+          {timerText}
+        </h1>
+        <h3 id="focusIndex" className="flex justify-center text-2xl font-mono">#{focusIndex}</h3>
+        <div className="flex justify-center space-x-1">
+          <span>
+            <button
+              className={styles.btn__primary}
+              onClick={() => pomodoroTimer?.startStop()}
+            >
+              {startStopButtonText}
+            </button>
+          </span>
+          <span>
+            <button
+              className={styles.btn__secondary}
+              onClick={() => pomodoroTimer?.stopAudio()}
+            >
+              Stop Alarm
+            </button>
+          </span>
+        </div>
       </div>
     </div>
   );
