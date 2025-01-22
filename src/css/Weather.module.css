@@ -1,0 +1,3 @@
+.rootDiv {
+    @apply flex justify-center items-center h-10 w-auto bg-orange-200 shadow rounded;
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import styles from '../css/Clock.module.css';
 
 const ClockTypes = {
   HourType12: 1, // 12 Hour Clock
@@ -29,9 +30,9 @@ function Clock() {
     return () => clearInterval(intervalId);
   }, []);
   return (
-    <div className='flex justify-center items-center h-auto w-auto bg-white shadow rounded'>
+    <div className={styles.rootDiv}>
       <span>
-        <h2 className="text-2xl text-purple-700 font-extrabold">{time}</h2>
+        <h2 className={styles.time}>{time}</h2>
       </span>
       <span>
         <button

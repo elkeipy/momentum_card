@@ -1,3 +1,18 @@
+.rootDiv {
+  @apply flex justify-center items-center w-screen;
+}
+.roundedCardDiv {
+  @apply space-y-4 h-60 w-80 bg-slate-300 shadow-lg rounded-2xl;
+}
+.timer {
+  @apply flex justify-center text-8xl font-semibold font-sans;
+}
+.focusIndex {
+  @apply flex justify-center text-2xl font-mono;
+}
+.timerButtonDiv {
+  @apply flex justify-center space-x-1;
+}
 .btn {
   @apply bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700;
 }

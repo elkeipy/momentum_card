@@ -1,0 +1,6 @@
+.rootDiv {
+  @apply flex justify-center items-center h-auto w-auto bg-white shadow rounded;
+}
+.time {
+  @apply text-2xl text-purple-700 font-extrabold;
+}

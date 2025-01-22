@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import styles from '../css/Weather.module.css';
 
 interface WeatherItem {
   id: number;
@@ -55,12 +56,11 @@ function Weather() {
   }, [weatherInfo]);
 
   return (
-    <div className="flex justify-center items-center h-10 w-auto bg-orange-200 shadow rounded">
+    <div className={styles.rootDiv}>
       <h3>{`🌡️${weatherInfo?.main.temp} `} @{weatherInfo?.name}</h3>
       <img
           src={`https://openweathermap.org/img/wn/${weatherInfo?.weather[0].icon}.png`}
         />
-      
     </div>
   );
 }
