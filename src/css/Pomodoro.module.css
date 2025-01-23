@@ -1,5 +1,5 @@
 .rootDiv {
-  @apply flex justify-center items-center w-screen;
+  @apply flex justify-center items-center w-screen mt-10;
 }
 .roundedCardDiv {
   @apply space-y-4 h-60 w-80 bg-slate-300 shadow-lg rounded-2xl;

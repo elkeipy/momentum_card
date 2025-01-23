@@ -45,7 +45,7 @@ function Clock() {
       </span>
       <span>
         <button 
-        className="py-2 px-2"
+        className={styles.hover_spin}
         onClick={openTimerOption}
         >⚙️</button>
       </span>
