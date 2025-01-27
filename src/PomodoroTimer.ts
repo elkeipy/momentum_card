@@ -5,21 +5,14 @@ interface PomodoroTimerProps {
   setTimerTextColor: (color: string) => void;
 }
 
-class PomodoroTimer {
-  //private timer: HTMLElement;
-  //private focusIndex: HTMLElement;
-  //private btnStart: HTMLElement;
-  //private btnStopAudio: HTMLElement;
-  //private modalLayer: HTMLElement;
-  //private btnShowSettings: HTMLElement;
-  //private btnClose: HTMLElement;
-  //private overlay: HTMLElement;
-  //private btnSave: HTMLElement;
-  //private inputFocus: HTMLInputElement;
-  //private inputShortBreak: HTMLInputElement;
-  //private inputLongBreak: HTMLInputElement;
-  //private longBreakInterval: HTMLInputElement;
+export type TimerSettings = {
+  focusTime: number;
+  shortBreak: number;
+  longBreak: number;
+  longBreakInterval: number;
+}
 
+class PomodoroTimer {
   private audio: HTMLAudioElement;
 
   private _timerID: NodeJS.Timeout | null = null;
@@ -40,12 +33,7 @@ class PomodoroTimer {
   private readonly PomodoroSettingsLocalStorageKey: string = 'PomodoroSettings';
 
   private _currentFocusData!: { dateId: string; focusCount: number };
-  private _settingsData!: {
-    focusTime: number;
-    shortBreak: number;
-    longBreak: number;
-    longBreakInterval: number;
-  };
+  private _settingsData!: TimerSettings;
 
   private setTimerText: (timer: string) => void;
   private setFocusIndex: (index: number) => void;
@@ -53,20 +41,6 @@ class PomodoroTimer {
   private setTimerTextColor: (color: string) => void;
 
   constructor({setTimerText, setFocusIndex, setStartStopButtonText, setTimerTextColor} : PomodoroTimerProps) {
-    //this.timer = document.querySelector("h1#timer")!;
-    //this.focusIndex = document.querySelector("h3#focusIndex")!;
-    //this.btnStart = document.querySelector("#btnStart")!;
-    //this.btnStopAudio = document.querySelector("#btnStopAudio")!;
-    //this.modalLayer = document.querySelector('.modal')!;
-    //this.btnShowSettings = document.querySelector('#btnTimerSettings')!;
-    //this.btnClose = document.querySelector('.modalClose')!;
-    //this.overlay = document.querySelector('.modalOverlay')!;
-    //this.btnSave = document.querySelector('.modalSave')!;
-    //this.inputFocus = document.querySelector('#focus-time')!;
-    //this.inputShortBreak = document.querySelector('#short-break')!;
-    //this.inputLongBreak = document.querySelector('#long-break')!;
-    //this.longBreakInterval = document.querySelector('#long-break-interval')!;
-
     this.setTimerText = setTimerText;
     this.setFocusIndex = setFocusIndex;
     this.setStartStopButtonText = setStartStopButtonText;
@@ -77,19 +51,14 @@ class PomodoroTimer {
     this.init();
   }
 
+  public getSettings() {
+    return this._settingsData;
+  }
+
   private init() {
-    this._focusCount = this.loadLocalStorageFocusData(
-      this.PomodoroFocusLocalStorageKey
-    );
+    this._focusCount = this.loadLocalStorageFocusData(this.PomodoroFocusLocalStorageKey);
     this.loadSettings();
     this._currentTimerMin = this.getNextTimerMinutes(this._focusCount);
-
-    //this.btnShowSettings.addEventListener('click', this.applySettingsToDialog.bind(this));
-    //this.overlay.addEventListener('click', this.modalControl.bind(this));
-    //this.btnClose.addEventListener('click', this.modalControl.bind(this));
-    //this.btnStart.addEventListener("click", this.startStop.bind(this));
-    //this.btnStopAudio.addEventListener("click", this.stopAudio.bind(this));
-    //this.btnSave.addEventListener("click", this.saveSettings.bind(this));
 
     document.addEventListener('keydown', (event: KeyboardEvent) => {
       if (event.altKey && event.code === 'KeyA') {
@@ -109,11 +78,13 @@ class PomodoroTimer {
     //this.overlay?.classList.toggle('hidden');
   }
 
-  private saveLocalStorageFocusData(
-    key: string,
-    data: { dateId: string; focusCount: number }
-  ) {
+  private saveLocalStorageFocusData(key: string, data: { dateId: string; focusCount: number }) {
     localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  public saveLocalStorageSettings(settings: TimerSettings) {
+    this._settingsData = settings;
+    localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(settings));
   }
 
   private loadLocalStorageFocusData(key: string): number {
@@ -225,30 +196,6 @@ class PomodoroTimer {
     this.audio.pause();
     this.audio.currentTime = 0;
   }
-
-  //private applySettingsToDialog() {
-  //    this.modalLayer?.classList.toggle('hidden');
-  //    this.overlay?.classList.toggle('hidden');
-  //
-  //    this.inputFocus.value = this._settingsData.focusTime.toString();
-  //    this.inputShortBreak.value = this._settingsData.shortBreak.toString();
-  //    this.inputLongBreak.value = this._settingsData.longBreak.toString();
-  //    this.longBreakInterval.value = this._settingsData.longBreakInterval.toString();
-  //}
-
-  //private saveSettings() {
-  //    this.modalLayer?.classList.toggle('hidden');
-  //    this.overlay?.classList.toggle('hidden');
-  //
-  //    this._settingsData = {
-  //        focusTime: Number(this.inputFocus.value),
-  //        shortBreak: Number(this.inputShortBreak.value),
-  //        longBreak: Number(this.inputLongBreak.value),
-  //        longBreakInterval: Number(this.longBreakInterval.value)
-  //    }
-  //    this._currentTimerMin = this._settingsData.focusTime;
-  //    localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(this._settingsData))
-  //}
 
   public loadSettings() {
     if (localStorage.getItem(this.PomodoroSettingsLocalStorageKey)) {

@@ -24,3 +24,29 @@
 .btn__secondary {
   @apply bg-slate-500 text-white font-bold py-4 px-8 rounded hover:bg-slate-400;
 }
+
+.optionDiv {
+  @apply flex flex-row justify-between;
+}
+.optionLabel {
+  @apply block text-base font-medium text-gray-900;
+}
+.optionValue {
+  @apply block min-w-0  pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hover_spin {
+  transition: transform 3s linear;
+}
+.hover_spin:hover {
+  animation: spin 3s linear infinite;
+}

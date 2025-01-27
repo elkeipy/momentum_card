@@ -4,21 +4,3 @@
 .time {
   @apply text-2xl text-purple-700 font-extrabold;
 }
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.hover_spin {
-  transition: transform 3s linear;
-  @apply px-1 py-1;
-}
-.hover_spin:hover {
-  animation: spin 3s linear infinite;
-  @apply px-1 py-1;
-}
