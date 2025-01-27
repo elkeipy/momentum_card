@@ -1,19 +1,26 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import styles from "../css/PomodoroOptionModal.module.css"
 
 type PomodoroOptionModalPropsType = {
   children: React.ReactNode;
+  onSave: () => void;
   onClose: () => void;
 };
 
-export default function PomodoroOptionModal({ children, onClose }: PomodoroOptionModalPropsType) {
+export default function PomodoroOptionModal({ children, onSave, onClose }: PomodoroOptionModalPropsType) {
   return ReactDOM.createPortal(
-    <div className="w-full h-full fixed top-0 left-0 bg-black/20 flex justify-center items-center">
-      <div className="bg-white p-[10px]">
+    <div className={styles.rootDiv}>
+      <div className={styles.containerDiv}>
         {children}
-        <button className="bg-green-300 mt-[10px] p-[5px]" onClick={onClose}>
-          Close
-        </button>
+        <div className={styles.buttonDiv}>
+          <button className={styles.btn__primary} onClick={onSave}>
+            Save
+          </button>
+          <button className={styles.btn__secondary} onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
     </div>,
     document.body

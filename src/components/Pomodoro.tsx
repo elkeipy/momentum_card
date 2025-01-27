@@ -19,7 +19,7 @@ function Pomodoro() {
   const openTimerOption = () => {
     setShowTimerOption(true);
   };
-  const closeTimerOption = () => {
+  const saveTimerOption = () => {
     // 설정값 저장
     let settings: TimerSettings = { 
       focusTime: focusTime,
@@ -28,6 +28,16 @@ function Pomodoro() {
       longBreakInterval: longBreakInterval
     };
     pomodoroTimer?.saveLocalStorageSettings(settings);
+    setShowTimerOption(false);
+  };
+  const closeTimerOption = () => {
+    if (pomodoroTimer) {
+      const settings: TimerSettings = pomodoroTimer.getSettings();
+      setFocusTime(settings.focusTime);
+      setShortBreak(settings.shortBreak);
+      setLongBreak(settings.longBreak);
+      setLongBreakInterval(settings.longBreakInterval);
+    }
     setShowTimerOption(false);
   };
   useEffect(() => {
@@ -64,9 +74,11 @@ function Pomodoro() {
           >⚙️</button>
         </div>
         {showTimerOption && (
-          <PomodoroOptionModal onClose={closeTimerOption}>
-            <h2>Modal Content</h2>
-            <p>This is a modal example using createPortal.</p>
+          <PomodoroOptionModal onSave={saveTimerOption} onClose={closeTimerOption}>
+            <div>
+              <h2 className={styles.title}>Timer Setting</h2>
+            </div>
+            <div className={styles.horizontalLine}></div>
             <div className={styles.optionDiv}>
               <label htmlFor="focusTime" className={styles.optionLabel}>Focus Time</label>
               <input name="focusTime" id="focusTime" className={styles.optionValue} 

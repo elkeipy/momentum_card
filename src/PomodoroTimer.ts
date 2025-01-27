@@ -84,6 +84,7 @@ class PomodoroTimer {
 
   public saveLocalStorageSettings(settings: TimerSettings) {
     this._settingsData = settings;
+    this._currentTimerMin = settings.focusTime ? settings.focusTime : 7;
     localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(settings));
   }
 
@@ -92,9 +93,7 @@ class PomodoroTimer {
     if (localStorage.getItem(key)) {
       this._currentFocusData = JSON.parse(localStorage.getItem(key)!);
       let now = new Date();
-      let dateId = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join(
-        '-'
-      );
+      let dateId = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-');
       if (dateId === this._currentFocusData.dateId) {
         rtn = this._currentFocusData.focusCount;
       }
@@ -124,7 +123,7 @@ class PomodoroTimer {
   }
 
   private getTimer() {
-    if (this._startDate == null) {
+    if (this._startDate === null || this._currentTimerMin === undefined) {
       return;
     }
     let curDate = new Date();
@@ -139,9 +138,7 @@ class PomodoroTimer {
         ++this._focusCount;
         const now = new Date();
         let saveData = {
-          dateId: [now.getFullYear(), now.getMonth() + 1, now.getDate()].join(
-            '-'
-          ),
+          dateId: [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-'),
           focusCount: this._focusCount,
         };
         this.saveLocalStorageFocusData(this.PomodoroFocusLocalStorageKey, saveData);
@@ -202,7 +199,7 @@ class PomodoroTimer {
       this._settingsData = JSON.parse(
         localStorage.getItem(this.PomodoroSettingsLocalStorageKey)!
       );
-      this._currentTimerMin = this._settingsData.focusTime;
+      this._currentTimerMin = this._settingsData.focusTime ? this._settingsData.focusTime : 7;
     } else {
       this._settingsData = {
         focusTime: this.FOCUS_MIN,
