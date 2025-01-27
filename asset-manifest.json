@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/momentum_card/static/css/main.2070ea5c.css",
-    "main.js": "/momentum_card/static/js/main.3aeec55e.js",
+    "main.js": "/momentum_card/static/js/main.b5492482.js",
     "index.html": "/momentum_card/index.html",
     "main.2070ea5c.css.map": "/momentum_card/static/css/main.2070ea5c.css.map",
-    "main.3aeec55e.js.map": "/momentum_card/static/js/main.3aeec55e.js.map"
+    "main.b5492482.js.map": "/momentum_card/static/js/main.b5492482.js.map"
   },
   "entrypoints": [
     "static/css/main.2070ea5c.css",
-    "static/js/main.3aeec55e.js"
+    "static/js/main.b5492482.js"
   ]
 }
