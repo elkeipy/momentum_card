@@ -57,6 +57,7 @@ class PomodoroTimer {
 
   private init() {
     this._focusCount = this.loadLocalStorageFocusData(this.PomodoroFocusLocalStorageKey);
+    this.setFocusIndex(this._focusCount);
     this.loadSettings();
     this._currentTimerMin = this.getNextTimerMinutes(this._focusCount);
 
