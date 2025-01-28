@@ -82,7 +82,7 @@ function Pomodoro() {
             <div className={styles.optionDiv}>
               <label htmlFor="focusTime" className={styles.optionLabel}>Focus Time</label>
               <input name="focusTime" id="focusTime" className={styles.optionValue} 
-                type="number" min="10" max="60" step="1" value={focusTime} 
+                type="number" min="1" max="60" step="1" value={focusTime} 
                 onChange={(e:ChangeEvent<HTMLInputElement>) => setFocusTime(parseInt(e.target.value))}/>
             </div>
             <div className={styles.optionDiv}>
