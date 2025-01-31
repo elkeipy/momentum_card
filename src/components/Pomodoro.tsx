@@ -5,7 +5,7 @@ import PomodoroOptionModal from './PomodoroOptionModal';
 
 function Pomodoro() {
   const [timerText, setTimerText] = useState('00:00');
-  const [focusIndex, setFocusIndex] = useState(1);
+  const [currentStateText, setCurrentStateText] = useState("");
   const [startStopButtonText, setStartStopButtonText] = useState('Start');
   const [pomodoroTimer, setPomodoroTimer] = useState<PomodoroTimer | null>(null);
   const [timerTextColor, setTimerTextColor] = useState('black');
@@ -44,7 +44,7 @@ function Pomodoro() {
     if (!pomodoroTimer) {
       const pomodoroTimer = new PomodoroTimer({
         setTimerText,
-        setFocusIndex,
+        setCurrentStateText,
         setStartStopButtonText,
         setTimerTextColor
       });
@@ -54,6 +54,22 @@ function Pomodoro() {
       setShortBreak(settings.shortBreak);
       setLongBreak(settings.longBreak);
       setLongBreakInterval(settings.longBreakInterval);
+    }
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.altKey && event.code === 'KeyA') {
+        console.log('KeyA');
+        pomodoroTimer?.stopAudio();
+      } else if (event.altKey && event.code === 'KeyS') {
+        console.log('KeyS');
+        pomodoroTimer?.startStop();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
     }
   }, [pomodoroTimer]);
 
@@ -67,7 +83,7 @@ function Pomodoro() {
           {timerText}
         </h1>
         <div className={styles.focusIndex}>
-          <h3 >#{focusIndex}</h3>
+          <h3 >{currentStateText}</h3>
           <button 
             className={styles.hover_spin}
             onClick={openTimerOption}

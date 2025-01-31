@@ -1,6 +1,6 @@
 interface PomodoroTimerProps {
   setTimerText: (timer: string) => void;
-  setFocusIndex: (index: number) => void;
+  setCurrentStateText: (index: string) => void;
   setStartStopButtonText: (text: string) => void;
   setTimerTextColor: (color: string) => void;
 }
@@ -43,9 +43,12 @@ class PomodoroTimer {
 
   private _timerID: NodeJS.Timeout | null = null;
   private _startDate: Date | null = null;
-  private _currentTimerMin: number = 25;
+  private _awayFromDeskDate: Date | null = null;
+  private _checkAwayFromDeskTimerId: NodeJS.Timeout | null = null;
+  private _awayFromDeskTimerId: NodeJS.Timeout | null = null;
+  private _currentTimerMinutes: number = 25;
   private _focusCount: number = 1;
-  private _periodType: PeriodTypes = PeriodType.Focus;
+  private _periodType: PeriodTypes = PeriodType.Break;
   private _timePeriod: Array<string> = [];
   
   private readonly FOCUS_MIN: number = 25;
@@ -63,13 +66,13 @@ class PomodoroTimer {
   private _settingsData!: TimerSettings;
 
   private setTimerText: (timer: string) => void;
-  private setFocusIndex: (index: number) => void;
+  private setCurrentStateText: (index: string) => void;
   private setStartStopButtonText: (text: string) => void;
   private setTimerTextColor: (color: string) => void;
 
-  constructor({setTimerText, setFocusIndex, setStartStopButtonText, setTimerTextColor} : PomodoroTimerProps) {
+  constructor({setTimerText, setCurrentStateText, setStartStopButtonText, setTimerTextColor} : PomodoroTimerProps) {
     this.setTimerText = setTimerText;
-    this.setFocusIndex = setFocusIndex;
+    this.setCurrentStateText = setCurrentStateText;
     this.setStartStopButtonText = setStartStopButtonText;
     this.setTimerTextColor = setTimerTextColor;
 
@@ -82,27 +85,34 @@ class PomodoroTimer {
     return this._settingsData;
   }
 
-  private init() {
-    this.loadLocalStorageFocusData();
-
-    // 최근 상태 로드
+  private loadLatestPeriodType(): PeriodTypes {
+    let periodType: PeriodTypes = PeriodType.Break;
     if (this._timePeriod.length > 0) {
       let periodData = this.parseStringToPeriodData(this._timePeriod[this._timePeriod.length - 1]);
-      this._periodType = periodData.periodType;
-      this.changeNextPeriodType();
+      return periodData.periodType;
     }
 
-    this.setFocusIndex(this._focusCount);
-    this.loadSettings();
-    this._currentTimerMin = this.getNextTimerMinutes(this._focusCount);
+    return periodType;
+  }
 
-    document.addEventListener('keydown', (event: KeyboardEvent) => {
-      if (event.altKey && event.code === 'KeyA') {
-        this.stopAudio();
-      } else if (event.altKey && event.code === 'KeyS') {
-        this.startStop();
-      }
-    });
+  private existSavedPeriodData(): boolean {
+    return this._timePeriod.length > 0;
+  }
+
+  private init() {
+    this.loadLocalStorageFocusData();
+    let nextPeriodType: PeriodTypes = PeriodType.Focus;
+    if (this.existSavedPeriodData()) {
+      nextPeriodType = this.getNextPeriodType(this.loadLatestPeriodType());
+      this.changeTimerTextColorByFocused(nextPeriodType);
+    }
+    this.setCurrentStateText(this.makeCurrentStateText(nextPeriodType));
+    this.loadSettings();
+    this._currentTimerMinutes = this.getNextTimerMinutes(this._periodType, this._focusCount);
+  }
+
+  private makeCurrentStateText(periodType: PeriodTypes): string {
+    return `[${periodType.toString()}] #${this._focusCount}`;
   }
 
   private formatDate(date: Date): string {
@@ -135,13 +145,12 @@ class PomodoroTimer {
     return rtnData;
   }
 
-  private saveLocalStorageFocusData() {
-    if (this._startDate) {
-      let now = new Date();
-      let periodStr = this.makeDateTimePeriodString(this._periodType, this._startDate, now);
+  private saveLocalStorageFocusData(periodType: PeriodTypes, startDate: Date, finishDate: Date) {
+    if (startDate && finishDate) {
+      let periodStr = this.makeDateTimePeriodString(periodType, startDate, finishDate);
       this._timePeriod.push(periodStr);
       let saveData = {
-        dateId: [this._startDate.getFullYear(), this._startDate.getMonth() + 1, this._startDate.getDate()].join('-'),
+        dateId: [startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate()].join('-'),
         focusCount: this._focusCount,
         focusPeriod: this._timePeriod
       };
@@ -169,12 +178,26 @@ class PomodoroTimer {
 
   public saveLocalStorageSettings(settings: TimerSettings) {
     this._settingsData = settings;
-    this._currentTimerMin = settings.focusTime ? settings.focusTime : 7;
+    this._currentTimerMinutes = settings.focusTime ? settings.focusTime : 7;
     localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(settings));
   }
 
   private isTimerRunning() {
     return this._timerID !== null;
+  }
+
+  private clearCheckAwayFromDeskTimerInterval() {
+    if (this._checkAwayFromDeskTimerId !== null) {
+      clearInterval(this._checkAwayFromDeskTimerId);
+    }
+    this._checkAwayFromDeskTimerId = null;
+  }
+
+  private clearAwayFromDeskTimerInterval() {
+    if (this._awayFromDeskTimerId !== null) {
+      clearInterval(this._awayFromDeskTimerId);
+    }
+    this._awayFromDeskTimerId = null;
   }
 
   private clearTimerInterval() {
@@ -189,48 +212,70 @@ class PomodoroTimer {
     this._timerID = setInterval(this.getTimer.bind(this), 300);
   }
 
-  // 집중 상태에 따른 타이머 컬러설정
-  private changeTimerTextColorByFocused() {
-    let colorStr = this.COLOR_FOCUS;
-    switch (this._periodType)
-    {
-      case PeriodType.Focus:
-        colorStr = this.COLOR_FOCUS;
-        break;
-      case PeriodType.Break:
-        colorStr = this.COLOR_BREAK;
-        break;
-      case PeriodType.Lost:
-        colorStr = this.COLOR_FOCUS;
-        break;
-      default:
-        break;
+  private startCheckAwayFromDeskTimer() {
+    this._checkAwayFromDeskTimerId = setInterval(this.checkAwayFromDeskTimer.bind(this), 60 * 1000);
+  }
+
+  private startAwayFromDeskTimer() {
+    this._awayFromDeskDate = new Date();
+    this._awayFromDeskTimerId = setInterval(this.awayFromDeskTimer.bind(this), 300);
+  }
+
+  private awayFromDeskTimer() {
+    // 자리비움을 계속 확인하며 자리비움 시간을 표시한다.
+    if (this._awayFromDeskDate === null || this._awayFromDeskTimerId === null) {
+      return;
     }
-    this.setTimerTextColor(colorStr);
+
+    let curDate = new Date();
+    let elapsed = curDate.getTime() - this._awayFromDeskDate.getTime();
+    let result = this.convertSecondToTime(elapsed / 1000);
+    const min = String(result.minutes).padStart(2, '0');
+    const sec = String(result.seconds).padStart(2, '0');
+
+    this.setTimerText(`${min}:${sec}`);
+  }
+
+  // 자리비움체크 1분동안 타이머를 시작하지 않으면 Lost Date 를 설정하고 낭비시간 체크를 시작한다.
+  private checkAwayFromDeskTimer() {
+    // 1분 후에 오면 자리비움 온다
+    console.log("checkAwayFromDeskTimer() start");
+    if (this._checkAwayFromDeskTimerId === null) {
+      return;
+    }
+
+    this.clearCheckAwayFromDeskTimerInterval();
+
+    console.log("1분 지났으니 이젠 낭비된 시간이다.")
+    this._periodType = PeriodType.Lost;
+    this.changeTimerTextColorByFocused(this._periodType);
+    this.startAwayFromDeskTimer();
+    this.setCurrentStateText(this.makeCurrentStateText(this._periodType));
   }
 
   // 시작시간의 경과시간으로 표시한다.
   private getTimer() {
-    if (this._startDate === null || this._currentTimerMin === undefined) {
+    if (this._startDate === null || this._currentTimerMinutes === undefined) {
       return;
     }
     let curDate = new Date();
     let elapsed = curDate.getTime() - this._startDate.getTime();
-    let focusRemainSeconds = this._currentTimerMin * 60 - elapsed / 1000;
+    let focusRemainSeconds = this._currentTimerMinutes * 60 - elapsed / 1000;
 
     if (focusRemainSeconds < 0) {
-      this.clearTimerInterval();
+      this.startCheckAwayFromDeskTimer();
       this.playAlarmSound();
-      this.saveLocalStorageFocusData();
-      this.changeNextPeriodType();
-      this._currentTimerMin = this.getNextTimerMinutes(this._focusCount);
-      if (this._periodType === PeriodType.Focus) {
+      if (this._periodType === PeriodType.Break) {
         ++this._focusCount;
       }
-      this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
-      this.setFocusIndex(this._focusCount);
-      this.changeTimerTextColorByFocused();
-      this.reset();
+      this.saveLocalStorageFocusData(this._periodType, this._startDate, new Date());
+      this.setStartStopButtonText(this.BTN_START_TEXT);
+
+      let nextPeriodType: PeriodTypes = this.getNextPeriodType(this._periodType);
+      this.setCurrentStateText(this.makeCurrentStateText(nextPeriodType));
+      this.changeTimerTextColorByFocused(nextPeriodType);
+      this._currentTimerMinutes = this.getNextTimerMinutes(nextPeriodType, this._focusCount);
+      this.resetTimer();
       return;
     }
     let result = this.convertSecondToTime(focusRemainSeconds);
@@ -240,14 +285,36 @@ class PomodoroTimer {
     this.setTimerText(`${min}:${sec}`);
   }
 
-  private changeNextPeriodType() {
-    this._periodType = this._periodType === PeriodType.Focus ? PeriodType.Break : PeriodType.Focus;
+  // 집중 상태에 따른 타이머 컬러설정
+  private changeTimerTextColorByFocused(periodType: PeriodTypes) {
+    let colorStr = this.COLOR_FOCUS;
+    switch (periodType)
+    {
+      case PeriodType.Focus:
+        colorStr = this.COLOR_FOCUS;
+        break;
+      case PeriodType.Break:
+        colorStr = this.COLOR_BREAK;
+        break;
+      case PeriodType.Lost:
+        colorStr = this.COLOR_LOST;
+        break;
+      default:
+        break;
+    }
+    this.setTimerTextColor(colorStr);
   }
 
-  private getNextTimerMinutes(focusCount: number): number {
-    if (this._periodType === PeriodType.Focus) {
+  private getNextPeriodType(periodType: PeriodTypes): PeriodTypes {
+    let rtnPeriodType: PeriodTypes = PeriodType.Break;
+    rtnPeriodType = periodType === PeriodType.Focus ? PeriodType.Break : PeriodType.Focus;
+    return rtnPeriodType;
+  }
+
+  private getNextTimerMinutes(periodType: PeriodTypes, focusCount: number): number {
+    if (periodType === PeriodType.Focus) {
       return this._settingsData.focusTime;
-    } else if (this._periodType === PeriodType.Break) {
+    } else if (periodType === PeriodType.Break) {
       return focusCount % this._settingsData.longBreakInterval === 0
         ? this._settingsData.longBreak
         : this._settingsData.shortBreak;
@@ -256,18 +323,41 @@ class PomodoroTimer {
   }
 
   public startStop() {
-    if (this.isTimerRunning()) {
-      this.stop();
+    // 시작시 마지막 상태에서 다음 상태로 바꾼후 타이머 시간설정후 시작
+    if (this._periodType === PeriodType.Lost && this._awayFromDeskDate) {
+      let periodType = this.loadLatestPeriodType();
+      if (periodType === PeriodType.Focus) {
+        ++this._focusCount;
+      }
+      this.saveLocalStorageFocusData(PeriodType.Lost, this._awayFromDeskDate, new Date());
+      this._awayFromDeskDate = null;
+      this._periodType = PeriodType.Break;
     } else {
-      this.reset();
-      this.startTimerInterval();
+      this._periodType = this.loadLatestPeriodType();
     }
-    this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
-    this.changeTimerTextColorByFocused();
+
+    if (this.isTimerRunning()) {
+      this.stopTimerInterval();
+      this.setStartStopButtonText(this.BTN_START_TEXT);
+      return;
+    } 
+
     this.stopAudio();
+
+    this._periodType = this.getNextPeriodType(this._periodType);
+    this._currentTimerMinutes = this.getNextTimerMinutes(this._periodType, this._focusCount);
+    this.changeTimerTextColorByFocused(this._periodType);
+    this.setCurrentStateText(this.makeCurrentStateText(this._periodType));
+
+    this.resetTimer();
+    this.clearCheckAwayFromDeskTimerInterval();
+    this.clearAwayFromDeskTimerInterval();
+  
+    this.startTimerInterval();
+    this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
   }
 
-  private stop() {
+  private stopTimerInterval() {
     this.clearTimerInterval();
     this._startDate = null;
   }
@@ -293,7 +383,7 @@ class PomodoroTimer {
       this._settingsData = JSON.parse(
         localStorage.getItem(this.PomodoroSettingsLocalStorageKey)!
       );
-      this._currentTimerMin = this._settingsData.focusTime ? this._settingsData.focusTime : 7;
+      this._currentTimerMinutes = this._settingsData.focusTime ? this._settingsData.focusTime : 7;
     } else {
       this._settingsData = {
         focusTime: this.FOCUS_MIN,
@@ -304,10 +394,10 @@ class PomodoroTimer {
     }
   }
 
-  private reset() {
+  private resetTimer() {
     this.clearTimerInterval();
     this._startDate = null;
-    const min = String(this._currentTimerMin).padStart(2, '0');
+    const min = String(this._currentTimerMinutes).padStart(2, '0');
     this.setTimerText(`${min}:00`);
   }
 
