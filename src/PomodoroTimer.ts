@@ -238,15 +238,14 @@ class PomodoroTimer {
 
   // 자리비움체크 1분동안 타이머를 시작하지 않으면 Lost Date 를 설정하고 낭비시간 체크를 시작한다.
   private checkAwayFromDeskTimer() {
-    // 1분 후에 오면 자리비움 온다
-    console.log("checkAwayFromDeskTimer() start");
     if (this._checkAwayFromDeskTimerId === null) {
       return;
     }
 
     this.clearCheckAwayFromDeskTimerInterval();
 
-    console.log("1분 지났으니 이젠 낭비된 시간이다.")
+    console.log("start away from desk timer");
+
     this._periodType = PeriodType.Lost;
     this.changeTimerTextColorByFocused(this._periodType);
     this.startAwayFromDeskTimer();
@@ -323,7 +322,6 @@ class PomodoroTimer {
   }
 
   public startStop() {
-    // 시작시 마지막 상태에서 다음 상태로 바꾼후 타이머 시간설정후 시작
     if (this._periodType === PeriodType.Lost && this._awayFromDeskDate) {
       let periodType = this.loadLatestPeriodType();
       if (periodType === PeriodType.Focus) {
@@ -364,7 +362,7 @@ class PomodoroTimer {
 
   private playAlarmSound() {
     if (this.isPlayingAlarmSound() === false) {
-      this.audio.loop = this._periodType === PeriodType.Focus ? true : false;
+      //this.audio.loop = this._periodType === PeriodType.Focus ? true : false;
       this.audio.play();
     }
   }
