@@ -109,6 +109,8 @@ https://picsum.photos/200/300
     - [ ] 횟수, 시작/종료시간 표로 표시
       - "Focus,시간,시간" string 형식으로 배열에 저장
     - [ ] 그래프로 시각화?
+      - React Google Charts (Gantt Chart)
+      > https://www.react-google-charts.com/examples/timeline
 - [ ] 디자인
 ### 명언을 표시, 추가, 삭제? - 개인 DB를 갱신
 - [x] 버튼으로 새로고침
