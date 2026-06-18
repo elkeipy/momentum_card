@@ -18,7 +18,6 @@ function CoinListApp() {
     fetch('https://api.coinpaprika.com/v1/tickers')
       .then((response) => response.json())
       .then((json) => {
-        console.log(json);
         setCoins(json);
         setLoading(false);
       });

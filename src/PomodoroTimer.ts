@@ -25,6 +25,12 @@ type PeriodData = {
   finishDate: Date;
 }
 
+type FocusStorageData = {
+  dateId: string;
+  focusCount: number;
+  focusPeriod: Array<string>;
+}
+
 //const timeManager = new TimeManager();
 //timeManager.addTimePair(new Date('2025-01-27T09:00:00'), new Date('2025-01-27T10:00:00'));
 //timeManager.addTimePair(new Date('2025-01-27T11:00:00'), new Date('2025-01-27T12:00:00'));
@@ -145,6 +151,38 @@ class PomodoroTimer {
     return rtnData;
   }
 
+  private isValidFocusStorageData(data: unknown): data is FocusStorageData {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+
+    const focusData = data as FocusStorageData;
+    return (
+      typeof focusData.dateId === 'string' &&
+      typeof focusData.focusCount === 'number' &&
+      Array.isArray(focusData.focusPeriod) &&
+      focusData.focusPeriod.every((period) => typeof period === 'string')
+    );
+  }
+
+  private isValidSettingsData(data: unknown): data is TimerSettings {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+
+    const settings = data as TimerSettings;
+    return (
+      typeof settings.focusTime === 'number' &&
+      settings.focusTime > 0 &&
+      typeof settings.shortBreak === 'number' &&
+      settings.shortBreak > 0 &&
+      typeof settings.longBreak === 'number' &&
+      settings.longBreak > 0 &&
+      typeof settings.longBreakInterval === 'number' &&
+      settings.longBreakInterval > 0
+    );
+  }
+
   private saveLocalStorageFocusData(periodType: PeriodTypes, startDate: Date, finishDate: Date) {
     if (startDate && finishDate) {
       let periodStr = this.makeDateTimePeriodString(periodType, startDate, finishDate);
@@ -162,8 +200,20 @@ class PomodoroTimer {
   private loadLocalStorageFocusData() {
     this._focusCount = 1;
     if (localStorage.getItem(this.PomodoroFocusLocalStorageKey)) {
-      let loadFocusData: { dateId: string; focusCount: number, focusPeriod: Array<string> };
-      loadFocusData = JSON.parse(localStorage.getItem(this.PomodoroFocusLocalStorageKey)!);
+      let loadFocusData: FocusStorageData | null = null;
+      try {
+        const parsedData = JSON.parse(localStorage.getItem(this.PomodoroFocusLocalStorageKey)!);
+        loadFocusData = this.isValidFocusStorageData(parsedData) ? parsedData : null;
+      } catch {
+        loadFocusData = null;
+      }
+
+      if (!loadFocusData) {
+        this._focusCount = 1;
+        this._timePeriod = new Array<string>();
+        return;
+      }
+
       let now = new Date();
       let dateId = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-');
       if (dateId === loadFocusData.dateId) {
@@ -378,10 +428,26 @@ class PomodoroTimer {
 
   public loadSettings() {
     if (localStorage.getItem(this.PomodoroSettingsLocalStorageKey)) {
-      this._settingsData = JSON.parse(
-        localStorage.getItem(this.PomodoroSettingsLocalStorageKey)!
-      );
-      this._currentTimerMinutes = this._settingsData.focusTime ? this._settingsData.focusTime : 7;
+      let parsedSettings: unknown = null;
+      try {
+        parsedSettings = JSON.parse(
+          localStorage.getItem(this.PomodoroSettingsLocalStorageKey)!
+        );
+      } catch {
+        parsedSettings = null;
+      }
+
+      if (this.isValidSettingsData(parsedSettings)) {
+        this._settingsData = parsedSettings;
+        this._currentTimerMinutes = this._settingsData.focusTime ? this._settingsData.focusTime : 7;
+      } else {
+        this._settingsData = {
+          focusTime: this.FOCUS_MIN,
+          shortBreak: this.SHORT_BREAK_MIN,
+          longBreak: this.LONG_BREAK_MIN,
+          longBreakInterval: this.LONG_BREAK_INTERVAL,
+        };
+      }
     } else {
       this._settingsData = {
         focusTime: this.FOCUS_MIN,
