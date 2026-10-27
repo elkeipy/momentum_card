@@ -67,3 +67,26 @@ test('pins a card, switches theme, and shows quote and word cards', async ({page
   await expect(page.getByRole('region', {name: '명언'})).toContainText('남은 시간');
   await expect(page.getByRole('region', {name: '단어'})).toContainText('steady attention');
 });
+
+test('themes the action buttons and keeps timer settings above the cards', async ({page}) => {
+  await page.goto('/');
+  const quoteRefresh = page.getByRole('button', {name: '명언 새로고침'});
+  const quoteBorder = await quoteRefresh.evaluate(element => getComputedStyle(element).borderTopWidth);
+  const quotePadding = await quoteRefresh.evaluate(element => getComputedStyle(element).paddingTop);
+  expect(quoteBorder).not.toBe('0px');
+  expect(quotePadding).not.toBe('0px');
+
+  await page.getByLabel('테마').selectOption('flat');
+  const startRadius = await page
+    .getByRole('button', {name: 'Start', exact: true})
+    .evaluate(element => getComputedStyle(element).borderRadius);
+  expect(startRadius).toBe('8px');
+
+  await page.getByRole('button', {name: '타이머 설정'}).click();
+  const dialog = page.getByRole('dialog', {name: 'Timer Setting'});
+  await expect(dialog).toBeVisible();
+  const overlayZ = await dialog.evaluate(element => getComputedStyle(element.parentElement!).zIndex);
+  expect(Number(overlayZ)).toBeGreaterThan(100);
+  await page.getByRole('button', {name: 'Save'}).click();
+  await expect(dialog).toHaveCount(0);
+});

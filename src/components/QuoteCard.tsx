@@ -32,7 +32,7 @@ export default function QuoteCard() {
       <p>{quote.text}</p>
       <p>{quote.from}</p>
       <p>남은 시간 {remainingQuoteSeconds(now - startedAt)}초</p>
-      <button type="button" onClick={refresh}>
+      <button className="app-button" type="button" onClick={refresh}>
         명언 새로고침
       </button>
     </div>

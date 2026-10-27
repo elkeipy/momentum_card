@@ -28,10 +28,10 @@ export default function PomodoroOptionModal({
       <div className={styles.containerDiv} role="dialog" aria-modal="true" aria-label="Timer Setting">
         {children}
         <div className={styles.buttonDiv}>
-          <button className={styles.btn__primary} type="button" onClick={onSave}>
+          <button className="btn-primary" type="button" onClick={onSave}>
             Save
           </button>
-          <button className={styles.btn__secondary} type="button" onClick={onClose}>
+          <button className="btn-secondary" type="button" onClick={onClose}>
             Close
           </button>
         </div>

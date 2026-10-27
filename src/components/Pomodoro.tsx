@@ -115,8 +115,8 @@ function Pomodoro() {
         </h1>
         <div className={styles.focusIndex}>
           <h3>{currentStateText}</h3>
-          <button className={styles.hover_spin} type="button" onClick={openTimerOption}>
-            ⚙️
+          <button className="app-button" type="button" onClick={openTimerOption} aria-label="타이머 설정">
+            설정
           </button>
         </div>
         {showTimerOption && (
@@ -198,7 +198,7 @@ function Pomodoro() {
         <div className={styles.timerButtonDiv}>
           <span>
             <button
-              className={styles.btn__primary}
+              className="btn-primary"
               type="button"
               onClick={() => timerRef.current?.startStop()}
             >
@@ -207,7 +207,7 @@ function Pomodoro() {
           </span>
           <span>
             <button
-              className={styles.btn__secondary}
+              className="btn-secondary"
               type="button"
               onClick={() => timerRef.current?.stopAudio()}
             >

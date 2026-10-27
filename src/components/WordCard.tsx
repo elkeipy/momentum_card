@@ -77,19 +77,22 @@ export default function WordCard() {
           onChange={event => setDraft(event.target.value)}
           placeholder="english"
         />
-        <button type="submit">추가</button>
+        <button className="app-button" type="submit">
+          추가
+        </button>
       </form>
-      <button type="button" onClick={() => setShowAll(current => !current)}>
+      <button className="app-button" type="button" onClick={() => setShowAll(current => !current)}>
         전체 목록
       </button>
       {showAll ? (
         <ul>
           {words.map(word => (
             <li key={word}>
-              <button type="button" onClick={() => setSelected(word)}>
+              <button className="app-button" type="button" onClick={() => setSelected(word)}>
                 {word}
               </button>
               <button
+                className="app-button"
                 type="button"
                 aria-label={`${word} 삭제`}
                 onClick={() => {
