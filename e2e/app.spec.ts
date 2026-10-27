@@ -66,7 +66,9 @@ test('pins a card and shows quote and word cards', async ({page}) => {
     'data-pinned',
     'true'
   );
-  await expect(page.getByRole('region', {name: '명언'})).toContainText('남은 시간');
+  await expect(
+    page.getByRole('progressbar', {name: '명언 남은 시간'})
+  ).toBeVisible();
   await expect(page.getByRole('region', {name: '단어'})).toContainText(
     'steady attention'
   );
@@ -148,7 +150,7 @@ test('keeps action buttons and timer settings above the cards', async ({page}) =
     element => getComputedStyle(element).borderTopWidth
   );
   const quotePadding = await quoteRefresh.evaluate(
-    element => getComputedStyle(element).paddingTop
+    element => getComputedStyle(element).paddingLeft
   );
   expect(quoteBorder).not.toBe('0px');
   expect(quotePadding).not.toBe('0px');
@@ -165,6 +167,11 @@ test('keeps action buttons and timer settings above the cards', async ({page}) =
     element => getComputedStyle(element.parentElement!).zIndex
   );
   expect(Number(overlayZ)).toBeGreaterThan(100);
+  await dialog.getByLabel('Timer Text').fill('64');
   await page.getByRole('button', {name: 'Save'}).click();
   await expect(dialog).toHaveCount(0);
+  const timerSize = await page.getByText('25:00').evaluate(
+    element => getComputedStyle(element).fontSize
+  );
+  expect(timerSize).toBe('64px');
 });

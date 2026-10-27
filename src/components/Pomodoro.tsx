@@ -1,5 +1,11 @@
 import React, {useEffect, useRef, useState, ChangeEvent} from 'react';
 import PomodoroTimer, {TimerSettings} from '../PomodoroTimer';
+import {
+  readTimerTextSize,
+  TIMER_TEXT_SIZE_MAX,
+  TIMER_TEXT_SIZE_MIN,
+  writeTimerTextSize
+} from '../pomodoro/timerTextSize';
 import styles from '../css/Pomodoro.module.css';
 import PomodoroOptionModal from './PomodoroOptionModal';
 import FocusHistory from './FocusHistory';
@@ -8,7 +14,8 @@ const LIMITS = {
   focusTime: {min: 1, max: 60},
   shortBreak: {min: 1, max: 30},
   longBreak: {min: 1, max: 30},
-  longBreakInterval: {min: 1, max: 10}
+  longBreakInterval: {min: 1, max: 10},
+  timerTextSize: {min: TIMER_TEXT_SIZE_MIN, max: TIMER_TEXT_SIZE_MAX}
 } as const;
 
 function readBoundedInteger(value: string, min: number, max: number): number | null {
@@ -20,6 +27,49 @@ function readBoundedInteger(value: string, min: number, max: number): number | n
     return null;
   }
   return parsed;
+}
+
+function updateSetting(
+  min: number,
+  max: number,
+  apply: (value: number) => void
+) {
+  return (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue = readBoundedInteger(event.target.value, min, max);
+    if (nextValue !== null) {
+      apply(nextValue);
+    }
+  };
+}
+
+type OptionFieldProps = {
+  id: string;
+  label: string;
+  min: number;
+  max: number;
+  value: number;
+  onValue: (value: number) => void;
+};
+
+function OptionField({id, label, min, max, value, onValue}: OptionFieldProps) {
+  return (
+    <div className={styles.optionDiv}>
+      <label htmlFor={id} className={styles.optionLabel}>
+        {label}
+      </label>
+      <input
+        name={id}
+        id={id}
+        className={styles.optionValue}
+        type="number"
+        min={min}
+        max={max}
+        step="1"
+        value={value}
+        onChange={updateSetting(min, max, onValue)}
+      />
+    </div>
+  );
 }
 
 function GearIcon() {
@@ -44,6 +94,7 @@ function Pomodoro() {
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
   const [longBreakInterval, setLongBreakInterval] = useState(4);
+  const [timerTextSize, setTimerTextSize] = useState(() => readTimerTextSize(localStorage));
 
   const openTimerOption = () => {
     setShowTimerOption(true);
@@ -56,6 +107,7 @@ function Pomodoro() {
       longBreakInterval
     };
     timerRef.current?.saveLocalStorageSettings(settings);
+    writeTimerTextSize(localStorage, timerTextSize);
     setShowTimerOption(false);
   };
   const closeTimerOption = () => {
@@ -66,6 +118,7 @@ function Pomodoro() {
       setLongBreak(settings.longBreak);
       setLongBreakInterval(settings.longBreakInterval);
     }
+    setTimerTextSize(readTimerTextSize(localStorage));
     setShowTimerOption(false);
   };
 
@@ -109,19 +162,13 @@ function Pomodoro() {
     };
   }, []);
 
-  const updateSetting =
-    (min: number, max: number, apply: (value: number) => void) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const nextValue = readBoundedInteger(event.target.value, min, max);
-      if (nextValue !== null) {
-        apply(nextValue);
-      }
-    };
-
   return (
     <div className={styles.rootDiv}>
       <div className={styles.roundedCardDiv}>
-        <p className={`${styles.timer} num`} style={{color: timerTextColor}}>
+        <p
+          className={`${styles.timer} num`}
+          style={{color: timerTextColor, fontSize: `${timerTextSize}px`}}
+        >
           {timerText}
         </p>
         <div className={styles.focusIndex}>
@@ -138,86 +185,46 @@ function Pomodoro() {
         {showTimerOption && (
           <PomodoroOptionModal onSave={saveTimerOption} onClose={closeTimerOption}>
             <h2 className={styles.title}>구간 길이</h2>
-            <div className={styles.optionDiv}>
-              <label htmlFor="focusTime" className={styles.optionLabel}>
-                Focus Time
-              </label>
-              <input
-                name="focusTime"
-                id="focusTime"
-                className={styles.optionValue}
-                type="number"
-                min={LIMITS.focusTime.min}
-                max={LIMITS.focusTime.max}
-                step="1"
-                value={focusTime}
-                onChange={updateSetting(
-                  LIMITS.focusTime.min,
-                  LIMITS.focusTime.max,
-                  setFocusTime
-                )}
-              />
-            </div>
-            <div className={styles.optionDiv}>
-              <label htmlFor="shortBreak" className={styles.optionLabel}>
-                Short Break
-              </label>
-              <input
-                name="shortBreak"
-                id="shortBreak"
-                className={styles.optionValue}
-                type="number"
-                min={LIMITS.shortBreak.min}
-                max={LIMITS.shortBreak.max}
-                step="1"
-                value={shortBreak}
-                onChange={updateSetting(
-                  LIMITS.shortBreak.min,
-                  LIMITS.shortBreak.max,
-                  setShortBreak
-                )}
-              />
-            </div>
-            <div className={styles.optionDiv}>
-              <label htmlFor="longBreak" className={styles.optionLabel}>
-                Long Break
-              </label>
-              <input
-                name="longBreak"
-                id="longBreak"
-                className={styles.optionValue}
-                type="number"
-                min={LIMITS.longBreak.min}
-                max={LIMITS.longBreak.max}
-                step="1"
-                value={longBreak}
-                onChange={updateSetting(
-                  LIMITS.longBreak.min,
-                  LIMITS.longBreak.max,
-                  setLongBreak
-                )}
-              />
-            </div>
-            <div className={styles.optionDiv}>
-              <label htmlFor="longBreakInterval" className={styles.optionLabel}>
-                Long Break Interval
-              </label>
-              <input
-                name="longBreakInterval"
-                id="longBreakInterval"
-                className={styles.optionValue}
-                type="number"
-                min={LIMITS.longBreakInterval.min}
-                max={LIMITS.longBreakInterval.max}
-                step="1"
-                value={longBreakInterval}
-                onChange={updateSetting(
-                  LIMITS.longBreakInterval.min,
-                  LIMITS.longBreakInterval.max,
-                  setLongBreakInterval
-                )}
-              />
-            </div>
+            <OptionField
+              id="focusTime"
+              label="Focus Time"
+              min={LIMITS.focusTime.min}
+              max={LIMITS.focusTime.max}
+              value={focusTime}
+              onValue={setFocusTime}
+            />
+            <OptionField
+              id="shortBreak"
+              label="Short Break"
+              min={LIMITS.shortBreak.min}
+              max={LIMITS.shortBreak.max}
+              value={shortBreak}
+              onValue={setShortBreak}
+            />
+            <OptionField
+              id="longBreak"
+              label="Long Break"
+              min={LIMITS.longBreak.min}
+              max={LIMITS.longBreak.max}
+              value={longBreak}
+              onValue={setLongBreak}
+            />
+            <OptionField
+              id="longBreakInterval"
+              label="Long Break Interval"
+              min={LIMITS.longBreakInterval.min}
+              max={LIMITS.longBreakInterval.max}
+              value={longBreakInterval}
+              onValue={setLongBreakInterval}
+            />
+            <OptionField
+              id="timerTextSize"
+              label="Timer Text"
+              min={LIMITS.timerTextSize.min}
+              max={LIMITS.timerTextSize.max}
+              value={timerTextSize}
+              onValue={setTimerTextSize}
+            />
           </PomodoroOptionModal>
         )}
         <div className={styles.timerButtonDiv}>
