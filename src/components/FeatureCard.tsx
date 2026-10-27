@@ -57,19 +57,30 @@ function viewportSize(): ViewportSize {
   return {width: window.innerWidth, height: window.innerHeight};
 }
 
+type StoredCard = CardLayout & {placed?: boolean};
+
 function storageKey(id: string): string {
   return `feature-card:${id}`;
 }
 
-function readStoredLayout(id: string, fallback: CardLayout): CardLayout {
+function readStoredCard(
+  id: string,
+  fallback: CardLayout
+): {layout: CardLayout; placed: boolean} {
   const raw = localStorage.getItem(storageKey(id));
   if (!raw) {
-    return clampCardLayout(fallback, viewportSize());
+    return {layout: fallback, placed: false};
   }
   try {
-    return clampCardLayout(parseCardLayout(JSON.parse(raw), fallback), viewportSize());
+    const parsed: unknown = JSON.parse(raw);
+    const layout = clampCardLayout(parseCardLayout(parsed, fallback), viewportSize());
+    const placed =
+      !!parsed &&
+      typeof parsed === 'object' &&
+      ('placed' in parsed ? Boolean((parsed as StoredCard).placed) : true);
+    return {layout, placed};
   } catch {
-    return clampCardLayout(fallback, viewportSize());
+    return {layout: clampCardLayout(fallback, viewportSize()), placed: false};
   }
 }
 
@@ -82,21 +93,29 @@ export default function FeatureCard({
   onClose,
   children
 }: FeatureCardProps) {
-  const [layout, setLayout] = useState<CardLayout>(() =>
-    readStoredLayout(id, defaultLayout)
-  );
+  const stored = useRef(readStoredCard(id, defaultLayout));
+  const [layout, setLayout] = useState<CardLayout>(stored.current.layout);
+  const [placed, setPlaced] = useState(stored.current.placed);
   const [zIndex, setZIndex] = useState(1);
   const dragRef = useRef<DragState | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    localStorage.setItem(storageKey(id), JSON.stringify(layout));
-  }, [id, layout]);
+    if (!placed && !layout.pinned && !localStorage.getItem(storageKey(id))) {
+      return;
+    }
+    const record: StoredCard = {...layout, placed};
+    localStorage.setItem(storageKey(id), JSON.stringify(record));
+  }, [id, layout, placed]);
 
   useEffect(() => {
+    if (!placed) {
+      return;
+    }
     const onResize = () => setLayout(current => clampCardLayout(current, viewportSize()));
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [placed]);
 
   const beginPointer =
     (mode: DragState['mode']) => (event: React.PointerEvent<HTMLElement>) => {
@@ -107,17 +126,31 @@ export default function FeatureCard({
       if (mode === 'move' && target instanceof Element && target.closest('button')) {
         return;
       }
+      const rect = sectionRef.current?.getBoundingClientRect();
+      if (!rect) {
+        return;
+      }
       event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
         pointerId: event.pointerId,
         originX: event.clientX,
         originY: event.clientY,
-        startX: layout.x,
-        startY: layout.y,
-        startWidth: layout.width,
-        startHeight: layout.height,
+        startX: rect.left,
+        startY: rect.top,
+        startWidth: rect.width,
+        startHeight: rect.height,
         mode
       };
+      if (!placed) {
+        setLayout(current => ({
+          ...current,
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height
+        }));
+        setPlaced(true);
+      }
       zSeed += 1;
       setZIndex(zSeed);
     };
@@ -154,14 +187,20 @@ export default function FeatureCard({
 
   return (
     <section
+      ref={sectionRef}
       className={styles.card}
-      style={{
-        left: layout.x,
-        top: layout.y,
-        width: layout.width,
-        height: layout.height,
-        zIndex
-      }}
+      style={
+        placed
+          ? {
+              left: layout.x,
+              top: layout.y,
+              width: layout.width,
+              height: layout.height,
+              zIndex
+            }
+          : undefined
+      }
+      data-placed={placed}
       data-pinned={layout.pinned}
       aria-label={title}
     >
@@ -171,7 +210,7 @@ export default function FeatureCard({
         onPointerMove={movePointer}
         onPointerUp={endPointer}
       >
-        <span className={styles.title}>{title}</span>
+        <h2 className={styles.title}>{title}</h2>
         <span className={styles.actions}>
           <button
             type="button"

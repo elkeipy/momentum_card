@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {nextQuoteIndex, QUOTE_REFRESH_MS, QUOTES, remainingQuoteSeconds} from '../quotes/quotes';
+import styles from './QuoteCard.module.css';
 
 export default function QuoteCard() {
   const [index, setIndex] = useState(0);
@@ -29,10 +30,12 @@ export default function QuoteCard() {
 
   return (
     <div>
-      <p>{quote.text}</p>
-      <p>{quote.from}</p>
-      <p>남은 시간 {remainingQuoteSeconds(now - startedAt)}초</p>
-      <button className="app-button" type="button" onClick={refresh}>
+      <p className={styles.quote}>{quote.text}</p>
+      <p className={styles.from}>{quote.from}</p>
+      <p className={styles.remain}>
+        남은 시간 {remainingQuoteSeconds(now - startedAt)}초
+      </p>
+      <button className={`app-button ${styles.refresh}`} type="button" onClick={refresh}>
         명언 새로고침
       </button>
     </div>

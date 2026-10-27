@@ -25,7 +25,7 @@ export default function PomodoroOptionModal({
 
   return ReactDOM.createPortal(
     <div className={styles.rootDiv} role="presentation">
-      <div className={styles.containerDiv} role="dialog" aria-modal="true" aria-label="Timer Setting">
+      <div className={styles.containerDiv} role="dialog" aria-modal="true" aria-label="구간 길이">
         {children}
         <div className={styles.buttonDiv}>
           <button className="btn-primary" type="button" onClick={onSave}>

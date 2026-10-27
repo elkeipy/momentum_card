@@ -39,8 +39,8 @@ const MemorizedBtn = React.memo(Btn);
 
 function Hello() {
   React.useEffect(() => {
-    console.log('Created 😊');
-    return () => console.log('Destroyed 😭');
+    console.log('Created');
+    return () => console.log('Destroyed');
   }, []);
 
   const [value, setValue] = React.useState('Save Change');

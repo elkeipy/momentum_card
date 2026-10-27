@@ -4,6 +4,5 @@ import Clock from './components/Clock';
 
 test('renders clock container', () => {
   render(<Clock />);
-  const clockElement = screen.getByRole('heading', { level: 2 });
-  expect(clockElement).toBeInTheDocument();
+  expect(screen.getByText(/\d/)).toBeInTheDocument();
 });

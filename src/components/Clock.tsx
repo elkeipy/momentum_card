@@ -19,9 +19,7 @@ function Clock() {
 
   return (
     <div className={styles.rootDiv}>
-      <span>
-        <h2 className={styles.time}>{time}</h2>
-      </span>
+      <p className={`${styles.time} num`}>{time}</p>
     </div>
   );
 }

@@ -1,0 +1,85 @@
+.root {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.word {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.definition,
+.empty {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  line-height: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.form label {
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+
+.join {
+  display: flex;
+  min-width: 0;
+}
+
+.join input {
+  flex: 1;
+  min-width: 0;
+  height: var(--control-height);
+  padding: 0 12px;
+  color: var(--text);
+  font: inherit;
+  background: var(--surface);
+  border: 1px solid var(--control);
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+}
+
+.join input::placeholder {
+  color: var(--faint);
+}
+
+.join button {
+  border-radius: 0 999px 999px 0;
+}
+
+.listToggle {
+  margin-top: 12px;
+}
+
+.list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  border-top: 1px solid var(--rule);
+}
+
+.list li button:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -3,10 +3,14 @@ import Clock from '../components/Clock';
 import FeatureCard from '../components/FeatureCard';
 import Pomodoro from '../components/Pomodoro';
 import QuoteCard from '../components/QuoteCard';
-import ThemeSwitcher from '../components/ThemeSwitcher';
 import Weather from '../components/Weather';
 import WordCard from '../components/WordCard';
 import type {CardLayout} from '../featureCard/cardLayout';
+import {
+  readTodayFocusHistory,
+  summarizePeriodMinutes,
+  type PeriodMinutes
+} from '../pomodoro/focusHistory';
 import {
   hideCard,
   readVisibleCards,
@@ -26,49 +30,141 @@ const CARDS: CardSpec[] = [
   {
     id: 'weather',
     title: '날씨',
-    layout: {x: 16, y: 48, width: 280, height: 150, pinned: false},
+    layout: {x: 24, y: 96, width: 420, height: 168, pinned: false},
     content: <Weather />
   },
   {
     id: 'clock',
     title: '시계',
-    layout: {x: 312, y: 48, width: 260, height: 140, pinned: false},
+    layout: {x: 460, y: 96, width: 420, height: 168, pinned: false},
     content: <Clock />
   },
   {
     id: 'pomodoro',
     title: '뽀모도로',
-    layout: {x: 16, y: 208, width: 360, height: 520, pinned: false},
+    layout: {x: 24, y: 280, width: 640, height: 520, pinned: false},
     content: <Pomodoro />
   },
   {
     id: 'quote',
     title: '명언',
-    layout: {x: 392, y: 208, width: 280, height: 200, pinned: false},
+    layout: {x: 680, y: 280, width: 420, height: 220, pinned: false},
     content: <QuoteCard />
   },
   {
     id: 'words',
     title: '단어',
-    layout: {x: 392, y: 420, width: 300, height: 260, pinned: false},
+    layout: {x: 680, y: 516, width: 420, height: 280, pinned: false},
     content: <WordCard />
   }
 ];
 
+const HISTORY_REFRESH_MS = 5000;
+
+function formatDay(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function todaySentence(minutes: PeriodMinutes, day: string): string {
+  const lost = minutes.Lost > 0 ? `, 놓친 ${minutes.Lost}분` : '';
+  return `오늘 집중 ${minutes.Focus}분${lost} · ${day}`;
+}
+
+function Mark() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <rect
+        x="3.5"
+        y="4.5"
+        width="17"
+        height="15"
+        rx="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <rect x="6" y="13" width="12" height="3" rx="1.5" fill="var(--accent)" />
+    </svg>
+  );
+}
+
+function TodayFact() {
+  const [line, setLine] = useState(() => todaySentence(
+    summarizePeriodMinutes(readTodayFocusHistory(localStorage, new Date())),
+    formatDay(new Date())
+  ));
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      const minutes = summarizePeriodMinutes(readTodayFocusHistory(localStorage, now));
+      setLine(todaySentence(minutes, formatDay(now)));
+    };
+    update();
+    const timerId = window.setInterval(update, HISTORY_REFRESH_MS);
+    return () => window.clearInterval(timerId);
+  }, []);
+
+  return <p className="mast-sub">{line}</p>;
+}
+
 export default function Board() {
   const [visible, setVisible] = useState<CardId[]>(() => readVisibleCards(localStorage));
   const [menuOpen, setMenuOpen] = useState(false);
+  const hidden = CARDS.filter(card => !visible.includes(card.id));
+  const cardById = (id: CardId) => CARDS.find(card => card.id === id);
 
   useEffect(() => {
     localStorage.setItem(VISIBLE_CARDS_KEY, JSON.stringify(visible));
   }, [visible]);
 
-  const hidden = CARDS.filter(card => !visible.includes(card.id));
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
+
+  const renderCard = (id: CardId) => {
+    const card = cardById(id);
+    if (!card || !visible.includes(id)) {
+      return null;
+    }
+    return (
+      <FeatureCard
+        key={card.id}
+        id={card.id}
+        title={card.title}
+        defaultLayout={card.layout}
+        onClose={() => setVisible(current => hideCard(current, card.id))}
+      >
+        {card.content}
+      </FeatureCard>
+    );
+  };
+
+  const showBand = visible.includes('weather') || visible.includes('clock');
+  const showStack = visible.includes('quote') || visible.includes('words');
 
   return (
     <>
-      <div className="board-tools">
-        <ThemeSwitcher />
+      <header className="mast">
+        <div className="brand">
+          <Mark />
+          <span>Momentum</span>
+        </div>
+        <div className="title-block">
+          <h1 className="screen-title">이번 구간</h1>
+          <TodayFact />
+        </div>
         <div className="card-adder">
           <button
             type="button"
@@ -102,18 +198,24 @@ export default function Board() {
             </div>
           ) : null}
         </div>
+      </header>
+      <div className="desk">
+        {showBand ? (
+          <div className="band">
+            {renderCard('weather')}
+            {renderCard('clock')}
+          </div>
+        ) : null}
+        {visible.includes('pomodoro') ? (
+          <div className="pomo-slot">{renderCard('pomodoro')}</div>
+        ) : null}
+        {showStack ? (
+          <div className="stack">
+            {renderCard('quote')}
+            {renderCard('words')}
+          </div>
+        ) : null}
       </div>
-      {CARDS.filter(card => visible.includes(card.id)).map(card => (
-        <FeatureCard
-          key={card.id}
-          id={card.id}
-          title={card.title}
-          defaultLayout={card.layout}
-          onClose={() => setVisible(current => hideCard(current, card.id))}
-        >
-          {card.content}
-        </FeatureCard>
-      ))}
     </>
   );
 }

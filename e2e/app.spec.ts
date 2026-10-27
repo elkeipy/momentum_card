@@ -41,11 +41,10 @@ test.beforeEach(async ({page}) => {
 
 test('shows the clock, weather, and pomodoro controls', async ({page}) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', {level: 2})).toBeVisible();
+  await expect(page.getByRole('heading', {name: '이번 구간'})).toBeVisible();
+  await expect(page.getByRole('region', {name: '시계'})).toBeVisible();
   await expect(page.getByRole('button', {name: 'Start'})).toBeVisible();
-  await expect(
-    page.getByRole('heading', {level: 3}).filter({hasText: '서울'})
-  ).toBeVisible();
+  await expect(page.getByRole('region', {name: '날씨'})).toContainText('서울');
   await expect(page.getByText('체감온도: 20.1°C')).toBeVisible();
 });
 
@@ -58,7 +57,7 @@ test('starts and stops the pomodoro timer', async ({page}) => {
   await expect(page.getByRole('button', {name: 'Start', exact: true})).toBeVisible();
 });
 
-test('pins a card, switches theme, and shows quote and word cards', async ({page}) => {
+test('pins a card and shows quote and word cards', async ({page}) => {
   await page.goto('/');
   const pin = page.getByRole('button', {name: '날씨 고정'});
   await pin.click();
@@ -67,8 +66,6 @@ test('pins a card, switches theme, and shows quote and word cards', async ({page
     'data-pinned',
     'true'
   );
-  await page.getByLabel('테마').selectOption('flat');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'flat');
   await expect(page.getByRole('region', {name: '명언'})).toContainText('남은 시간');
   await expect(page.getByRole('region', {name: '단어'})).toContainText(
     'steady attention'
@@ -103,9 +100,7 @@ test('summarizes today and restores a closed card', async ({page}) => {
   await expect(page.getByRole('region', {name: '날씨'})).toBeVisible();
 });
 
-test('themes the action buttons and keeps timer settings above the cards', async ({
-  page
-}) => {
+test('keeps action buttons and timer settings above the cards', async ({page}) => {
   await page.goto('/');
   const quoteRefresh = page.getByRole('button', {name: '명언 새로고침'});
   const quoteBorder = await quoteRefresh.evaluate(
@@ -117,14 +112,13 @@ test('themes the action buttons and keeps timer settings above the cards', async
   expect(quoteBorder).not.toBe('0px');
   expect(quotePadding).not.toBe('0px');
 
-  await page.getByLabel('테마').selectOption('flat');
   const startRadius = await page
     .getByRole('button', {name: 'Start', exact: true})
     .evaluate(element => getComputedStyle(element).borderRadius);
-  expect(startRadius).toBe('8px');
+  expect(startRadius).toBe('999px');
 
   await page.getByRole('button', {name: '타이머 설정'}).click();
-  const dialog = page.getByRole('dialog', {name: 'Timer Setting'});
+  const dialog = page.getByRole('dialog', {name: '구간 길이'});
   await expect(dialog).toBeVisible();
   const overlayZ = await dialog.evaluate(
     element => getComputedStyle(element.parentElement!).zIndex

@@ -22,6 +22,9 @@
 .env.test.local
 .env.production.local
 
+.taste-skill/
+_preview/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

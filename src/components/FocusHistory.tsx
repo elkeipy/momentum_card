@@ -21,21 +21,29 @@ export default function FocusHistory() {
   }, []);
 
   const minutes = summarizePeriodMinutes(rows);
-  const widest = Math.max(minutes.Focus, minutes.Break, minutes.Lost, 1);
+  const total = minutes.Focus + minutes.Break + minutes.Lost;
 
   return (
-    <div>
-      <ul className={styles.bars} aria-label="오늘 시간 요약">
+    <div className={styles.day}>
+      <div className={styles.track} aria-hidden="true">
+        {total > 0
+          ? BAR_KINDS.map(kind =>
+              minutes[kind] > 0 ? (
+                <span
+                  key={kind}
+                  className={`${styles.seg} ${styles[kind.toLowerCase()]}`}
+                  style={{flexGrow: minutes[kind]}}
+                />
+              ) : null
+            )
+          : null}
+      </div>
+      <ul className={styles.legend} aria-label="오늘 시간 요약">
         {BAR_KINDS.map(kind => (
           <li key={kind}>
-            <span className={styles.barLabel}>
-              {kind} {minutes[kind]}분
-            </span>
-            <span className={styles.barTrack}>
-              <span
-                className={`${styles.barFill} ${styles[kind.toLowerCase()]}`}
-                style={{width: `${(minutes[kind] / widest) * 100}%`}}
-              />
+            {kind}{' '}
+            <span className={kind === 'Lost' && minutes.Lost > 0 ? styles.lostNum : undefined}>
+              {minutes[kind]}분
             </span>
           </li>
         ))}

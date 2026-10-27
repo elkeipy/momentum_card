@@ -121,9 +121,9 @@ function Pomodoro() {
   return (
     <div className={styles.rootDiv}>
       <div className={styles.roundedCardDiv}>
-        <h1 className={styles.timer} style={{color: timerTextColor}}>
+        <p className={`${styles.timer} num`} style={{color: timerTextColor}}>
           {timerText}
-        </h1>
+        </p>
         <div className={styles.focusIndex}>
           <h3>{currentStateText}</h3>
           <button
@@ -137,10 +137,7 @@ function Pomodoro() {
         </div>
         {showTimerOption && (
           <PomodoroOptionModal onSave={saveTimerOption} onClose={closeTimerOption}>
-            <div>
-              <h2 className={styles.title}>Timer Setting</h2>
-            </div>
-            <div className={styles.horizontalLine}></div>
+            <h2 className={styles.title}>구간 길이</h2>
             <div className={styles.optionDiv}>
               <label htmlFor="focusTime" className={styles.optionLabel}>
                 Focus Time

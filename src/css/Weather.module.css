@@ -1,3 +1,43 @@
 .rootDiv {
-    @apply flex flex-col justify-center items-start h-auto w-full bg-transparent shadow-none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.place {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.temp {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  letter-spacing: 0;
+}
+
+.meta,
+.missing,
+.error {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  line-height: 20px;
+}
+
+.error {
+  color: var(--text);
 }

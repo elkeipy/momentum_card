@@ -135,16 +135,26 @@ function Weather() {
   }, []);
 
   if (errorMessage) {
-    return <div className={styles.rootDiv}>{errorMessage}</div>;
+    return <p className={styles.error}>{errorMessage}</p>;
   }
+
+  const temperature = weatherInfo?.temperature;
+  const feelsLike = weatherInfo?.feelsLike;
 
   return (
     <div className={styles.rootDiv}>
-      <h3>
-        {`🌡️${weatherInfo?.temperature ?? '-'} `} @
-        {weatherInfo?.location ?? '위치 확인 중'}
-      </h3>
-      <p>{`체감온도: ${weatherInfo?.feelsLike ?? '-'}°C`}</p>
+      <p className={styles.place}>{weatherInfo?.location ?? '위치 확인 중'}</p>
+      {typeof temperature === 'number' ? (
+        <p className={styles.temp}>
+          <span className="num">{temperature}</span>
+          <span className={styles.unit}>°C</span>
+        </p>
+      ) : (
+        <p className={styles.missing}>—</p>
+      )}
+      <p className={styles.meta}>
+        {typeof feelsLike === 'number' ? `체감온도: ${feelsLike}°C` : '체감온도: —'}
+      </p>
     </div>
   );
 }

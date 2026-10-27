@@ -1,7 +1,16 @@
 .rootDiv {
-  @apply flex justify-center items-center h-auto w-full bg-transparent shadow-none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
+
 .time {
-  @apply text-2xl font-semibold;
-  color: var(--card-fg);
+  margin: 0;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }

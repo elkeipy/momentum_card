@@ -1,0 +1,23 @@
+.quote {
+  margin: 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.from,
+.remain {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  line-height: 20px;
+}
+
+.remain {
+  font-variant-numeric: tabular-nums;
+}
+
+.refresh {
+  margin-top: 16px;
+}

@@ -7,6 +7,7 @@ import {
   sanitizeWord,
   WORD_LIST_STORAGE_KEY
 } from '../words/words';
+import styles from './WordCard.module.css';
 
 export default function WordCard() {
   const [words, setWords] = useState<string[]>(() => readWordList(localStorage));
@@ -61,38 +62,47 @@ export default function WordCard() {
   };
 
   return (
-    <div>
-      <p>{selected || '단어가 없습니다.'}</p>
-      <p>{definition}</p>
+    <div className={styles.root}>
+      <p className={styles.word}>{selected || '단어가 없습니다.'}</p>
+      <p className={selected ? styles.definition : styles.empty}>
+        {selected ? definition : '영어 단어를 추가하면 뜻이 여기에 붙는다.'}
+      </p>
       <form
+        className={styles.form}
         onSubmit={event => {
           event.preventDefault();
           saveWord();
         }}
       >
         <label htmlFor="new-word">단어 추가</label>
-        <input
-          id="new-word"
-          value={draft}
-          onChange={event => setDraft(event.target.value)}
-          placeholder="english"
-        />
-        <button className="app-button" type="submit">
-          추가
-        </button>
+        <div className={styles.join}>
+          <input
+            id="new-word"
+            value={draft}
+            onChange={event => setDraft(event.target.value)}
+            placeholder="english"
+          />
+          <button className="app-button" type="submit">
+            추가
+          </button>
+        </div>
       </form>
-      <button className="app-button" type="button" onClick={() => setShowAll(current => !current)}>
+      <button
+        className={`text-button ${styles.listToggle}`}
+        type="button"
+        onClick={() => setShowAll(current => !current)}
+      >
         전체 목록
       </button>
       {showAll ? (
-        <ul>
+        <ul className={styles.list}>
           {words.map(word => (
             <li key={word}>
-              <button className="app-button" type="button" onClick={() => setSelected(word)}>
+              <button className="text-button" type="button" onClick={() => setSelected(word)}>
                 {word}
               </button>
               <button
-                className="app-button"
+                className="text-button"
                 type="button"
                 aria-label={`${word} 삭제`}
                 onClick={() => {

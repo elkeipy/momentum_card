@@ -75,10 +75,10 @@ class PomodoroTimer {
     /^(Focus|Break|Lost),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
   private readonly BTN_START_TEXT: string = 'Start';
   private readonly BTN_STOP_TEXT: string = 'Stop';
-  private readonly COLOR_FOCUS: string = 'var(--card-fg)';
-  private readonly COLOR_UNMANAGED: string = '#b45309';
-  private readonly COLOR_BREAK: string = 'deeppink';
-  private readonly COLOR_LOST: string = 'red';
+  private readonly COLOR_FOCUS: string = 'var(--accent)';
+  private readonly COLOR_UNMANAGED: string = 'var(--warning)';
+  private readonly COLOR_BREAK: string = 'var(--text)';
+  private readonly COLOR_LOST: string = 'var(--negative)';
   private readonly PomodoroFocusLocalStorageKey: string = 'PomodoroFocusData';
   private readonly PomodoroSettingsLocalStorageKey: string = 'PomodoroSettings';
 
