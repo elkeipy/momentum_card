@@ -1,5 +1,6 @@
 export const CARD_MIN_WIDTH = 220;
 export const CARD_MIN_HEIGHT = 140;
+export const CARD_TOP_INSET = 80;
 
 export type CardLayout = {
   x: number;
@@ -14,20 +15,25 @@ export type ViewportSize = {
   height: number;
 };
 
-export function clampCardLayout(layout: CardLayout, viewport: ViewportSize): CardLayout {
+export function clampCardLayout(
+  layout: CardLayout,
+  viewport: ViewportSize,
+  minY = 0
+): CardLayout {
+  const top = Math.max(0, minY);
   const width = Math.min(
     Math.max(layout.width, CARD_MIN_WIDTH),
     Math.max(viewport.width, CARD_MIN_WIDTH)
   );
   const height = Math.min(
     Math.max(layout.height, CARD_MIN_HEIGHT),
-    Math.max(viewport.height, CARD_MIN_HEIGHT)
+    Math.max(viewport.height - top, CARD_MIN_HEIGHT)
   );
   const maxX = Math.max(0, viewport.width - width);
-  const maxY = Math.max(0, viewport.height - height);
+  const maxY = Math.max(top, viewport.height - height);
   return {
     x: Math.min(Math.max(layout.x, 0), maxX),
-    y: Math.min(Math.max(layout.y, 0), maxY),
+    y: Math.min(Math.max(layout.y, top), maxY),
     width,
     height,
     pinned: layout.pinned

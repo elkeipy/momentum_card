@@ -162,7 +162,7 @@ export default function Board() {
           <span>Momentum</span>
         </div>
         <div className="title-block">
-          <h1 className="screen-title">이번 구간</h1>
+          <h1 className="screen-title">This session</h1>
           <TodayFact />
         </div>
         <div className="card-adder">

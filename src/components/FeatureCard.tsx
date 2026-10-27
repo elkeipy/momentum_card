@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  CARD_TOP_INSET,
   clampCardLayout,
   parseCardLayout,
   type CardLayout,
@@ -57,6 +58,18 @@ function viewportSize(): ViewportSize {
   return {width: window.innerWidth, height: window.innerHeight};
 }
 
+function cardTopInset(): number {
+  const mast = document.querySelector('.mast');
+  if (!(mast instanceof HTMLElement)) {
+    return CARD_TOP_INSET;
+  }
+  return Math.ceil(mast.getBoundingClientRect().bottom);
+}
+
+function boundCardLayout(layout: CardLayout): CardLayout {
+  return clampCardLayout(layout, viewportSize(), cardTopInset());
+}
+
 type StoredCard = CardLayout & {placed?: boolean};
 
 function storageKey(id: string): string {
@@ -73,14 +86,14 @@ function readStoredCard(
   }
   try {
     const parsed: unknown = JSON.parse(raw);
-    const layout = clampCardLayout(parseCardLayout(parsed, fallback), viewportSize());
+    const layout = boundCardLayout(parseCardLayout(parsed, fallback));
     const placed =
       !!parsed &&
       typeof parsed === 'object' &&
       ('placed' in parsed ? Boolean((parsed as StoredCard).placed) : true);
     return {layout, placed};
   } catch {
-    return {layout: clampCardLayout(fallback, viewportSize()), placed: false};
+    return {layout: boundCardLayout(fallback), placed: false};
   }
 }
 
@@ -109,10 +122,14 @@ export default function FeatureCard({
   }, [id, layout, placed]);
 
   useEffect(() => {
+    setLayout(current => boundCardLayout(current));
+  }, []);
+
+  useEffect(() => {
     if (!placed) {
       return;
     }
-    const onResize = () => setLayout(current => clampCardLayout(current, viewportSize()));
+    const onResize = () => setLayout(current => boundCardLayout(current));
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [placed]);
@@ -176,7 +193,7 @@ export default function FeatureCard({
             width: drag.startWidth + dx,
             height: drag.startHeight + dy
           };
-    setLayout(current => clampCardLayout({...current, ...next}, viewportSize()));
+    setLayout(current => boundCardLayout({...current, ...next}));
   };
 
   const endPointer = (event: React.PointerEvent<HTMLElement>) => {

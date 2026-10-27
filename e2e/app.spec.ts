@@ -41,7 +41,7 @@ test.beforeEach(async ({page}) => {
 
 test('shows the clock, weather, and pomodoro controls', async ({page}) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', {name: '이번 구간'})).toBeVisible();
+  await expect(page.getByRole('heading', {name: 'This session'})).toBeVisible();
   await expect(page.getByRole('region', {name: '시계'})).toBeVisible();
   await expect(page.getByRole('button', {name: 'Start'})).toBeVisible();
   await expect(page.getByRole('region', {name: '날씨'})).toContainText('서울');
@@ -98,6 +98,47 @@ test('summarizes today and restores a closed card', async ({page}) => {
   await page.getByRole('button', {name: '카드 추가'}).click();
   await page.getByRole('menuitem', {name: '날씨'}).click();
   await expect(page.getByRole('region', {name: '날씨'})).toBeVisible();
+});
+
+test('keeps cards below the top bar so their headers stay draggable', async ({
+  page
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'feature-card:weather',
+      JSON.stringify({
+        x: 24,
+        y: 0,
+        width: 420,
+        height: 168,
+        pinned: false,
+        placed: true
+      })
+    );
+  });
+  await page.goto('/');
+  const weather = page.getByRole('region', {name: '날씨'});
+  const mast = page.locator('header.mast');
+  const mastBottom = () => mast.evaluate(element => element.getBoundingClientRect().bottom);
+  const weatherTop = () => weather.evaluate(element => element.getBoundingClientRect().top);
+  await expect(weather).toBeVisible();
+  expect(await weatherTop()).toBeGreaterThanOrEqual(await mastBottom());
+
+  const header = weather.locator('header');
+  const headerBox = await header.boundingBox();
+  expect(headerBox).not.toBeNull();
+  const hit = await header.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const topElement = document.elementFromPoint(rect.left + 24, rect.top + 8);
+    return element.contains(topElement);
+  });
+  expect(hit).toBe(true);
+
+  await header.hover();
+  await page.mouse.down();
+  await page.mouse.move(headerBox!.x + headerBox!.width / 2, 0);
+  await page.mouse.up();
+  expect(await weatherTop()).toBeGreaterThanOrEqual(await mastBottom());
 });
 
 test('keeps action buttons and timer settings above the cards', async ({page}) => {
