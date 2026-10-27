@@ -101,11 +101,36 @@ html[data-theme='glass'] {
   color-scheme: light;
 }
 
-.theme-switcher {
+.board-tools {
   position: fixed;
   top: 12px;
   right: 12px;
   z-index: 30;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.card-adder {
+  position: relative;
+}
+
+.card-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+  padding: 8px;
+  color: var(--card-fg);
+  background: var(--dialog-bg);
+  border: var(--card-border);
+  border-radius: 12px;
+}
+
+.theme-switcher {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -144,9 +169,24 @@ html[data-theme='glass'] {
   box-shadow: var(--button-shadow);
 }
 
+.icon-button {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--button-secondary-fg);
+  background: var(--button-secondary-bg);
+  border: var(--button-border);
+  border-radius: var(--button-radius);
+}
+
 .app-button:active,
 .btn-primary:active,
-.btn-secondary:active {
+.btn-secondary:active,
+.icon-button:active {
   transform: scale(0.98);
 }
 
@@ -163,7 +203,8 @@ body,
 @media (prefers-reduced-motion: reduce) {
   .app-button:active,
   .btn-primary:active,
-  .btn-secondary:active {
+  .btn-secondary:active,
+  .icon-button:active {
     transform: none;
   }
 }

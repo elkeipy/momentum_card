@@ -22,6 +22,17 @@ function readBoundedInteger(value: string, min: number, max: number): number | n
   return parsed;
 }
 
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M19.4 13a7.8 7.8 0 0 0 .1-1 7.8 7.8 0 0 0-.1-1l2.1-1.6a.5.5 0 0 0 .1-.6l-2-3.5a.5.5 0 0 0-.6-.2l-2.5 1a7.4 7.4 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.5a.5.5 0 0 0 .1.6L4.6 11a7.8 7.8 0 0 0-.1 1 7.8 7.8 0 0 0 .1 1l-2.1 1.6a.5.5 0 0 0-.1.6l2 3.5a.5.5 0 0 0 .6.2l2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6a.5.5 0 0 0 .5.4h4a.5.5 0 0 0 .5-.4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1a.5.5 0 0 0 .6-.2l2-3.5a.5.5 0 0 0-.1-.6L19.4 13zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"
+      />
+    </svg>
+  );
+}
+
 function Pomodoro() {
   const timerRef = useRef<PomodoroTimer | null>(null);
   const [timerText, setTimerText] = useState('25:00');
@@ -115,8 +126,13 @@ function Pomodoro() {
         </h1>
         <div className={styles.focusIndex}>
           <h3>{currentStateText}</h3>
-          <button className="app-button" type="button" onClick={openTimerOption} aria-label="타이머 설정">
-            설정
+          <button
+            className="icon-button"
+            type="button"
+            onClick={openTimerOption}
+            aria-label="타이머 설정"
+          >
+            <GearIcon />
           </button>
         </div>
         {showTimerOption && (
@@ -138,7 +154,11 @@ function Pomodoro() {
                 max={LIMITS.focusTime.max}
                 step="1"
                 value={focusTime}
-                onChange={updateSetting(LIMITS.focusTime.min, LIMITS.focusTime.max, setFocusTime)}
+                onChange={updateSetting(
+                  LIMITS.focusTime.min,
+                  LIMITS.focusTime.max,
+                  setFocusTime
+                )}
               />
             </div>
             <div className={styles.optionDiv}>
@@ -154,7 +174,11 @@ function Pomodoro() {
                 max={LIMITS.shortBreak.max}
                 step="1"
                 value={shortBreak}
-                onChange={updateSetting(LIMITS.shortBreak.min, LIMITS.shortBreak.max, setShortBreak)}
+                onChange={updateSetting(
+                  LIMITS.shortBreak.min,
+                  LIMITS.shortBreak.max,
+                  setShortBreak
+                )}
               />
             </div>
             <div className={styles.optionDiv}>
@@ -170,7 +194,11 @@ function Pomodoro() {
                 max={LIMITS.longBreak.max}
                 step="1"
                 value={longBreak}
-                onChange={updateSetting(LIMITS.longBreak.min, LIMITS.longBreak.max, setLongBreak)}
+                onChange={updateSetting(
+                  LIMITS.longBreak.min,
+                  LIMITS.longBreak.max,
+                  setLongBreak
+                )}
               />
             </div>
             <div className={styles.optionDiv}>

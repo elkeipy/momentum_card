@@ -24,6 +24,33 @@ function parsePeriod(value: string): FocusPeriod | null {
   };
 }
 
+export type PeriodMinutes = {
+  Focus: number;
+  Break: number;
+  Lost: number;
+};
+
+function secondsOf(time: string): number {
+  const [hours, minutes, seconds] = time.split(':').map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+export function summarizePeriodMinutes(periods: FocusPeriod[]): PeriodMinutes {
+  const totals = {Focus: 0, Break: 0, Lost: 0};
+  periods.forEach(period => {
+    let delta = secondsOf(period.finish) - secondsOf(period.start);
+    if (delta < 0) {
+      delta += 24 * 3600;
+    }
+    totals[period.periodType] += delta;
+  });
+  return {
+    Focus: Math.round(totals.Focus / 60),
+    Break: Math.round(totals.Break / 60),
+    Lost: Math.round(totals.Lost / 60)
+  };
+}
+
 export function readTodayFocusHistory(
   storage: {getItem(key: string): string | null},
   now: Date

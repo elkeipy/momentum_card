@@ -43,7 +43,9 @@ test('shows the clock, weather, and pomodoro controls', async ({page}) => {
   await page.goto('/');
   await expect(page.getByRole('heading', {level: 2})).toBeVisible();
   await expect(page.getByRole('button', {name: 'Start'})).toBeVisible();
-  await expect(page.getByRole('heading', {level: 3}).filter({hasText: '서울'})).toBeVisible();
+  await expect(
+    page.getByRole('heading', {level: 3}).filter({hasText: '서울'})
+  ).toBeVisible();
   await expect(page.getByText('체감온도: 20.1°C')).toBeVisible();
 });
 
@@ -61,18 +63,57 @@ test('pins a card, switches theme, and shows quote and word cards', async ({page
   const pin = page.getByRole('button', {name: '날씨 고정'});
   await pin.click();
   await expect(pin).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('region', {name: '날씨'})).toHaveAttribute('data-pinned', 'true');
+  await expect(page.getByRole('region', {name: '날씨'})).toHaveAttribute(
+    'data-pinned',
+    'true'
+  );
   await page.getByLabel('테마').selectOption('flat');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'flat');
   await expect(page.getByRole('region', {name: '명언'})).toContainText('남은 시간');
-  await expect(page.getByRole('region', {name: '단어'})).toContainText('steady attention');
+  await expect(page.getByRole('region', {name: '단어'})).toContainText(
+    'steady attention'
+  );
 });
 
-test('themes the action buttons and keeps timer settings above the cards', async ({page}) => {
+test('summarizes today and restores a closed card', async ({page}) => {
+  await page.addInitScript(() => {
+    const now = new Date();
+    const dateId = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-');
+    localStorage.setItem(
+      'PomodoroFocusData',
+      JSON.stringify({
+        dateId,
+        focusCount: 1,
+        focusPeriod: [
+          'Focus,09:00:00,09:25:00',
+          'Break,09:25:00,09:30:00',
+          'Lost,09:30:00,09:32:00'
+        ]
+      })
+    );
+  });
+  await page.goto('/');
+  await expect(page.getByText('Focus 25분')).toBeVisible();
+  await expect(page.getByText('Break 5분')).toBeVisible();
+  await expect(page.getByText('Lost 2분')).toBeVisible();
+  await page.getByRole('button', {name: '날씨 닫기'}).click();
+  await expect(page.getByRole('region', {name: '날씨'})).toHaveCount(0);
+  await page.getByRole('button', {name: '카드 추가'}).click();
+  await page.getByRole('menuitem', {name: '날씨'}).click();
+  await expect(page.getByRole('region', {name: '날씨'})).toBeVisible();
+});
+
+test('themes the action buttons and keeps timer settings above the cards', async ({
+  page
+}) => {
   await page.goto('/');
   const quoteRefresh = page.getByRole('button', {name: '명언 새로고침'});
-  const quoteBorder = await quoteRefresh.evaluate(element => getComputedStyle(element).borderTopWidth);
-  const quotePadding = await quoteRefresh.evaluate(element => getComputedStyle(element).paddingTop);
+  const quoteBorder = await quoteRefresh.evaluate(
+    element => getComputedStyle(element).borderTopWidth
+  );
+  const quotePadding = await quoteRefresh.evaluate(
+    element => getComputedStyle(element).paddingTop
+  );
   expect(quoteBorder).not.toBe('0px');
   expect(quotePadding).not.toBe('0px');
 
@@ -85,7 +126,9 @@ test('themes the action buttons and keeps timer settings above the cards', async
   await page.getByRole('button', {name: '타이머 설정'}).click();
   const dialog = page.getByRole('dialog', {name: 'Timer Setting'});
   await expect(dialog).toBeVisible();
-  const overlayZ = await dialog.evaluate(element => getComputedStyle(element.parentElement!).zIndex);
+  const overlayZ = await dialog.evaluate(
+    element => getComputedStyle(element.parentElement!).zIndex
+  );
   expect(Number(overlayZ)).toBeGreaterThan(100);
   await page.getByRole('button', {name: 'Save'}).click();
   await expect(dialog).toHaveCount(0);

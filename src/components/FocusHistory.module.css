@@ -1,3 +1,44 @@
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barLabel {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.barTrack {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--muted);
+  border-radius: 999px;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  min-width: 0;
+}
+
+.focus {
+  background: var(--card-fg);
+}
+
+.break {
+  background: #db2777;
+}
+
+.lost {
+  background: #b45309;
+}
+
 .empty {
   margin: 8px 0 0;
   font-size: 12px;

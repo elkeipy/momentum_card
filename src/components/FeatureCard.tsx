@@ -11,6 +11,7 @@ type FeatureCardProps = {
   id: string;
   title: string;
   defaultLayout: CardLayout;
+  onClose: () => void;
   children: React.ReactNode;
 };
 
@@ -24,6 +25,33 @@ type DragState = {
   startHeight: number;
   mode: 'move' | 'resize';
 };
+
+function PinIcon({filled}: {filled: boolean}) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path
+        d="M9 4h6l-1 6 3 3v2H7v-2l3-3L9 4zm3 11v5"
+        fill={filled ? 'currentColor' : 'none'}
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
 
 function viewportSize(): ViewportSize {
   return {width: window.innerWidth, height: window.innerHeight};
@@ -47,8 +75,16 @@ function readStoredLayout(id: string, fallback: CardLayout): CardLayout {
 
 let zSeed = 2;
 
-export default function FeatureCard({id, title, defaultLayout, children}: FeatureCardProps) {
-  const [layout, setLayout] = useState<CardLayout>(() => readStoredLayout(id, defaultLayout));
+export default function FeatureCard({
+  id,
+  title,
+  defaultLayout,
+  onClose,
+  children
+}: FeatureCardProps) {
+  const [layout, setLayout] = useState<CardLayout>(() =>
+    readStoredLayout(id, defaultLayout)
+  );
   const [zIndex, setZIndex] = useState(1);
   const dragRef = useRef<DragState | null>(null);
 
@@ -95,8 +131,18 @@ export default function FeatureCard({id, title, defaultLayout, children}: Featur
     const dy = event.clientY - drag.originY;
     const next =
       drag.mode === 'move'
-        ? {x: drag.startX + dx, y: drag.startY + dy, width: drag.startWidth, height: drag.startHeight}
-        : {x: drag.startX, y: drag.startY, width: drag.startWidth + dx, height: drag.startHeight + dy};
+        ? {
+            x: drag.startX + dx,
+            y: drag.startY + dy,
+            width: drag.startWidth,
+            height: drag.startHeight
+          }
+        : {
+            x: drag.startX,
+            y: drag.startY,
+            width: drag.startWidth + dx,
+            height: drag.startHeight + dy
+          };
     setLayout(current => clampCardLayout({...current, ...next}, viewportSize()));
   };
 
@@ -126,15 +172,25 @@ export default function FeatureCard({id, title, defaultLayout, children}: Featur
         onPointerUp={endPointer}
       >
         <span className={styles.title}>{title}</span>
-        <button
-          type="button"
-          className={styles.pin}
-          aria-pressed={layout.pinned}
-          aria-label={`${title} 고정`}
-          onClick={() => setLayout(current => ({...current, pinned: !current.pinned}))}
-        >
-          {layout.pinned ? '고정됨' : '고정'}
-        </button>
+        <span className={styles.actions}>
+          <button
+            type="button"
+            className="icon-button"
+            aria-pressed={layout.pinned}
+            aria-label={`${title} 고정`}
+            onClick={() => setLayout(current => ({...current, pinned: !current.pinned}))}
+          >
+            <PinIcon filled={layout.pinned} />
+          </button>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={`${title} 닫기`}
+            onClick={onClose}
+          >
+            <CloseIcon />
+          </button>
+        </span>
       </header>
       <div className={styles.body}>{children}</div>
       {layout.pinned ? null : (
