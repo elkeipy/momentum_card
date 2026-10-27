@@ -1,11 +1,11 @@
 .rootDiv {
-  @apply flex justify-center items-center w-screen mt-10;
+  @apply flex justify-center items-center w-full;
 }
 .roundedCardDiv {
-  @apply space-y-4 h-60 w-80 bg-slate-300 shadow-lg rounded-2xl;
+  @apply space-y-4 w-full bg-transparent;
 }
 .timer {
-  @apply flex justify-center text-8xl font-semibold font-sans;
+  @apply flex justify-center text-6xl font-semibold font-sans;
 }
 .focusIndex {
   @apply flex justify-center text-2xl font-mono;

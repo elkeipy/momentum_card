@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState, ChangeEvent} from 'react';
 import PomodoroTimer, {TimerSettings} from '../PomodoroTimer';
 import styles from '../css/Pomodoro.module.css';
 import PomodoroOptionModal from './PomodoroOptionModal';
+import FocusHistory from './FocusHistory';
 
 const LIMITS = {
   focusTime: {min: 1, max: 60},
@@ -26,7 +27,7 @@ function Pomodoro() {
   const [timerText, setTimerText] = useState('25:00');
   const [currentStateText, setCurrentStateText] = useState('[Focus] #1');
   const [startStopButtonText, setStartStopButtonText] = useState('Start');
-  const [timerTextColor, setTimerTextColor] = useState('black');
+  const [timerTextColor, setTimerTextColor] = useState('var(--card-fg)');
   const [showTimerOption, setShowTimerOption] = useState(false);
   const [focusTime, setFocusTime] = useState(25);
   const [shortBreak, setShortBreak] = useState(5);
@@ -214,6 +215,7 @@ function Pomodoro() {
             </button>
           </span>
         </div>
+        <FocusHistory />
       </div>
     </div>
   );

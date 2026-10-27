@@ -1,3 +1,5 @@
+import {formatElapsed} from './pomodoro/formatElapsed';
+
 interface PomodoroTimerProps {
   setTimerText: (timer: string) => void;
   setCurrentStateText: (index: string) => void;
@@ -73,7 +75,8 @@ class PomodoroTimer {
     /^(Focus|Break|Lost),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
   private readonly BTN_START_TEXT: string = 'Start';
   private readonly BTN_STOP_TEXT: string = 'Stop';
-  private readonly COLOR_FOCUS: string = 'black';
+  private readonly COLOR_FOCUS: string = 'var(--card-fg)';
+  private readonly COLOR_UNMANAGED: string = '#b45309';
   private readonly COLOR_BREAK: string = 'deeppink';
   private readonly COLOR_LOST: string = 'red';
   private readonly PomodoroFocusLocalStorageKey: string = 'PomodoroFocusData';
@@ -293,23 +296,21 @@ class PomodoroTimer {
   }
 
   private startAwayFromDeskTimer() {
-    this._awayFromDeskDate = new Date();
+    if (this._awayFromDeskDate === null) {
+      this._awayFromDeskDate = new Date();
+    }
+    if (this._awayFromDeskTimerId !== null) {
+      return;
+    }
     this._awayFromDeskTimerId = setInterval(this.awayFromDeskTimer.bind(this), this.TIMER_TICK_MS);
   }
 
   private awayFromDeskTimer() {
-    // 자리비움을 계속 확인하며 자리비움 시간을 표시한다.
     if (this._awayFromDeskDate === null || this._awayFromDeskTimerId === null) {
       return;
     }
-
-    let curDate = new Date();
-    let elapsed = curDate.getTime() - this._awayFromDeskDate.getTime();
-    let result = this.convertSecondToTime(elapsed / 1000);
-    const min = String(result.minutes).padStart(2, '0');
-    const sec = String(result.seconds).padStart(2, '0');
-
-    this.setTimerText(`${min}:${sec}`);
+    const elapsed = new Date().getTime() - this._awayFromDeskDate.getTime();
+    this.setTimerText(formatElapsed(elapsed / 1000));
   }
 
   // 자리비움체크 1분동안 타이머를 시작하지 않으면 Lost Date 를 설정하고 낭비시간 체크를 시작한다.
@@ -335,19 +336,25 @@ class PomodoroTimer {
     let focusRemainSeconds = this._currentTimerMinutes * 60 - elapsed / 1000;
 
     if (focusRemainSeconds < 0) {
-      this.startCheckAwayFromDeskTimer();
+      const startedAt = this._startDate;
+      this.clearTimerInterval();
+      this._startDate = null;
       this.playAlarmSound();
       if (this._periodType === PeriodType.Break) {
         this.incrementFocusCount();
       }
-      this.saveLocalStorageFocusData(this._periodType, this._startDate, new Date());
+      if (startedAt) {
+        this.saveLocalStorageFocusData(this._periodType, startedAt, new Date());
+      }
       this.setStartStopButtonText(this.BTN_START_TEXT);
-
-      let nextPeriodType: PeriodTypes = this.getNextPeriodType(this._periodType);
-      this.setCurrentStateText(this.makeCurrentStateText(nextPeriodType));
-      this.changeTimerTextColorByFocused(nextPeriodType);
+      const nextPeriodType = this.getNextPeriodType(this._periodType);
       this._currentTimerMinutes = this.getNextTimerMinutes(nextPeriodType, this._focusCount);
-      this.resetTimer();
+      this._awayFromDeskDate = new Date();
+      this.setTimerTextColor(this.COLOR_UNMANAGED);
+      this.setCurrentStateText('Unmanaged');
+      this.startAwayFromDeskTimer();
+      this.awayFromDeskTimer();
+      this.startCheckAwayFromDeskTimer();
       return;
     }
     let result = this.convertSecondToTime(focusRemainSeconds);
@@ -408,6 +415,7 @@ class PomodoroTimer {
       this._awayFromDeskDate = null;
       this._periodType = PeriodType.Break;
     } else {
+      this._awayFromDeskDate = null;
       this._periodType = this.loadLatestPeriodType();
     }
 

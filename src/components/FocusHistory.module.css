@@ -1,0 +1,25 @@
+.empty {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.table th,
+.table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--muted);
+  text-align: left;
+}

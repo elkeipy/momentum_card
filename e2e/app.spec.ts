@@ -11,6 +11,10 @@ const locationBody = JSON.stringify({
   city: '서울'
 });
 
+const definitionBody = JSON.stringify([
+  {meanings: [{definitions: [{definition: 'steady attention'}]}]}
+]);
+
 test.beforeEach(async ({page}) => {
   await page.route('**/api.open-meteo.com/**', route =>
     route.fulfill({
@@ -24,6 +28,13 @@ test.beforeEach(async ({page}) => {
       status: 200,
       contentType: 'application/json',
       body: locationBody
+    })
+  );
+  await page.route('**/api.dictionaryapi.dev/**', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: definitionBody
     })
   );
 });
@@ -43,4 +54,16 @@ test('starts and stops the pomodoro timer', async ({page}) => {
   await expect(stopButton).toBeVisible();
   await stopButton.click();
   await expect(page.getByRole('button', {name: 'Start', exact: true})).toBeVisible();
+});
+
+test('pins a card, switches theme, and shows quote and word cards', async ({page}) => {
+  await page.goto('/');
+  const pin = page.getByRole('button', {name: '날씨 고정'});
+  await pin.click();
+  await expect(pin).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('region', {name: '날씨'})).toHaveAttribute('data-pinned', 'true');
+  await page.getByLabel('테마').selectOption('flat');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'flat');
+  await expect(page.getByRole('region', {name: '명언'})).toContainText('남은 시간');
+  await expect(page.getByRole('region', {name: '단어'})).toContainText('steady attention');
 });

@@ -1,6 +1,7 @@
 .rootDiv {
-  @apply flex justify-center items-center h-auto w-auto bg-white shadow rounded;
+  @apply flex justify-center items-center h-auto w-full bg-transparent shadow-none;
 }
 .time {
-  @apply text-2xl text-purple-700 font-extrabold;
+  @apply text-2xl font-semibold;
+  color: var(--card-fg);
 }

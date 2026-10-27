@@ -1,0 +1,105 @@
+:root {
+  --board-bg: #f5f5f7;
+  --card-bg: rgba(255, 255, 255, 0.78);
+  --card-fg: #1d1d1f;
+  --card-border: 1px solid rgba(0, 0, 0, 0.08);
+  --card-radius: 18px;
+  --card-shadow: none;
+  --card-blur: blur(18px);
+  --control-radius: 980px;
+  --muted: #6e6e73;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --board-bg: #1c1c1e;
+  --card-bg: rgba(44, 44, 46, 0.86);
+  --card-fg: #f5f5f7;
+  --card-border: 1px solid rgba(255, 255, 255, 0.12);
+  --card-radius: 18px;
+  --card-shadow: none;
+  --card-blur: blur(18px);
+  --muted: #aeaeb2;
+  color-scheme: dark;
+}
+
+html[data-theme='flat'] {
+  --board-bg: #eef2ff;
+  --card-bg: #ffffff;
+  --card-fg: #111827;
+  --card-border: 2px solid #111827;
+  --card-radius: 12px;
+  --card-shadow: none;
+  --card-blur: none;
+  --control-radius: 8px;
+  --muted: #374151;
+  --font: 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+html[data-theme='material'] {
+  --board-bg: #fafafa;
+  --card-bg: #ffffff;
+  --card-fg: #1c1b1f;
+  --card-border: none;
+  --card-radius: 12px;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.15);
+  --card-blur: none;
+  --control-radius: 4px;
+  --muted: #49454f;
+  color-scheme: light;
+}
+
+html[data-theme='glass'] {
+  --board-bg: #d7e3f4;
+  --card-bg: rgba(255, 255, 255, 0.45);
+  --card-fg: #0f172a;
+  --card-border: 1px solid rgba(255, 255, 255, 0.65);
+  --card-radius: 16px;
+  --card-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --card-blur: blur(24px);
+  --control-radius: 4px;
+  --muted: #334155;
+  --font: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+.theme-switcher {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.theme-switcher select {
+  font: inherit;
+  color: inherit;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--control-radius);
+  padding: 4px 8px;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  background: var(--board-bg);
+  color: var(--card-fg);
+  font-family: var(--font);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  html[data-theme='dark'],
+  html[data-theme='glass'] {
+    --card-bg: var(--board-bg);
+    --card-blur: none;
+  }
+}
