@@ -1,40 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from '../css/Clock.module.css';
 
-const ClockTypes = {
-  HourType12: 1, // 12 Hour Clock
-  HourType24: 2, // 24 Hour Clock
-} as const;
-type ClockTypes = (typeof ClockTypes)[keyof typeof ClockTypes];
-// 사용예
-//const hourType: ClockTypes = ClockTypes.HourType12;
+const CLOCK_TIMEOUT_MS = 1000;
+
+function formatCurrentTime(): string {
+  return new Date().toLocaleTimeString();
+}
 
 function Clock() {
-  const CLOCK_TIMEOUT = 1000;
-  const [time, setTime] = useState('');
-  const [hourType, setHourType] = useState<ClockTypes>(ClockTypes.HourType12);
-  const getCurrentTime = () => {
-    if (hourType === ClockTypes.HourType24) {
-      const date = new Date();
-      const hour = String(date.getHours()).padStart(2, '0');
-      const min = String(date.getMinutes()).padStart(2, '0');
-      const sec = String(date.getSeconds()).padStart(2, '0');
-      setTime(`${hour}:${min}:${sec}`);
-    } else {
-      setTime(new Date().toLocaleTimeString());
-    }
-  };
+  const [time, setTime] = useState(formatCurrentTime);
+
   useEffect(() => {
-    getCurrentTime();
-    const intervalId = setInterval(getCurrentTime, CLOCK_TIMEOUT);
-    return () => clearInterval(intervalId);
+    const intervalId = window.setInterval(() => {
+      setTime(formatCurrentTime());
+    }, CLOCK_TIMEOUT_MS);
+    return () => window.clearInterval(intervalId);
   }, []);
+
   return (
     <div className={styles.rootDiv}>
       <span>
         <h2 className={styles.time}>{time}</h2>
       </span>
-      
     </div>
   );
 }

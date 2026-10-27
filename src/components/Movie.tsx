@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import styles from '../css/Movie.module.css';
@@ -24,14 +24,28 @@ Movie.propsType = {
   medium_cover_image: PropTypes.string,
 };
 
+function isSafeImageUrl(url: string | undefined): url is string {
+  if (!url) {
+    return false;
+  }
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
 function Movie(props: MovieProps) {
   return (
     <div className={styles.movie}>
-      <img
-        className={styles.movie__img}
-        src={props.medium_cover_image}
-        alt={props.title}
-      />
+      {isSafeImageUrl(props.medium_cover_image) ? (
+        <img
+          className={styles.movie__img}
+          src={props.medium_cover_image}
+          alt={props.title}
+        />
+      ) : null}
       <div>
         <h2 className={styles.movie__title}>
           <Link to={`/detail/${props.id}`}>{props.title}</Link>

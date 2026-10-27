@@ -1,18 +1,35 @@
-import React, {useState, useEffect, ChangeEvent} from 'react';
-import PomodoroTimer, { TimerSettings } from '../PomodoroTimer';
+import React, {useEffect, useRef, useState, ChangeEvent} from 'react';
+import PomodoroTimer, {TimerSettings} from '../PomodoroTimer';
 import styles from '../css/Pomodoro.module.css';
 import PomodoroOptionModal from './PomodoroOptionModal';
 
+const LIMITS = {
+  focusTime: {min: 1, max: 60},
+  shortBreak: {min: 1, max: 30},
+  longBreak: {min: 1, max: 30},
+  longBreakInterval: {min: 1, max: 10}
+} as const;
+
+function readBoundedInteger(value: string, min: number, max: number): number | null {
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+    return null;
+  }
+  return parsed;
+}
+
 function Pomodoro() {
-  const [timerText, setTimerText] = useState('00:00');
-  const [currentStateText, setCurrentStateText] = useState("");
+  const timerRef = useRef<PomodoroTimer | null>(null);
+  const [timerText, setTimerText] = useState('25:00');
+  const [currentStateText, setCurrentStateText] = useState('[Focus] #1');
   const [startStopButtonText, setStartStopButtonText] = useState('Start');
-  const [pomodoroTimer, setPomodoroTimer] = useState<PomodoroTimer | null>(null);
   const [timerTextColor, setTimerTextColor] = useState('black');
   const [showTimerOption, setShowTimerOption] = useState(false);
-
-  const [focusTime, setFocusTime] = useState(30);
-  const [shortBreak, setShortBreak] = useState(10);
+  const [focusTime, setFocusTime] = useState(25);
+  const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
   const [longBreakInterval, setLongBreakInterval] = useState(4);
 
@@ -20,19 +37,18 @@ function Pomodoro() {
     setShowTimerOption(true);
   };
   const saveTimerOption = () => {
-    // 설정값 저장
-    let settings: TimerSettings = { 
-      focusTime: focusTime,
-      shortBreak: shortBreak,
-      longBreak: longBreak,
-      longBreakInterval: longBreakInterval
+    const settings: TimerSettings = {
+      focusTime,
+      shortBreak,
+      longBreak,
+      longBreakInterval
     };
-    pomodoroTimer?.saveLocalStorageSettings(settings);
+    timerRef.current?.saveLocalStorageSettings(settings);
     setShowTimerOption(false);
   };
   const closeTimerOption = () => {
-    if (pomodoroTimer) {
-      const settings: TimerSettings = pomodoroTimer.getSettings();
+    const settings = timerRef.current?.getSettings();
+    if (settings) {
       setFocusTime(settings.focusTime);
       setShortBreak(settings.shortBreak);
       setLongBreak(settings.longBreak);
@@ -40,54 +56,67 @@ function Pomodoro() {
     }
     setShowTimerOption(false);
   };
+
   useEffect(() => {
-    if (!pomodoroTimer) {
-      const pomodoroTimer = new PomodoroTimer({
-        setTimerText,
-        setCurrentStateText,
-        setStartStopButtonText,
-        setTimerTextColor
-      });
-      setPomodoroTimer(pomodoroTimer);
-      const settings: TimerSettings = pomodoroTimer.getSettings();
-      setFocusTime(settings.focusTime);
-      setShortBreak(settings.shortBreak);
-      setLongBreak(settings.longBreak);
-      setLongBreakInterval(settings.longBreakInterval);
-    }
+    const timer = new PomodoroTimer({
+      setTimerText,
+      setCurrentStateText,
+      setStartStopButtonText,
+      setTimerTextColor
+    });
+    timerRef.current = timer;
+    const settings = timer.getSettings();
+    setFocusTime(settings.focusTime);
+    setShortBreak(settings.shortBreak);
+    setLongBreak(settings.longBreak);
+    setLongBreakInterval(settings.longBreakInterval);
 
     const handleKeydown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
       if (event.altKey && event.code === 'KeyA') {
-        console.log('KeyA');
-        pomodoroTimer?.stopAudio();
+        event.preventDefault();
+        timer.stopAudio();
       } else if (event.altKey && event.code === 'KeyS') {
-        console.log('KeyS');
-        pomodoroTimer?.startStop();
+        event.preventDefault();
+        timer.startStop();
       }
     };
 
     document.addEventListener('keydown', handleKeydown);
-
     return () => {
       document.removeEventListener('keydown', handleKeydown);
-    }
-  }, [pomodoroTimer]);
+      timer.dispose();
+      timerRef.current = null;
+    };
+  }, []);
+
+  const updateSetting =
+    (min: number, max: number, apply: (value: number) => void) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const nextValue = readBoundedInteger(event.target.value, min, max);
+      if (nextValue !== null) {
+        apply(nextValue);
+      }
+    };
 
   return (
     <div className={styles.rootDiv}>
       <div className={styles.roundedCardDiv}>
-        <h1
-          className={styles.timer}
-          style={{color: timerTextColor}}
-        >
+        <h1 className={styles.timer} style={{color: timerTextColor}}>
           {timerText}
         </h1>
         <div className={styles.focusIndex}>
-          <h3 >{currentStateText}</h3>
-          <button 
-            className={styles.hover_spin}
-            onClick={openTimerOption}
-          >⚙️</button>
+          <h3>{currentStateText}</h3>
+          <button className={styles.hover_spin} type="button" onClick={openTimerOption}>
+            ⚙️
+          </button>
         </div>
         {showTimerOption && (
           <PomodoroOptionModal onSave={saveTimerOption} onClose={closeTimerOption}>
@@ -96,28 +125,72 @@ function Pomodoro() {
             </div>
             <div className={styles.horizontalLine}></div>
             <div className={styles.optionDiv}>
-              <label htmlFor="focusTime" className={styles.optionLabel}>Focus Time</label>
-              <input name="focusTime" id="focusTime" className={styles.optionValue} 
-                type="number" min="1" max="60" step="1" value={focusTime} 
-                onChange={(e:ChangeEvent<HTMLInputElement>) => setFocusTime(parseInt(e.target.value))}/>
+              <label htmlFor="focusTime" className={styles.optionLabel}>
+                Focus Time
+              </label>
+              <input
+                name="focusTime"
+                id="focusTime"
+                className={styles.optionValue}
+                type="number"
+                min={LIMITS.focusTime.min}
+                max={LIMITS.focusTime.max}
+                step="1"
+                value={focusTime}
+                onChange={updateSetting(LIMITS.focusTime.min, LIMITS.focusTime.max, setFocusTime)}
+              />
             </div>
             <div className={styles.optionDiv}>
-              <label htmlFor="shortBreak" className={styles.optionLabel}>Short Break</label>
-              <input name="shortBreak" id="shortBreak" className={styles.optionValue} 
-                type="number" min="1" max="30" step="1" value={shortBreak} 
-                onChange={(e:ChangeEvent<HTMLInputElement>) => setShortBreak(parseInt(e.target.value))}/>
+              <label htmlFor="shortBreak" className={styles.optionLabel}>
+                Short Break
+              </label>
+              <input
+                name="shortBreak"
+                id="shortBreak"
+                className={styles.optionValue}
+                type="number"
+                min={LIMITS.shortBreak.min}
+                max={LIMITS.shortBreak.max}
+                step="1"
+                value={shortBreak}
+                onChange={updateSetting(LIMITS.shortBreak.min, LIMITS.shortBreak.max, setShortBreak)}
+              />
             </div>
             <div className={styles.optionDiv}>
-              <label htmlFor="longBreak" className={styles.optionLabel}>Long Break</label>
-              <input name="longBreak" id="longBreak" className={styles.optionValue} 
-                type="number" min="1" max="30" step="1" value={longBreak}
-                onChange={(e:ChangeEvent<HTMLInputElement>) => setLongBreak(parseInt(e.target.value))}/>
+              <label htmlFor="longBreak" className={styles.optionLabel}>
+                Long Break
+              </label>
+              <input
+                name="longBreak"
+                id="longBreak"
+                className={styles.optionValue}
+                type="number"
+                min={LIMITS.longBreak.min}
+                max={LIMITS.longBreak.max}
+                step="1"
+                value={longBreak}
+                onChange={updateSetting(LIMITS.longBreak.min, LIMITS.longBreak.max, setLongBreak)}
+              />
             </div>
             <div className={styles.optionDiv}>
-              <label htmlFor="longBreakInterval" className={styles.optionLabel}>Long Break Interval</label>
-              <input name="longBreakInterval" id="longBreakInterval" className={styles.optionValue} 
-                type="number" min="1" max="10" step="1" value={longBreakInterval}
-                onChange={(e:ChangeEvent<HTMLInputElement>) => setLongBreakInterval(parseInt(e.target.value))}/>
+              <label htmlFor="longBreakInterval" className={styles.optionLabel}>
+                Long Break Interval
+              </label>
+              <input
+                name="longBreakInterval"
+                id="longBreakInterval"
+                className={styles.optionValue}
+                type="number"
+                min={LIMITS.longBreakInterval.min}
+                max={LIMITS.longBreakInterval.max}
+                step="1"
+                value={longBreakInterval}
+                onChange={updateSetting(
+                  LIMITS.longBreakInterval.min,
+                  LIMITS.longBreakInterval.max,
+                  setLongBreakInterval
+                )}
+              />
             </div>
           </PomodoroOptionModal>
         )}
@@ -125,7 +198,8 @@ function Pomodoro() {
           <span>
             <button
               className={styles.btn__primary}
-              onClick={() => pomodoroTimer?.startStop()}
+              type="button"
+              onClick={() => timerRef.current?.startStop()}
             >
               {startStopButtonText}
             </button>
@@ -133,7 +207,8 @@ function Pomodoro() {
           <span>
             <button
               className={styles.btn__secondary}
-              onClick={() => pomodoroTimer?.stopAudio()}
+              type="button"
+              onClick={() => timerRef.current?.stopAudio()}
             >
               Stop Alarm
             </button>

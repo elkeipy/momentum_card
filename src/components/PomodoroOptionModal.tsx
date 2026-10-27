@@ -1,6 +1,6 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import styles from "../css/PomodoroOptionModal.module.css"
+import React, {useEffect} from 'react';
+import ReactDOM from 'react-dom';
+import styles from '../css/PomodoroOptionModal.module.css';
 
 type PomodoroOptionModalPropsType = {
   children: React.ReactNode;
@@ -8,16 +8,30 @@ type PomodoroOptionModalPropsType = {
   onClose: () => void;
 };
 
-export default function PomodoroOptionModal({ children, onSave, onClose }: PomodoroOptionModalPropsType) {
+export default function PomodoroOptionModal({
+  children,
+  onSave,
+  onClose
+}: PomodoroOptionModalPropsType) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   return ReactDOM.createPortal(
-    <div className={styles.rootDiv}>
-      <div className={styles.containerDiv}>
+    <div className={styles.rootDiv} role="presentation">
+      <div className={styles.containerDiv} role="dialog" aria-modal="true" aria-label="Timer Setting">
         {children}
         <div className={styles.buttonDiv}>
-          <button className={styles.btn__primary} onClick={onSave}>
+          <button className={styles.btn__primary} type="button" onClick={onSave}>
             Save
           </button>
-          <button className={styles.btn__secondary} onClick={onClose}>
+          <button className={styles.btn__secondary} type="button" onClick={onClose}>
             Close
           </button>
         </div>

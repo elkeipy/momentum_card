@@ -61,6 +61,16 @@ class PomodoroTimer {
   private readonly SHORT_BREAK_MIN: number = 5;
   private readonly LONG_BREAK_MIN: number = 15;
   private readonly LONG_BREAK_INTERVAL: number = 4;
+  private readonly MAX_FOCUS_MIN: number = 60;
+  private readonly MAX_SHORT_BREAK_MIN: number = 30;
+  private readonly MAX_LONG_BREAK_MIN: number = 30;
+  private readonly MAX_LONG_BREAK_INTERVAL: number = 10;
+  private readonly MAX_FOCUS_COUNT: number = 999;
+  private readonly MAX_STORED_PERIODS: number = 300;
+  private readonly TIMER_TICK_MS: number = 300;
+  private readonly AWAY_CHECK_MS: number = 60 * 1000;
+  private readonly PERIOD_PATTERN: RegExp =
+    /^(Focus|Break|Lost),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
   private readonly BTN_START_TEXT: string = 'Start';
   private readonly BTN_STOP_TEXT: string = 'Stop';
   private readonly COLOR_FOCUS: string = 'black';
@@ -107,14 +117,15 @@ class PomodoroTimer {
 
   private init() {
     this.loadLocalStorageFocusData();
+    this.loadSettings();
     let nextPeriodType: PeriodTypes = PeriodType.Focus;
     if (this.existSavedPeriodData()) {
       nextPeriodType = this.getNextPeriodType(this.loadLatestPeriodType());
-      this.changeTimerTextColorByFocused(nextPeriodType);
     }
+    this.changeTimerTextColorByFocused(nextPeriodType);
     this.setCurrentStateText(this.makeCurrentStateText(nextPeriodType));
-    this.loadSettings();
-    this._currentTimerMinutes = this.getNextTimerMinutes(this._periodType, this._focusCount);
+    this._currentTimerMinutes = this.getNextTimerMinutes(nextPeriodType, this._focusCount);
+    this.resetTimer();
   }
 
   private makeCurrentStateText(periodType: PeriodTypes): string {
@@ -158,10 +169,15 @@ class PomodoroTimer {
 
     const focusData = data as FocusStorageData;
     return (
-      typeof focusData.dateId === 'string' &&
-      typeof focusData.focusCount === 'number' &&
+      /^\d{4}-\d{1,2}-\d{1,2}$/.test(focusData.dateId) &&
+      Number.isInteger(focusData.focusCount) &&
+      focusData.focusCount >= 1 &&
+      focusData.focusCount <= this.MAX_FOCUS_COUNT &&
       Array.isArray(focusData.focusPeriod) &&
-      focusData.focusPeriod.every((period) => typeof period === 'string')
+      focusData.focusPeriod.length <= this.MAX_STORED_PERIODS &&
+      focusData.focusPeriod.every(
+        (period) => typeof period === 'string' && this.PERIOD_PATTERN.test(period)
+      )
     );
   }
 
@@ -172,21 +188,24 @@ class PomodoroTimer {
 
     const settings = data as TimerSettings;
     return (
-      typeof settings.focusTime === 'number' &&
-      settings.focusTime > 0 &&
-      typeof settings.shortBreak === 'number' &&
-      settings.shortBreak > 0 &&
-      typeof settings.longBreak === 'number' &&
-      settings.longBreak > 0 &&
-      typeof settings.longBreakInterval === 'number' &&
-      settings.longBreakInterval > 0
+      this.isBoundedInteger(settings.focusTime, 1, this.MAX_FOCUS_MIN) &&
+      this.isBoundedInteger(settings.shortBreak, 1, this.MAX_SHORT_BREAK_MIN) &&
+      this.isBoundedInteger(settings.longBreak, 1, this.MAX_LONG_BREAK_MIN) &&
+      this.isBoundedInteger(settings.longBreakInterval, 1, this.MAX_LONG_BREAK_INTERVAL)
     );
+  }
+
+  private isBoundedInteger(value: unknown, min: number, max: number): value is number {
+    return typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max;
   }
 
   private saveLocalStorageFocusData(periodType: PeriodTypes, startDate: Date, finishDate: Date) {
     if (startDate && finishDate) {
       let periodStr = this.makeDateTimePeriodString(periodType, startDate, finishDate);
       this._timePeriod.push(periodStr);
+      if (this._timePeriod.length > this.MAX_STORED_PERIODS) {
+        this._timePeriod = this._timePeriod.slice(-this.MAX_STORED_PERIODS);
+      }
       let saveData = {
         dateId: [startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate()].join('-'),
         focusCount: this._focusCount,
@@ -199,10 +218,11 @@ class PomodoroTimer {
 
   private loadLocalStorageFocusData() {
     this._focusCount = 1;
-    if (localStorage.getItem(this.PomodoroFocusLocalStorageKey)) {
+    const storedFocusData = localStorage.getItem(this.PomodoroFocusLocalStorageKey);
+    if (storedFocusData) {
       let loadFocusData: FocusStorageData | null = null;
       try {
-        const parsedData = JSON.parse(localStorage.getItem(this.PomodoroFocusLocalStorageKey)!);
+        const parsedData = JSON.parse(storedFocusData);
         loadFocusData = this.isValidFocusStorageData(parsedData) ? parsedData : null;
       } catch {
         loadFocusData = null;
@@ -227,8 +247,11 @@ class PomodoroTimer {
   }
 
   public saveLocalStorageSettings(settings: TimerSettings) {
+    if (!this.isValidSettingsData(settings)) {
+      return;
+    }
     this._settingsData = settings;
-    this._currentTimerMinutes = settings.focusTime ? settings.focusTime : 7;
+    this._currentTimerMinutes = settings.focusTime;
     localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(settings));
   }
 
@@ -259,16 +282,19 @@ class PomodoroTimer {
 
   private startTimerInterval() {
     this._startDate = new Date();
-    this._timerID = setInterval(this.getTimer.bind(this), 300);
+    this._timerID = setInterval(this.getTimer.bind(this), this.TIMER_TICK_MS);
   }
 
   private startCheckAwayFromDeskTimer() {
-    this._checkAwayFromDeskTimerId = setInterval(this.checkAwayFromDeskTimer.bind(this), 60 * 1000);
+    this._checkAwayFromDeskTimerId = setInterval(
+      this.checkAwayFromDeskTimer.bind(this),
+      this.AWAY_CHECK_MS
+    );
   }
 
   private startAwayFromDeskTimer() {
     this._awayFromDeskDate = new Date();
-    this._awayFromDeskTimerId = setInterval(this.awayFromDeskTimer.bind(this), 300);
+    this._awayFromDeskTimerId = setInterval(this.awayFromDeskTimer.bind(this), this.TIMER_TICK_MS);
   }
 
   private awayFromDeskTimer() {
@@ -293,9 +319,6 @@ class PomodoroTimer {
     }
 
     this.clearCheckAwayFromDeskTimerInterval();
-
-    console.log("start away from desk timer");
-
     this._periodType = PeriodType.Lost;
     this.changeTimerTextColorByFocused(this._periodType);
     this.startAwayFromDeskTimer();
@@ -315,7 +338,7 @@ class PomodoroTimer {
       this.startCheckAwayFromDeskTimer();
       this.playAlarmSound();
       if (this._periodType === PeriodType.Break) {
-        ++this._focusCount;
+        this.incrementFocusCount();
       }
       this.saveLocalStorageFocusData(this._periodType, this._startDate, new Date());
       this.setStartStopButtonText(this.BTN_START_TEXT);
@@ -368,14 +391,18 @@ class PomodoroTimer {
         ? this._settingsData.longBreak
         : this._settingsData.shortBreak;
     }
-    return 77;
+    return this._settingsData.focusTime;
+  }
+
+  private incrementFocusCount() {
+    this._focusCount = Math.min(this._focusCount + 1, this.MAX_FOCUS_COUNT);
   }
 
   public startStop() {
     if (this._periodType === PeriodType.Lost && this._awayFromDeskDate) {
       let periodType = this.loadLatestPeriodType();
       if (periodType === PeriodType.Focus) {
-        ++this._focusCount;
+        this.incrementFocusCount();
       }
       this.saveLocalStorageFocusData(PeriodType.Lost, this._awayFromDeskDate, new Date());
       this._awayFromDeskDate = null;
@@ -413,7 +440,7 @@ class PomodoroTimer {
   private playAlarmSound() {
     if (this.isPlayingAlarmSound() === false) {
       //this.audio.loop = this._periodType === PeriodType.Focus ? true : false;
-      this.audio.play();
+      void this.audio.play().catch(() => undefined);
     }
   }
 
@@ -426,13 +453,19 @@ class PomodoroTimer {
     this.audio.currentTime = 0;
   }
 
+  public dispose() {
+    this.clearTimerInterval();
+    this.clearCheckAwayFromDeskTimerInterval();
+    this.clearAwayFromDeskTimerInterval();
+    this.stopAudio();
+  }
+
   public loadSettings() {
-    if (localStorage.getItem(this.PomodoroSettingsLocalStorageKey)) {
+    const storedSettings = localStorage.getItem(this.PomodoroSettingsLocalStorageKey);
+    if (storedSettings) {
       let parsedSettings: unknown = null;
       try {
-        parsedSettings = JSON.parse(
-          localStorage.getItem(this.PomodoroSettingsLocalStorageKey)!
-        );
+        parsedSettings = JSON.parse(storedSettings);
       } catch {
         parsedSettings = null;
       }

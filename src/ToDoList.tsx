@@ -26,8 +26,6 @@ function ToDoList() {
     addToDoList();
   };
 
-  console.log(toDos);
-
   return (
     <div>
       <Typography variant="h3" component="h3">
