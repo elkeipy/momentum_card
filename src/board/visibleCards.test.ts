@@ -20,6 +20,7 @@ test('keeps an explicit empty list and drops unknown ids', () => {
     'clock',
     'pomodoro',
     'quote',
-    'words'
+    'words',
+    'todos'
   ]);
 });

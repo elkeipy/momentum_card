@@ -1,4 +1,4 @@
-export const CARD_IDS = ['weather', 'clock', 'pomodoro', 'quote', 'words'] as const;
+export const CARD_IDS = ['weather', 'clock', 'pomodoro', 'quote', 'words', 'todos'] as const;
 
 export type CardId = (typeof CARD_IDS)[number];
 

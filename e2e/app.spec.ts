@@ -177,3 +177,16 @@ test('keeps action buttons and timer settings above the cards', async ({page}) =
   );
   expect(timerSize).toBe('64px');
 });
+
+test('adds and completes a todo on the board', async ({page}) => {
+  await page.goto('/');
+  const card = page.getByRole('region', {name: '할 일'});
+  await expect(card).toBeVisible();
+  await card.getByLabel('할 일 추가').fill('write tests');
+  await card.getByRole('button', {name: '추가'}).click();
+  await expect(card.getByText('write tests')).toBeVisible();
+  await card.getByRole('checkbox', {name: 'write tests'}).check();
+  await expect(card.getByRole('checkbox', {name: 'write tests'})).toBeChecked();
+  await card.getByRole('button', {name: 'write tests 삭제'}).click();
+  await expect(card.getByText('할 일을 추가하면 여기에 쌓인다.')).toBeVisible();
+});

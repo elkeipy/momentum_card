@@ -4,6 +4,7 @@ import FeatureCard from '../components/FeatureCard';
 import Pomodoro from '../components/Pomodoro';
 import QuoteCard from '../components/QuoteCard';
 import Weather from '../components/Weather';
+import TodoCard from '../components/TodoCard';
 import WordCard from '../components/WordCard';
 import type {CardLayout} from '../featureCard/cardLayout';
 import {
@@ -56,6 +57,12 @@ const CARDS: CardSpec[] = [
     title: '단어',
     layout: {x: 680, y: 516, width: 420, height: 280, pinned: false},
     content: <WordCard />
+  },
+  {
+    id: 'todos',
+    title: '할 일',
+    layout: {x: 680, y: 812, width: 420, height: 320, pinned: false},
+    content: <TodoCard />
   }
 ];
 
@@ -153,7 +160,8 @@ export default function Board() {
   };
 
   const showBand = visible.includes('weather') || visible.includes('clock');
-  const showStack = visible.includes('quote') || visible.includes('words');
+  const showStack =
+    visible.includes('quote') || visible.includes('words') || visible.includes('todos');
 
   return (
     <>
@@ -219,6 +227,7 @@ export default function Board() {
           <div className="stack">
             {renderCard('quote')}
             {renderCard('words')}
+            {renderCard('todos')}
           </div>
         ) : null}
       </div>
