@@ -51,25 +51,29 @@ export default function FocusHistory() {
       {rows.length === 0 ? (
         <p className={styles.empty}>오늘 이력이 없습니다.</p>
       ) : (
-        <table className={styles.table}>
-          <caption>집중 이력</caption>
-          <thead>
-            <tr>
-              <th>구분</th>
-              <th>시작</th>
-              <th>종료</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={`${row.periodType}-${row.start}-${row.finish}-${index}`}>
-                <td>{row.periodType}</td>
-                <td>{row.start}</td>
-                <td>{row.finish}</td>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <caption>집중 이력</caption>
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>시작</th>
+                <th>종료</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr
+                  key={`${row.periodType}-${row.start}-${row.finish}-${index}`}
+                >
+                  <td>{row.periodType}</td>
+                  <td>{row.start}</td>
+                  <td>{row.finish}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

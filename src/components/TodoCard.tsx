@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useCallback, useEffect, useState} from 'react';
+import React, {ChangeEvent, useEffect, useState} from 'react';
 import {
   FONT_SIZE_DEFAULT,
   REFRESH_SEC_DEFAULT
@@ -6,16 +6,18 @@ import {
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
 import {
   addTodo,
+  clampDueParts,
   currentMinutes,
   dueTodos,
   formatDueMinutes,
   markAlarmed,
+  minDueHour,
+  minDueMinute,
   parseDueMinutes,
   readTodoList,
   removeTodo,
   TODO_STORAGE_KEY,
-  toggleTodo,
-  type TodoItem
+  toggleTodo
 } from '../todos/todos';
 import AlarmDialog from './AlarmDialog';
 import DisplaySettingsFields from './DisplaySettingsFields';
@@ -40,36 +42,62 @@ export default function TodoCard() {
   const settings = useDisplaySettings('todos', TODO_DEFAULTS);
   const [items, setItems] = useState(() => readTodoList(localStorage));
   const [draft, setDraft] = useState('');
-  const [dueHour, setDueHour] = useState(9);
-  const [dueMinute, setDueMinute] = useState(0);
-  const [alarm, setAlarm] = useState<TodoItem | null>(null);
+  const [nowMinutes, setNowMinutes] = useState(() => currentMinutes());
+  const [dueHour, setDueHour] = useState(() => minDueHour(currentMinutes()));
+  const [dueMinute, setDueMinute] = useState(
+    () => minDueMinute(minDueHour(currentMinutes()), currentMinutes())
+  );
   const remaining = items.filter(item => !item.done).length;
   const showDue = draft.includes('@');
+  const ringing = dueTodos(items, nowMinutes);
+  const hourMin = minDueHour(nowMinutes);
+  const minuteMin = minDueMinute(dueHour, nowMinutes);
 
   useEffect(() => {
     localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
-    const ring = () => {
-      setAlarm(current => current ?? dueTodos(items, currentMinutes())[0] ?? null);
-    };
-    ring();
-    const timerId = window.setInterval(ring, ALARM_TICK_MS);
+    const tick = () => setNowMinutes(currentMinutes());
+    tick();
+    const timerId = window.setInterval(tick, ALARM_TICK_MS);
     return () => window.clearInterval(timerId);
-  }, [items]);
+  }, []);
+
+  useEffect(() => {
+    if (!showDue) {
+      return;
+    }
+    const next = clampDueParts(dueHour, dueMinute, nowMinutes);
+    if (next.hour !== dueHour || next.minute !== dueMinute) {
+      setDueHour(next.hour);
+      setDueMinute(next.minute);
+    }
+  }, [showDue, dueHour, dueMinute, nowMinutes]);
 
   const onDraftChange = (value: string) => {
     if (!draft.includes('@') && value.includes('@')) {
-      const now = new Date();
-      setDueHour(now.getHours());
-      setDueMinute(now.getMinutes());
+      const now = currentMinutes();
+      const next = clampDueParts(0, 0, now);
+      setDueHour(next.hour);
+      setDueMinute(next.minute);
     }
     setDraft(value);
   };
 
+  const applyDuePart = (hour: number, minute: number) => {
+    const next = clampDueParts(hour, minute, currentMinutes());
+    setDueHour(next.hour);
+    setDueMinute(next.minute);
+  };
+
   const saveItem = () => {
-    const dueMinutes = showDue ? parseDueMinutes(dueHour, dueMinute) : null;
+    const clamped = showDue
+      ? clampDueParts(dueHour, dueMinute, currentMinutes())
+      : null;
+    const dueMinutes = clamped
+      ? parseDueMinutes(clamped.hour, clamped.minute)
+      : null;
     const nextItems = addTodo(items, draft, undefined, dueMinutes);
     if (nextItems === items) {
       return;
@@ -78,15 +106,9 @@ export default function TodoCard() {
     setDraft('');
   };
 
-  const ackAlarm = useCallback(() => {
-    setAlarm(current => {
-      if (current) {
-        const alarmId = current.id;
-        setItems(items => markAlarmed(items, alarmId));
-      }
-      return null;
-    });
-  }, []);
+  const ackAlarm = (id: string) => {
+    setItems(current => markAlarmed(current, id));
+  };
 
   return (
     <div className={styles.root}>
@@ -116,7 +138,7 @@ export default function TodoCard() {
               시
               <input
                 type="number"
-                min={0}
+                min={hourMin}
                 max={23}
                 step={1}
                 value={dueHour}
@@ -124,7 +146,7 @@ export default function TodoCard() {
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   const next = readClockPart(event.target.value, 23);
                   if (next !== null) {
-                    setDueHour(next);
+                    applyDuePart(next, dueMinute);
                   }
                 }}
               />
@@ -133,7 +155,7 @@ export default function TodoCard() {
               분
               <input
                 type="number"
-                min={0}
+                min={minuteMin}
                 max={59}
                 step={1}
                 value={dueMinute}
@@ -141,7 +163,7 @@ export default function TodoCard() {
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   const next = readClockPart(event.target.value, 59);
                   if (next !== null) {
-                    setDueMinute(next);
+                    applyDuePart(dueHour, next);
                   }
                 }}
               />
@@ -180,16 +202,17 @@ export default function TodoCard() {
           ))}
         </ul>
       )}
-      {alarm ? (
-        <AlarmDialog
-          title="할 일 알람"
-          message={alarm.text}
-          detail={
-            alarm.dueMinutes === null ? undefined : formatDueMinutes(alarm.dueMinutes)
-          }
-          onAck={ackAlarm}
-        />
-      ) : null}
+      <AlarmDialog
+        items={ringing.map(item => ({
+          id: item.id,
+          message: item.text,
+          detail:
+            item.dueMinutes === null
+              ? undefined
+              : formatDueMinutes(item.dueMinutes)
+        }))}
+        onAck={ackAlarm}
+      />
       {settings.isOpen ? (
         <SettingsModal title="할 일 설정" onSave={settings.save} onClose={settings.close}>
           <DisplaySettingsFields value={settings.draft} onChange={settings.setDraft} />

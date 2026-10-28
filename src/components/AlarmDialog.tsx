@@ -1,60 +1,70 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import ReactDOM from 'react-dom';
-import styles from '../css/SettingsModal.module.css';
+import styles from './AlarmDialog.module.css';
 
-type AlarmDialogProps = {
-  title: string;
+export type AlarmToastItem = {
+  id: string;
   message: string;
   detail?: string;
-  onAck: () => void;
 };
 
-export default function AlarmDialog({title, message, detail, onAck}: AlarmDialogProps) {
-  useEffect(() => {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/alarmSound.mp3`);
-    try {
-      const played = audio.play();
-      if (played && typeof played.catch === 'function') {
-        void played.catch(() => undefined);
-      }
-    } catch {
-      // jsdom has no media playback
+type AlarmDialogProps = {
+  items: AlarmToastItem[];
+  onAck: (id: string) => void;
+};
+
+const TODO_NOTIFY_SRC = `${process.env.PUBLIC_URL}/todoNotify.mp3`;
+
+function playTodoNotify() {
+  try {
+    const audio = new Audio(TODO_NOTIFY_SRC);
+    const played = audio.play();
+    if (played && typeof played.catch === 'function') {
+      void played.catch(() => undefined);
     }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' || event.key === 'Enter') {
-        onAck();
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      try {
-        audio.pause();
-        audio.currentTime = 0;
-      } catch {
-        // jsdom has no media playback
-      }
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [onAck]);
+  } catch {
+    // jsdom has no media playback
+  }
+}
+
+export default function AlarmDialog({items, onAck}: AlarmDialogProps) {
+  const seenIds = useRef(new Set<string>());
+  const ids = items.map(item => item.id).join(',');
+
+  useEffect(() => {
+    const nextIds = ids === '' ? [] : ids.split(',');
+    const hasNew = nextIds.some(id => !seenIds.current.has(id));
+    seenIds.current = new Set(nextIds);
+    if (hasNew) {
+      playTodoNotify();
+    }
+  }, [ids]);
+
+  if (items.length === 0) {
+    return null;
+  }
 
   return ReactDOM.createPortal(
-    <div className={styles.rootDiv} role="presentation">
-      <div
-        className={styles.containerDiv}
-        role="alertdialog"
-        aria-modal="true"
-        aria-label={title}
-        aria-describedby="todo-alarm-text"
-      >
-        <h2 className={styles.title}>{title}</h2>
-        <p id="todo-alarm-text">{message}</p>
-        {detail ? <p>{detail}</p> : null}
-        <div className={styles.buttonDiv}>
-          <button className="btn-primary" type="button" onClick={onAck}>
+    <div className={styles.stack} role="region" aria-label="할 일 알람">
+      {items.map(item => (
+        <article
+          key={item.id}
+          className={styles.toast}
+          role="status"
+          aria-label={`할 일 알람 ${item.message}`}
+        >
+          <h2 className={styles.title}>할 일 알람</h2>
+          <p>{item.message}</p>
+          {item.detail ? <p>{item.detail}</p> : null}
+          <button
+            className={`btn-primary ${styles.ack}`}
+            type="button"
+            onClick={() => onAck(item.id)}
+          >
             확인
           </button>
-        </div>
-      </div>
+        </article>
+      ))}
     </div>,
     document.body
   );

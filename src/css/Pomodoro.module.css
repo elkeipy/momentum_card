@@ -1,20 +1,23 @@
 .rootDiv {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
   flex-direction: column;
+  min-height: 0;
   width: 100%;
 }
 
 .roundedCardDiv {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
+  min-height: 0;
   width: 100%;
 }
 
 .timer {
+  flex: none;
   margin: 0;
   color: var(--text);
   font-size: var(--fs-kpi);
@@ -27,6 +30,7 @@
 
 .focusIndex {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -43,6 +47,7 @@
 
 .timerButtonDiv {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;

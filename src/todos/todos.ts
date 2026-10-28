@@ -52,6 +52,27 @@ export function stripDueTrigger(value: string): string {
   return value.replace(/@/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+export function minDueHour(nowMinutes: number): number {
+  return Math.floor(nowMinutes / 60);
+}
+
+export function minDueMinute(hour: number, nowMinutes: number): number {
+  return hour <= minDueHour(nowMinutes) ? nowMinutes % 60 : 0;
+}
+
+export function clampDueParts(
+  hour: number,
+  minute: number,
+  nowMinutes: number
+): {hour: number; minute: number} {
+  const parsed = parseDueMinutes(hour, minute);
+  const clamped = parsed === null ? nowMinutes : Math.max(parsed, nowMinutes);
+  return {
+    hour: Math.floor(clamped / 60),
+    minute: clamped % 60
+  };
+}
+
 export function parseDueMinutes(hour: number, minute: number): number | null {
   if (
     !Number.isInteger(hour) ||

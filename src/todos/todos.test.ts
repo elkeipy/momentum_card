@@ -1,7 +1,10 @@
 import {
   addTodo,
+  clampDueParts,
   dueTodos,
   formatDueMinutes,
+  minDueHour,
+  minDueMinute,
   parseDueMinutes,
   parseTodoItem,
   readTodoList,
@@ -73,4 +76,16 @@ test('stores a due time and finds unfinished items that are due', () => {
   expect(dueTodos(withDue, 9 * 60 + 59)).toEqual([]);
   expect(dueTodos(withDue, 10 * 60).map(item => item.id)).toEqual(['due-1']);
   expect(dueTodos(toggleTodo(withDue, 'due-1'), 10 * 60)).toEqual([]);
+});
+
+test('clamps due parts so they cannot be earlier than now', () => {
+  expect(minDueHour(10 * 60 + 30)).toBe(10);
+  expect(minDueMinute(10, 10 * 60 + 30)).toBe(30);
+  expect(minDueMinute(11, 10 * 60 + 30)).toBe(0);
+  expect(clampDueParts(9, 0, 10 * 60)).toEqual({hour: 10, minute: 0});
+  expect(clampDueParts(10, 0, 10 * 60 + 30)).toEqual({
+    hour: 10,
+    minute: 30
+  });
+  expect(clampDueParts(11, 5, 10 * 60 + 30)).toEqual({hour: 11, minute: 5});
 });

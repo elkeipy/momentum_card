@@ -13,6 +13,24 @@ test('renders the focus timer controls', () => {
   expect(screen.getByRole('button', {name: 'Stop Alarm'})).toBeInTheDocument();
 });
 
+test('keeps the focus history table in a scroll region', () => {
+  const now = new Date();
+  const dateId = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join(
+    '-'
+  );
+  localStorage.setItem(
+    'PomodoroFocusData',
+    JSON.stringify({
+      dateId,
+      focusCount: 1,
+      focusPeriod: ['Focus,09:00:00,09:25:00']
+    })
+  );
+  render(<Pomodoro />);
+  const table = screen.getByRole('table', {name: '집중 이력'});
+  expect(table.parentElement?.className).toMatch(/tableWrap/);
+});
+
 test('saves timer text size from the settings dialog', () => {
   render(
     <FeatureCard

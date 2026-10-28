@@ -40,10 +40,24 @@ test('shows hour and minute fields after @ and rings when due', () => {
   fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: 'call @'}});
   expect(screen.getByLabelText('마감 시')).toHaveValue(10);
   expect(screen.getByLabelText('마감 분')).toHaveValue(0);
+  fireEvent.change(screen.getByLabelText('마감 시'), {target: {value: '9'}});
+  expect(screen.getByLabelText('마감 시')).toHaveValue(10);
   fireEvent.click(screen.getByRole('button', {name: '추가'}));
-  const alarm = screen.getByRole('alertdialog', {name: '할 일 알람'});
+  const alarm = screen.getByRole('status', {name: '할 일 알람 call'});
   expect(alarm).toHaveTextContent('call');
   expect(alarm).toHaveTextContent('10:00');
   fireEvent.click(screen.getByRole('button', {name: '확인'}));
-  expect(screen.queryByRole('alertdialog', {name: '할 일 알람'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('region', {name: '할 일 알람'})).not.toBeInTheDocument();
+});
+
+test('stacks a toast for each overdue todo', () => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date('2026-10-28T10:00:00'));
+  render(<TodoCard />);
+  fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: 'call @'}});
+  fireEvent.click(screen.getByRole('button', {name: '추가'}));
+  fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: 'mail @'}});
+  fireEvent.click(screen.getByRole('button', {name: '추가'}));
+  expect(screen.getByRole('status', {name: '할 일 알람 call'})).toBeInTheDocument();
+  expect(screen.getByRole('status', {name: '할 일 알람 mail'})).toBeInTheDocument();
 });
