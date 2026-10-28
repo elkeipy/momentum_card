@@ -1,18 +1,20 @@
 import React, {useEffect} from 'react';
 import ReactDOM from 'react-dom';
-import styles from '../css/PomodoroOptionModal.module.css';
+import styles from '../css/SettingsModal.module.css';
 
-type PomodoroOptionModalPropsType = {
+type SettingsModalProps = {
+  title: string;
   children: React.ReactNode;
   onSave: () => void;
   onClose: () => void;
 };
 
-export default function PomodoroOptionModal({
+export default function SettingsModal({
+  title,
   children,
   onSave,
   onClose
-}: PomodoroOptionModalPropsType) {
+}: SettingsModalProps) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -25,7 +27,8 @@ export default function PomodoroOptionModal({
 
   return ReactDOM.createPortal(
     <div className={styles.rootDiv} role="presentation">
-      <div className={styles.containerDiv} role="dialog" aria-modal="true" aria-label="구간 길이">
+      <div className={styles.containerDiv} role="dialog" aria-modal="true" aria-label={title}>
+        <h2 className={styles.title}>{title}</h2>
         {children}
         <div className={styles.buttonDiv}>
           <button className="btn-primary" type="button" onClick={onSave}>

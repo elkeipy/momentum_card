@@ -69,6 +69,8 @@ test('pins a card and shows quote and word cards', async ({page}) => {
   await expect(
     page.getByRole('progressbar', {name: '명언 남은 시간'})
   ).toBeVisible();
+  await expect(page.getByRole('button', {name: '명언 새로고침'})).toBeVisible();
+  await expect(page.getByRole('progressbar', {name: '단어 남은 시간'})).toBeVisible();
   await expect(page.getByRole('region', {name: '단어'})).toContainText(
     'steady attention'
   );
@@ -97,9 +99,17 @@ test('summarizes today and restores a closed card', async ({page}) => {
   await expect(page.getByText('Lost 2분')).toBeVisible();
   await page.getByRole('button', {name: '날씨 닫기'}).click();
   await expect(page.getByRole('region', {name: '날씨'})).toHaveCount(0);
-  await page.getByRole('button', {name: '카드 추가'}).click();
-  await page.getByRole('menuitem', {name: '날씨'}).click();
-  await expect(page.getByRole('region', {name: '날씨'})).toBeVisible();
+  await page.getByRole('button', {name: '카드 목록'}).click();
+  const weatherToggle = page.getByRole('menuitemcheckbox', {name: '날씨'});
+  await expect(weatherToggle).toHaveAttribute('aria-checked', 'false');
+  await weatherToggle.click();
+  const weather = page.getByRole('region', {name: '날씨'});
+  await expect(weather).toBeVisible();
+  const weatherZ = await weather.evaluate(element => Number(getComputedStyle(element).zIndex) || 0);
+  const pomodoroZ = await page
+    .getByRole('region', {name: '뽀모도로'})
+    .evaluate(element => Number(getComputedStyle(element).zIndex) || 0);
+  expect(weatherZ).toBeGreaterThan(pomodoroZ);
 });
 
 test('keeps cards below the top bar so their headers stay draggable', async ({
@@ -145,22 +155,14 @@ test('keeps cards below the top bar so their headers stay draggable', async ({
 
 test('keeps action buttons and timer settings above the cards', async ({page}) => {
   await page.goto('/');
-  const quoteRefresh = page.getByRole('button', {name: '명언 새로고침'});
-  const quoteBorder = await quoteRefresh.evaluate(
-    element => getComputedStyle(element).borderTopWidth
-  );
-  const quotePadding = await quoteRefresh.evaluate(
-    element => getComputedStyle(element).paddingLeft
-  );
-  expect(quoteBorder).not.toBe('0px');
-  expect(quotePadding).not.toBe('0px');
+  await expect(page.getByRole('button', {name: '명언 새로고침'})).toBeVisible();
 
   const startRadius = await page
     .getByRole('button', {name: 'Start', exact: true})
     .evaluate(element => getComputedStyle(element).borderRadius);
   expect(startRadius).toBe('999px');
 
-  await page.getByRole('button', {name: '타이머 설정'}).click();
+  await page.getByRole('button', {name: '뽀모도로 설정'}).click();
   const dialog = page.getByRole('dialog', {name: '구간 길이'});
   await expect(dialog).toBeVisible();
   const overlayZ = await dialog.evaluate(

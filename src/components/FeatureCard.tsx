@@ -6,12 +6,15 @@ import {
   type CardLayout,
   type ViewportSize
 } from '../featureCard/cardLayout';
+import {CardSettingsProvider} from '../featureCard/cardSettingsContext';
+import {CloseIcon, GearIcon, PinIcon} from './icons';
 import styles from './FeatureCard.module.css';
 
 type FeatureCardProps = {
   id: string;
   title: string;
   defaultLayout: CardLayout;
+  frontNonce?: number;
   onClose: () => void;
   children: React.ReactNode;
 };
@@ -26,33 +29,6 @@ type DragState = {
   startHeight: number;
   mode: 'move' | 'resize';
 };
-
-function PinIcon({filled}: {filled: boolean}) {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-      <path
-        d="M9 4h6l-1 6 3 3v2H7v-2l3-3L9 4zm3 11v5"
-        fill={filled ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-      <path
-        d="M6 6l12 12M18 6L6 18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
 
 function viewportSize(): ViewportSize {
   return {width: window.innerWidth, height: window.innerHeight};
@@ -103,6 +79,7 @@ export default function FeatureCard({
   id,
   title,
   defaultLayout,
+  frontNonce = 0,
   onClose,
   children
 }: FeatureCardProps) {
@@ -110,8 +87,28 @@ export default function FeatureCard({
   const [layout, setLayout] = useState<CardLayout>(stored.current.layout);
   const [placed, setPlaced] = useState(stored.current.placed);
   const [zIndex, setZIndex] = useState(1);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const dragRef = useRef<DragState | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+
+  const bringToFront = () => {
+    const rect = sectionRef.current?.getBoundingClientRect();
+    zSeed += 1;
+    setZIndex(zSeed);
+    if (!rect) {
+      return;
+    }
+    setPlaced(true);
+    setLayout(current =>
+      boundCardLayout({
+        ...current,
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height
+      })
+    );
+  };
 
   useEffect(() => {
     if (!placed && !layout.pinned && !localStorage.getItem(storageKey(id))) {
@@ -124,6 +121,13 @@ export default function FeatureCard({
   useEffect(() => {
     setLayout(current => boundCardLayout(current));
   }, []);
+
+  useEffect(() => {
+    if (!frontNonce) {
+      return;
+    }
+    bringToFront();
+  }, [frontNonce]);
 
   useEffect(() => {
     if (!placed) {
@@ -203,61 +207,73 @@ export default function FeatureCard({
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className={styles.card}
-      style={
-        placed
-          ? {
-              left: layout.x,
-              top: layout.y,
-              width: layout.width,
-              height: layout.height,
-              zIndex
-            }
-          : undefined
-      }
-      data-placed={placed}
-      data-pinned={layout.pinned}
-      aria-label={title}
+    <CardSettingsProvider
+      value={{isOpen: settingsOpen, close: () => setSettingsOpen(false)}}
     >
-      <header
-        className={styles.header}
-        onPointerDown={beginPointer('move')}
-        onPointerMove={movePointer}
-        onPointerUp={endPointer}
+      <section
+        ref={sectionRef}
+        className={styles.card}
+        style={
+          placed
+            ? {
+                left: layout.x,
+                top: layout.y,
+                width: layout.width,
+                height: layout.height,
+                zIndex
+              }
+            : undefined
+        }
+        data-placed={placed}
+        data-pinned={layout.pinned}
+        aria-label={title}
       >
-        <h2 className={styles.title}>{title}</h2>
-        <span className={styles.actions}>
-          <button
-            type="button"
-            className="icon-button"
-            aria-pressed={layout.pinned}
-            aria-label={`${title} 고정`}
-            onClick={() => setLayout(current => ({...current, pinned: !current.pinned}))}
-          >
-            <PinIcon filled={layout.pinned} />
-          </button>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label={`${title} 닫기`}
-            onClick={onClose}
-          >
-            <CloseIcon />
-          </button>
-        </span>
-      </header>
-      <div className={styles.body}>{children}</div>
-      {layout.pinned ? null : (
-        <div
-          className={styles.resize}
-          aria-hidden="true"
-          onPointerDown={beginPointer('resize')}
+        <header
+          className={styles.header}
+          onPointerDown={beginPointer('move')}
           onPointerMove={movePointer}
           onPointerUp={endPointer}
-        />
-      )}
-    </section>
+        >
+          <h2 className={styles.title}>{title}</h2>
+          <span className={styles.actions}>
+            <button
+              type="button"
+              className="icon-button"
+              aria-label={`${title} 설정`}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <GearIcon />
+            </button>
+            <button
+              type="button"
+              className="icon-button"
+              aria-pressed={layout.pinned}
+              aria-label={`${title} 고정`}
+              onClick={() => setLayout(current => ({...current, pinned: !current.pinned}))}
+            >
+              <PinIcon filled={layout.pinned} />
+            </button>
+            <button
+              type="button"
+              className="icon-button"
+              aria-label={`${title} 닫기`}
+              onClick={onClose}
+            >
+              <CloseIcon />
+            </button>
+          </span>
+        </header>
+        <div className={styles.body}>{children}</div>
+        {layout.pinned ? null : (
+          <div
+            className={styles.resize}
+            aria-hidden="true"
+            onPointerDown={beginPointer('resize')}
+            onPointerMove={movePointer}
+            onPointerUp={endPointer}
+          />
+        )}
+      </section>
+    </CardSettingsProvider>
   );
 }

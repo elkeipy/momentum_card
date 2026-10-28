@@ -14,7 +14,7 @@ import {
 import {
   hideCard,
   readVisibleCards,
-  showCard,
+  toggleCard,
   VISIBLE_CARDS_KEY,
   type CardId
 } from './visibleCards';
@@ -113,7 +113,7 @@ function TodayFact() {
 export default function Board() {
   const [visible, setVisible] = useState<CardId[]>(() => readVisibleCards(localStorage));
   const [menuOpen, setMenuOpen] = useState(false);
-  const hidden = CARDS.filter(card => !visible.includes(card.id));
+  const [frontNonce, setFrontNonce] = useState<Partial<Record<CardId, number>>>({});
   const cardById = (id: CardId) => CARDS.find(card => card.id === id);
 
   useEffect(() => {
@@ -144,6 +144,7 @@ export default function Board() {
         id={card.id}
         title={card.title}
         defaultLayout={card.layout}
+        frontNonce={frontNonce[card.id] ?? 0}
         onClose={() => setVisible(current => hideCard(current, card.id))}
       >
         {card.content}
@@ -173,28 +174,33 @@ export default function Board() {
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(open => !open)}
           >
-            카드 추가
+            카드 목록
           </button>
           {menuOpen ? (
             <div className="card-menu" role="menu">
-              {hidden.length === 0 ? (
-                <p>숨긴 카드가 없습니다.</p>
-              ) : (
-                hidden.map(card => (
+              {CARDS.map(card => {
+                const isOn = visible.includes(card.id);
+                return (
                   <button
                     key={card.id}
                     type="button"
                     className="app-button"
-                    role="menuitem"
+                    role="menuitemcheckbox"
+                    aria-checked={isOn}
                     onClick={() => {
-                      setVisible(current => showCard(current, card.id));
-                      setMenuOpen(false);
+                      setVisible(current => toggleCard(current, card.id));
+                      if (!isOn) {
+                        setFrontNonce(current => ({
+                          ...current,
+                          [card.id]: (current[card.id] ?? 0) + 1
+                        }));
+                      }
                     }}
                   >
                     {card.title}
                   </button>
-                ))
-              )}
+                );
+              })}
             </div>
           ) : null}
         </div>

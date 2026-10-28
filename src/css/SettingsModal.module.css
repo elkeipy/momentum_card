@@ -24,6 +24,40 @@
   box-shadow: 0 8px 24px rgba(31, 32, 29, 0.12);
 }
 
+.title {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: inherit;
+}
+
+.optionDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.optionLabel {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  color: inherit;
+}
+
+.optionValue {
+  width: 88px;
+  height: var(--control-height);
+  padding: 0 12px;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface);
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+}
+
 .buttonDiv {
   display: flex;
   flex-wrap: wrap;

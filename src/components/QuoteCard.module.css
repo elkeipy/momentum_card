@@ -3,7 +3,7 @@
   color: var(--text);
   font-size: 16px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 1.4;
 }
 
 .from {
@@ -11,42 +11,4 @@
   color: var(--muted);
   font-size: var(--fs-body);
   line-height: 20px;
-}
-
-.remain {
-  margin: 8px 0 0;
-  height: 6px;
-  overflow: hidden;
-  background: var(--raised);
-  border-radius: 999px;
-}
-
-.remainFill {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--accent);
-  transform-origin: left center;
-  animation-name: quoteRemain;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-@keyframes quoteRemain {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
-.refresh {
-  margin-top: 16px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .remainFill {
-    animation: none;
-  }
 }

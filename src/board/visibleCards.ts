@@ -36,3 +36,7 @@ export function showCard(visible: CardId[], id: CardId): CardId[] {
   }
   return [...visible, id];
 }
+
+export function toggleCard(visible: CardId[], id: CardId): CardId[] {
+  return visible.includes(id) ? hideCard(visible, id) : showCard(visible, id);
+}

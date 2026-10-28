@@ -45,6 +45,18 @@ export function removeWord(words: string[], value: string): string[] {
   return words.filter(word => word !== value);
 }
 
+export function nextRandomIndex(
+  current: number,
+  length: number,
+  random = Math.random
+): number {
+  if (length <= 1) {
+    return 0;
+  }
+  const offset = 1 + Math.floor(random() * (length - 1));
+  return (current + offset) % length;
+}
+
 export function readDefinition(payload: unknown): string {
   if (!Array.isArray(payload) || payload.length === 0) {
     return '';

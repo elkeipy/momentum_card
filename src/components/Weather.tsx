@@ -1,5 +1,9 @@
 import React, {useEffect, useState} from 'react';
+import {REFRESH_SEC_DEFAULT, WEATHER_FONT_DEFAULT} from '../featureCard/cardSettings';
+import {useDisplaySettings} from '../featureCard/useDisplaySettings';
 import styles from '../css/Weather.module.css';
+import DisplaySettingsFields from './DisplaySettingsFields';
+import SettingsModal from './SettingsModal';
 
 interface WeatherInfoMap {
   temperature: number | null;
@@ -38,7 +42,13 @@ function readLocationName(value: unknown): string {
   return cleaned.slice(0, MAX_LOCATION_LENGTH);
 }
 
+const WEATHER_DEFAULTS = {
+  fontSize: WEATHER_FONT_DEFAULT,
+  refreshSec: REFRESH_SEC_DEFAULT
+};
+
 function Weather() {
+  const settings = useDisplaySettings('weather', WEATHER_DEFAULTS);
   const [weatherInfo, setWeatherInfo] = useState<WeatherInfoMap | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -134,8 +144,19 @@ function Weather() {
     };
   }, []);
 
+  const settingsModal = settings.isOpen ? (
+    <SettingsModal title="날씨 설정" onSave={settings.save} onClose={settings.close}>
+      <DisplaySettingsFields value={settings.draft} onChange={settings.setDraft} />
+    </SettingsModal>
+  ) : null;
+
   if (errorMessage) {
-    return <p className={styles.error}>{errorMessage}</p>;
+    return (
+      <>
+        <p className={styles.error}>{errorMessage}</p>
+        {settingsModal}
+      </>
+    );
   }
 
   const temperature = weatherInfo?.temperature;
@@ -145,7 +166,7 @@ function Weather() {
     <div className={styles.rootDiv}>
       <p className={styles.place}>{weatherInfo?.location ?? '위치 확인 중'}</p>
       {typeof temperature === 'number' ? (
-        <p className={styles.temp}>
+        <p className={styles.temp} style={{fontSize: `${settings.saved.fontSize}px`}}>
           <span className="num">{temperature}</span>
           <span className={styles.unit}>°C</span>
         </p>
@@ -155,6 +176,7 @@ function Weather() {
       <p className={styles.meta}>
         {typeof feelsLike === 'number' ? `체감온도: ${feelsLike}°C` : '체감온도: —'}
       </p>
+      {settingsModal}
     </div>
   );
 }
