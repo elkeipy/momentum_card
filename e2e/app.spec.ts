@@ -37,6 +37,9 @@ test.beforeEach(async ({page}) => {
       body: definitionBody
     })
   );
+  await page.route('https://ntfy.sh/**', route =>
+    route.fulfill({status: 200, body: 'ok'})
+  );
 });
 
 test('shows the clock, weather, and pomodoro controls', async ({page}) => {
@@ -193,4 +196,15 @@ test('adds and completes a todo on the board', async ({page}) => {
   await card.getByLabel('할 일 추가').fill('call @');
   await expect(card.getByLabel('마감 시')).toBeVisible();
   await expect(card.getByLabel('마감 분')).toBeVisible();
+});
+
+test('saves an ntfy topic from the header', async ({page}) => {
+  await page.goto('/');
+  await page.getByRole('button', {name: '푸시 알림'}).click();
+  const dialog = page.getByRole('dialog', {name: '푸시 알림'});
+  await dialog.getByLabel('ntfy 토픽').fill('desk-42');
+  await dialog.getByRole('button', {name: 'Save'}).click();
+  await expect(dialog).toHaveCount(0);
+  const stored = await page.evaluate(() => localStorage.getItem('ntfy-topic'));
+  expect(stored).toBe('desk-42');
 });

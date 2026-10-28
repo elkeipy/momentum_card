@@ -1,5 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import ReactDOM from 'react-dom';
+import {publishNtfy} from '../notify/ntfy';
 import styles from './AlarmDialog.module.css';
 
 export type AlarmToastItem = {
@@ -29,14 +30,24 @@ function playTodoNotify() {
 
 export default function AlarmDialog({items, onAck}: AlarmDialogProps) {
   const seenIds = useRef(new Set<string>());
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
   const ids = items.map(item => item.id).join(',');
 
   useEffect(() => {
     const nextIds = ids === '' ? [] : ids.split(',');
-    const hasNew = nextIds.some(id => !seenIds.current.has(id));
+    const newIds = nextIds.filter(id => !seenIds.current.has(id));
     seenIds.current = new Set(nextIds);
-    if (hasNew) {
-      playTodoNotify();
+    if (newIds.length === 0) {
+      return;
+    }
+    playTodoNotify();
+    for (const id of newIds) {
+      const item = itemsRef.current.find(entry => entry.id === id);
+      if (item) {
+        const detail = item.detail ? ` (${item.detail})` : '';
+        publishNtfy('할 일', `${item.message}${detail}`);
+      }
     }
   }, [ids]);
 

@@ -102,6 +102,29 @@
   }
 }
 
+.textField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.textInput {
+  height: var(--control-height);
+  padding: 0 12px;
+  color: inherit;
+  font: inherit;
+  background: var(--surface);
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  line-height: 20px;
+}
+
 .buttonDiv {
   display: flex;
   flex-wrap: wrap;

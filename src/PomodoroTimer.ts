@@ -1,3 +1,4 @@
+import {publishNtfy} from './notify/ntfy';
 import {formatElapsed} from './pomodoro/formatElapsed';
 
 interface PomodoroTimerProps {
@@ -450,6 +451,9 @@ class PomodoroTimer {
       //this.audio.loop = this._periodType === PeriodType.Focus ? true : false;
       void this.audio.play().catch(() => undefined);
     }
+    const ended =
+      this._periodType === PeriodType.Focus ? 'Focus 끝' : 'Break 끝';
+    publishNtfy('뽀모도로', ended);
   }
 
   private isPlayingAlarmSound(): boolean {

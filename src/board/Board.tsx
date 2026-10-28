@@ -6,6 +6,7 @@ import QuoteCard from '../components/QuoteCard';
 import Weather from '../components/Weather';
 import TodoCard from '../components/TodoCard';
 import WordCard from '../components/WordCard';
+import NtfySettings from '../notify/NtfySettings';
 import type {CardLayout} from '../featureCard/cardLayout';
 import {
   readTodayFocusHistory,
@@ -175,6 +176,7 @@ export default function Board() {
           <TodayFact />
         </div>
         <div className="card-adder">
+          <NtfySettings />
           <button
             type="button"
             className="app-button"
