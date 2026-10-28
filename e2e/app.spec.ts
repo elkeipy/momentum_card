@@ -189,4 +189,7 @@ test('adds and completes a todo on the board', async ({page}) => {
   await expect(card.getByRole('checkbox', {name: 'write tests'})).toBeChecked();
   await card.getByRole('button', {name: 'write tests 삭제'}).click();
   await expect(card.getByText('할 일을 추가하면 여기에 쌓인다.')).toBeVisible();
+  await card.getByLabel('할 일 추가').fill('call @');
+  await expect(card.getByLabel('마감 시')).toBeVisible();
+  await expect(card.getByLabel('마감 분')).toBeVisible();
 });

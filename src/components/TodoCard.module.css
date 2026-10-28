@@ -49,6 +49,36 @@
   border-radius: 0 999px 999px 0;
 }
 
+.due {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.due label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.due input {
+  width: 64px;
+  height: var(--control-height);
+  padding: 0 8px;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface);
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+}
+
+.dueStamp {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .list {
   margin: 12px 0 0;
   padding: 0;

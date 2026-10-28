@@ -7,6 +7,8 @@ export type TodoItem = {
   id: string;
   text: string;
   done: boolean;
+  dueMinutes: number | null;
+  alarmed: boolean;
 };
 
 export function sanitizeTodoText(value: string): string | null {
@@ -37,7 +39,62 @@ export function parseTodoItem(value: unknown): TodoItem | null {
   if (!text || typeof raw.done !== 'boolean') {
     return null;
   }
-  return {id: raw.id, text, done: raw.done};
+  return {
+    id: raw.id,
+    text,
+    done: raw.done,
+    dueMinutes: parseStoredDueMinutes(raw.dueMinutes),
+    alarmed: raw.alarmed === true
+  };
+}
+
+export function stripDueTrigger(value: string): string {
+  return value.replace(/@/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+export function parseDueMinutes(hour: number, minute: number): number | null {
+  if (
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+  return hour * 60 + minute;
+}
+
+export function formatDueMinutes(dueMinutes: number): string {
+  const hour = Math.floor(dueMinutes / 60);
+  const minute = dueMinutes % 60;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+export function currentMinutes(now = new Date()): number {
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function parseStoredDueMinutes(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 23 * 60 + 59) {
+    return null;
+  }
+  return value;
+}
+
+export function dueTodos(items: TodoItem[], nowMinutes: number): TodoItem[] {
+  return items.filter(
+    item =>
+      !item.done &&
+      item.dueMinutes !== null &&
+      !item.alarmed &&
+      nowMinutes >= item.dueMinutes
+  );
+}
+
+export function markAlarmed(items: TodoItem[], id: string): TodoItem[] {
+  return items.map(item => (item.id === id ? {...item, alarmed: true} : item));
 }
 
 export function readTodoList(storage: {getItem(key: string): string | null}): TodoItem[] {
@@ -59,17 +116,20 @@ export function readTodoList(storage: {getItem(key: string): string | null}): To
 export function addTodo(
   items: TodoItem[],
   value: string,
-  id = createTodoId()
+  id = createTodoId(),
+  dueMinutes: number | null = null
 ): TodoItem[] {
-  const text = sanitizeTodoText(value);
+  const text = sanitizeTodoText(stripDueTrigger(value));
   if (!text || items.length >= MAX_TODOS) {
     return items;
   }
-  return [...items, {id, text, done: false}];
+  return [...items, {id, text, done: false, dueMinutes, alarmed: false}];
 }
 
 export function toggleTodo(items: TodoItem[], id: string): TodoItem[] {
-  return items.map(item => (item.id === id ? {...item, done: !item.done} : item));
+  return items.map(item =>
+    item.id === id ? {...item, done: !item.done, alarmed: item.done ? false : item.alarmed} : item
+  );
 }
 
 export function removeTodo(items: TodoItem[], id: string): TodoItem[] {
