@@ -174,7 +174,7 @@ export default function TodoCard() {
       {items.length === 0 ? (
         <p className={styles.empty}>할 일을 추가하면 여기에 쌓인다.</p>
       ) : (
-        <ul className={styles.list} style={{fontSize: `${settings.saved.fontSize}px`}}>
+        <ul className={styles.list} style={{fontSize: `${settings.shown.fontSize}px`}}>
           {items.map(item => (
             <li key={item.id}>
               <label className={styles.check}>

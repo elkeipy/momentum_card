@@ -23,5 +23,6 @@ export function useDisplaySettings(id: string, fallback: DisplaySettings) {
     ui.close();
   };
 
-  return {saved, draft, setDraft, save, close: ui.close, isOpen: ui.isOpen};
+  const shown = ui.isOpen ? draft : saved;
+  return {saved, draft, shown, setDraft, save, close: ui.close, isOpen: ui.isOpen};
 }

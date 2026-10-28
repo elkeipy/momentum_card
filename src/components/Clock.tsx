@@ -30,7 +30,7 @@ function Clock() {
     <div className={styles.rootDiv}>
       <p
         className={`${styles.time} num`}
-        style={{fontSize: `${settings.saved.fontSize}px`}}
+        style={{fontSize: `${settings.shown.fontSize}px`}}
       >
         {time}
       </p>

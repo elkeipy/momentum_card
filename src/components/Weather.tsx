@@ -166,7 +166,7 @@ function Weather() {
     <div className={styles.rootDiv}>
       <p className={styles.place}>{weatherInfo?.location ?? '위치 확인 중'}</p>
       {typeof temperature === 'number' ? (
-        <p className={styles.temp} style={{fontSize: `${settings.saved.fontSize}px`}}>
+        <p className={styles.temp} style={{fontSize: `${settings.shown.fontSize}px`}}>
           <span className="num">{temperature}</span>
           <span className={styles.unit}>°C</span>
         </p>

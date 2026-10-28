@@ -20,7 +20,7 @@ export default function QuoteCard() {
   const [index, setIndex] = useState(0);
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const quote = QUOTES[index] ?? QUOTES[0];
-  const intervalMs = settings.saved.refreshSec * 1000;
+  const intervalMs = settings.shown.refreshSec * 1000;
 
   useEffect(() => {
     const timerId = window.setTimeout(() => {
@@ -37,7 +37,7 @@ export default function QuoteCard() {
 
   return (
     <div>
-      <p className={styles.quote} style={{fontSize: `${settings.saved.fontSize}px`}}>
+      <p className={styles.quote} style={{fontSize: `${settings.shown.fontSize}px`}}>
         {quote.text}
       </p>
       <p className={styles.from}>{quote.from}</p>

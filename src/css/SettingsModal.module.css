@@ -46,16 +46,60 @@
   color: inherit;
 }
 
-.optionValue {
-  width: 88px;
+.stepper {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.step {
+  width: 38px;
   height: var(--control-height);
-  padding: 0 12px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--surface);
+  border: var(--button-border);
+  border-radius: var(--button-radius);
+}
+
+.step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.optionValue {
+  width: 64px;
+  height: var(--control-height);
+  padding: 0 8px;
   color: inherit;
   font: inherit;
   font-variant-numeric: tabular-nums;
+  text-align: center;
   background: var(--surface);
   border: 1px solid var(--control);
   border-radius: var(--radius-control);
+  appearance: textfield;
+}
+
+.optionValue::-webkit-outer-spin-button,
+.optionValue::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+@media (max-width: 720px) {
+  .step {
+    width: 44px;
+    min-height: 44px;
+  }
 }
 
 .buttonDiv {

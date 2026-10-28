@@ -12,6 +12,10 @@ function readBoundedInteger(value: string, min: number, max: number): number | n
   return parsed;
 }
 
+function clampStep(value: number, delta: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value + delta));
+}
+
 type OptionFieldProps = {
   id: string;
   label: string;
@@ -40,17 +44,38 @@ export default function OptionField({
       <label htmlFor={id} className={styles.optionLabel}>
         {label}
       </label>
-      <input
-        name={id}
-        id={id}
-        className={styles.optionValue}
-        type="number"
-        min={min}
-        max={max}
-        step="1"
-        value={value}
-        onChange={onChange}
-      />
+      <div className={styles.stepper}>
+        <button
+          type="button"
+          className={styles.step}
+          aria-label={`${label} 줄이기`}
+          disabled={value <= min}
+          onClick={() => onValue(clampStep(value, -1, min, max))}
+        >
+          −
+        </button>
+        <input
+          name={id}
+          id={id}
+          className={styles.optionValue}
+          type="number"
+          inputMode="numeric"
+          min={min}
+          max={max}
+          step="1"
+          value={value}
+          onChange={onChange}
+        />
+        <button
+          type="button"
+          className={styles.step}
+          aria-label={`${label} 늘리기`}
+          disabled={value >= max}
+          onClick={() => onValue(clampStep(value, 1, min, max))}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }

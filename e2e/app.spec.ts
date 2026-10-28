@@ -165,11 +165,12 @@ test('keeps action buttons and timer settings above the cards', async ({page}) =
   await page.getByRole('button', {name: '뽀모도로 설정'}).click();
   const dialog = page.getByRole('dialog', {name: '구간 길이'});
   await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', {name: 'Timer Text 늘리기'})).toBeVisible();
   const overlayZ = await dialog.evaluate(
     element => getComputedStyle(element.parentElement!).zIndex
   );
   expect(Number(overlayZ)).toBeGreaterThan(100);
-  await dialog.getByLabel('Timer Text').fill('64');
+  await dialog.getByRole('spinbutton', {name: 'Timer Text'}).fill('64');
   await page.getByRole('button', {name: 'Save'}).click();
   await expect(dialog).toHaveCount(0);
   const timerSize = await page.getByText('25:00').evaluate(

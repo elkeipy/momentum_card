@@ -32,7 +32,7 @@ export default function WordCard() {
   const [definition, setDefinition] = useState('');
   const [showAll, setShowAll] = useState(false);
   const selected = words[index] ?? words[0] ?? '';
-  const intervalMs = settings.saved.refreshSec * 1000;
+  const intervalMs = settings.shown.refreshSec * 1000;
 
   useEffect(() => {
     localStorage.setItem(WORD_LIST_STORAGE_KEY, JSON.stringify(words));
@@ -107,7 +107,7 @@ export default function WordCard() {
 
   return (
     <div className={styles.root}>
-      <p className={styles.word} style={{fontSize: `${settings.saved.fontSize}px`}}>
+      <p className={styles.word} style={{fontSize: `${settings.shown.fontSize}px`}}>
         {selected || '단어가 없습니다.'}
       </p>
       <p className={selected ? styles.definition : styles.empty}>
