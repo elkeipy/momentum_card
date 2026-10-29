@@ -88,11 +88,39 @@
 
 .list li {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.itemRow {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 44px;
-  border-top: 1px solid var(--rule);
+}
+
+.track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--raised);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.fill[data-state='over'] {
+  background: var(--negative);
+}
+
+.fill[data-state='done'] {
+  background: var(--chart-3);
 }
 
 .check {

@@ -8,6 +8,7 @@ export type TodoItem = {
   text: string;
   done: boolean;
   dueMinutes: number | null;
+  startMinutes: number | null;
   alarmed: boolean;
 };
 
@@ -39,11 +40,13 @@ export function parseTodoItem(value: unknown): TodoItem | null {
   if (!text || typeof raw.done !== 'boolean') {
     return null;
   }
+  const dueMinutes = parseStoredDueMinutes(raw.dueMinutes);
   return {
     id: raw.id,
     text,
     done: raw.done,
-    dueMinutes: parseStoredDueMinutes(raw.dueMinutes),
+    dueMinutes,
+    startMinutes: dueMinutes === null ? null : parseStoredDueMinutes(raw.startMinutes),
     alarmed: raw.alarmed === true
   };
 }
@@ -97,6 +100,24 @@ export function currentMinutes(now = new Date()): number {
   return now.getHours() * 60 + now.getMinutes();
 }
 
+export function currentExactMinutes(now = new Date()): number {
+  return currentMinutes(now) + now.getSeconds() / 60;
+}
+
+export function dueProgress(
+  startMinutes: number,
+  dueMinutes: number,
+  nowMinutes: number
+): number {
+  if (nowMinutes >= dueMinutes || dueMinutes <= startMinutes) {
+    return 1;
+  }
+  if (nowMinutes <= startMinutes) {
+    return 0;
+  }
+  return (nowMinutes - startMinutes) / (dueMinutes - startMinutes);
+}
+
 function parseStoredDueMinutes(value: unknown): number | null {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 23 * 60 + 59) {
     return null;
@@ -138,13 +159,24 @@ export function addTodo(
   items: TodoItem[],
   value: string,
   id = createTodoId(),
-  dueMinutes: number | null = null
+  dueMinutes: number | null = null,
+  startMinutes: number | null = null
 ): TodoItem[] {
   const text = sanitizeTodoText(stripDueTrigger(value));
   if (!text || items.length >= MAX_TODOS) {
     return items;
   }
-  return [...items, {id, text, done: false, dueMinutes, alarmed: false}];
+  return [
+    ...items,
+    {
+      id,
+      text,
+      done: false,
+      dueMinutes,
+      startMinutes: dueMinutes === null ? null : startMinutes,
+      alarmed: false
+    }
+  ];
 }
 
 export function toggleTodo(items: TodoItem[], id: string): TodoItem[] {

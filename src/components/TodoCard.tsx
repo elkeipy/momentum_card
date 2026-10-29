@@ -7,7 +7,9 @@ import {useDisplaySettings} from '../featureCard/useDisplaySettings';
 import {
   addTodo,
   clampDueParts,
+  currentExactMinutes,
   currentMinutes,
+  dueProgress,
   dueTodos,
   formatDueMinutes,
   markAlarmed,
@@ -42,11 +44,13 @@ export default function TodoCard() {
   const settings = useDisplaySettings('todos', TODO_DEFAULTS);
   const [items, setItems] = useState(() => readTodoList(localStorage));
   const [draft, setDraft] = useState('');
-  const [nowMinutes, setNowMinutes] = useState(() => currentMinutes());
+  const [now, setNow] = useState(() => new Date());
   const [dueHour, setDueHour] = useState(() => minDueHour(currentMinutes()));
   const [dueMinute, setDueMinute] = useState(
     () => minDueMinute(minDueHour(currentMinutes()), currentMinutes())
   );
+  const nowMinutes = currentMinutes(now);
+  const nowExact = currentExactMinutes(now);
   const remaining = items.filter(item => !item.done).length;
   const showDue = draft.includes('@');
   const ringing = dueTodos(items, nowMinutes);
@@ -58,7 +62,7 @@ export default function TodoCard() {
   }, [items]);
 
   useEffect(() => {
-    const tick = () => setNowMinutes(currentMinutes());
+    const tick = () => setNow(new Date());
     tick();
     const timerId = window.setInterval(tick, ALARM_TICK_MS);
     return () => window.clearInterval(timerId);
@@ -98,7 +102,13 @@ export default function TodoCard() {
     const dueMinutes = clamped
       ? parseDueMinutes(clamped.hour, clamped.minute)
       : null;
-    const nextItems = addTodo(items, draft, undefined, dueMinutes);
+    const nextItems = addTodo(
+      items,
+      draft,
+      undefined,
+      dueMinutes,
+      dueMinutes === null ? null : currentMinutes()
+    );
     if (nextItems === items) {
       return;
     }
@@ -175,31 +185,57 @@ export default function TodoCard() {
         <p className={styles.empty}>할 일을 추가하면 여기에 쌓인다.</p>
       ) : (
         <ul className={styles.list} style={{fontSize: `${settings.shown.fontSize}px`}}>
-          {items.map(item => (
-            <li key={item.id}>
-              <label className={styles.check}>
-                <input
-                  type="checkbox"
-                  checked={item.done}
-                  onChange={() => setItems(current => toggleTodo(current, item.id))}
-                />
-                <span className={item.done ? `${styles.label} ${styles.done}` : styles.label}>
-                  {item.text}
-                </span>
-                {item.dueMinutes !== null ? (
-                  <span className={styles.dueStamp}>{formatDueMinutes(item.dueMinutes)}</span>
+          {items.map(item => {
+            const due = item.dueMinutes;
+            const ratio =
+              due === null
+                ? 0
+                : dueProgress(item.startMinutes ?? 0, due, nowExact);
+            const overdue = due !== null && !item.done && nowMinutes >= due;
+            return (
+              <li key={item.id}>
+                <div className={styles.itemRow}>
+                  <label className={styles.check}>
+                    <input
+                      type="checkbox"
+                      checked={item.done}
+                      onChange={() => setItems(current => toggleTodo(current, item.id))}
+                    />
+                    <span className={item.done ? `${styles.label} ${styles.done}` : styles.label}>
+                      {item.text}
+                    </span>
+                    {due !== null ? (
+                      <span className={styles.dueStamp}>{formatDueMinutes(due)}</span>
+                    ) : null}
+                  </label>
+                  <button
+                    className="text-button"
+                    type="button"
+                    aria-label={`${item.text} 삭제`}
+                    onClick={() => setItems(current => removeTodo(current, item.id))}
+                  >
+                    삭제
+                  </button>
+                </div>
+                {due !== null ? (
+                  <div
+                    className={styles.track}
+                    role="progressbar"
+                    aria-label={`${item.text} 마감`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(ratio * 100)}
+                  >
+                    <span
+                      className={styles.fill}
+                      data-state={item.done ? 'done' : overdue ? 'over' : 'open'}
+                      style={{width: `${ratio * 100}%`}}
+                    />
+                  </div>
                 ) : null}
-              </label>
-              <button
-                className="text-button"
-                type="button"
-                aria-label={`${item.text} 삭제`}
-                onClick={() => setItems(current => removeTodo(current, item.id))}
-              >
-                삭제
-              </button>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
       <AlarmDialog

@@ -1,5 +1,5 @@
 import React from 'react';
-import {cleanup, fireEvent, render, screen} from '@testing-library/react';
+import {act, cleanup, fireEvent, render, screen} from '@testing-library/react';
 import {NTFY_ORIGIN, NTFY_TOPIC_KEY} from '../notify/ntfy';
 import TodoCard from './TodoCard';
 
@@ -49,6 +49,23 @@ test('shows hour and minute fields after @ and rings when due', () => {
   expect(alarm).toHaveTextContent('10:00');
   fireEvent.click(screen.getByRole('button', {name: '확인'}));
   expect(screen.queryByRole('region', {name: '할 일 알람'})).not.toBeInTheDocument();
+});
+
+test('fills a bar from the moment a timed todo is added until it is due', () => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date('2026-10-28T10:00:00'));
+  render(<TodoCard />);
+  fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: 'call @'}});
+  fireEvent.change(screen.getByLabelText('마감 시'), {target: {value: '11'}});
+  fireEvent.click(screen.getByRole('button', {name: '추가'}));
+  const bar = screen.getByRole('progressbar', {name: 'call 마감'});
+  expect(bar).toHaveAttribute('aria-valuenow', '0');
+
+  act(() => {
+    jest.setSystemTime(new Date('2026-10-28T10:30:00'));
+    jest.advanceTimersByTime(1000);
+  });
+  expect(bar).toHaveAttribute('aria-valuenow', '50');
 });
 
 test('posts a due todo to ntfy when a topic is set', () => {

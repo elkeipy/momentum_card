@@ -1,6 +1,7 @@
 import {
   addTodo,
   clampDueParts,
+  dueProgress,
   dueTodos,
   formatDueMinutes,
   minDueHour,
@@ -26,6 +27,7 @@ test('parses stored items and ignores anything else', () => {
     text: 'ship',
     done: false,
     dueMinutes: null,
+    startMinutes: null,
     alarmed: false
   });
   expect(parseTodoItem({id: '<script>', text: 'ship', done: false})).toBeNull();
@@ -35,7 +37,7 @@ test('parses stored items and ignores anything else', () => {
 test('adds, toggles, and removes todos without growing past the cap', () => {
   const added = addTodo([], ' ship it ', 'id-1');
   expect(added).toEqual([
-    {id: 'id-1', text: 'ship it', done: false, dueMinutes: null, alarmed: false}
+    {id: 'id-1', text: 'ship it', done: false, dueMinutes: null, startMinutes: null, alarmed: false}
   ]);
   expect(addTodo(added, '   ')).toEqual(added);
   expect(toggleTodo(added, 'id-1')[0].done).toBe(true);
@@ -45,6 +47,7 @@ test('adds, toggles, and removes todos without growing past the cap', () => {
     text: 'task',
     done: false,
     dueMinutes: null,
+    startMinutes: null,
     alarmed: false
   }));
   expect(addTodo(full, 'one more', 'n40')).toEqual(full);
@@ -60,7 +63,7 @@ test('reads a stored list and drops corrupt rows', () => {
       ])
   };
   expect(readTodoList(storage)).toEqual([
-    {id: 'ok-1', text: 'keep', done: true, dueMinutes: null, alarmed: false}
+    {id: 'ok-1', text: 'keep', done: true, dueMinutes: null, startMinutes: null, alarmed: false}
   ]);
   expect(readTodoList({getItem: () => null})).toEqual([]);
   expect(readTodoList({getItem: () => '{'})).toEqual([]);
@@ -71,8 +74,13 @@ test('stores a due time and finds unfinished items that are due', () => {
   expect(parseDueMinutes(9, 5)).toBe(9 * 60 + 5);
   expect(parseDueMinutes(24, 0)).toBeNull();
   expect(formatDueMinutes(9 * 60 + 5)).toBe('09:05');
-  const withDue = addTodo([], 'call @', 'due-1', 10 * 60);
+  const withDue = addTodo([], 'call @', 'due-1', 10 * 60, 9 * 60);
   expect(withDue[0].dueMinutes).toBe(10 * 60);
+  expect(withDue[0].startMinutes).toBe(9 * 60);
+  expect(dueProgress(9 * 60, 10 * 60, 9 * 60)).toBe(0);
+  expect(dueProgress(9 * 60, 10 * 60, 9 * 60 + 30)).toBe(0.5);
+  expect(dueProgress(9 * 60, 10 * 60, 10 * 60)).toBe(1);
+  expect(dueProgress(10 * 60, 10 * 60, 10 * 60)).toBe(1);
   expect(dueTodos(withDue, 9 * 60 + 59)).toEqual([]);
   expect(dueTodos(withDue, 10 * 60).map(item => item.id)).toEqual(['due-1']);
   expect(dueTodos(toggleTodo(withDue, 'due-1'), 10 * 60)).toEqual([]);
