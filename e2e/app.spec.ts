@@ -47,17 +47,33 @@ test('shows the clock, weather, and pomodoro controls', async ({page}) => {
   await expect(page.getByRole('heading', {name: 'This session'})).toBeVisible();
   await expect(page.getByRole('region', {name: '시계'})).toBeVisible();
   await expect(page.getByRole('button', {name: 'Start'})).toBeVisible();
+  await expect(page.getByRole('progressbar', {name: '구간 진행'})).toHaveAttribute(
+    'aria-valuenow',
+    '0'
+  );
   await expect(page.getByRole('region', {name: '날씨'})).toContainText('서울');
   await expect(page.getByText('체감온도: 20.1°C')).toBeVisible();
 });
 
-test('starts and stops the pomodoro timer', async ({page}) => {
+test('starts and pauses the pomodoro timer', async ({page}) => {
   await page.goto('/');
+  const bar = page.getByRole('progressbar', {name: '구간 진행'});
+  await expect(bar).toHaveAttribute('aria-valuenow', '0');
   await page.getByRole('button', {name: 'Start', exact: true}).click();
-  const stopButton = page.getByRole('button', {name: 'Stop', exact: true});
-  await expect(stopButton).toBeVisible();
-  await stopButton.click();
+  const pauseButton = page.getByRole('button', {name: 'Pause', exact: true});
+  await expect(pauseButton).toBeVisible();
+  await expect(page.getByRole('region', {name: '뽀모도로'})).toHaveAttribute(
+    'data-tone',
+    'focus'
+  );
+  await expect
+    .poll(async () => bar.getAttribute('aria-valuenow'), {timeout: 20000})
+    .not.toBe('0');
+  const filled = await bar.getAttribute('aria-valuenow');
+  await pauseButton.click();
   await expect(page.getByRole('button', {name: 'Start', exact: true})).toBeVisible();
+  await page.waitForTimeout(1200);
+  await expect(bar).toHaveAttribute('aria-valuenow', filled ?? '0');
 });
 
 test('pins a card and shows quote and word cards', async ({page}) => {

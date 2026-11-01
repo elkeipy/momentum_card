@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import PomodoroTimer, {TimerSettings} from '../PomodoroTimer';
+import PomodoroTimer, {CardTone, TimerSettings} from '../PomodoroTimer';
 import {useCardSettings} from '../featureCard/cardSettingsContext';
 import {
   readTimerTextSize,
@@ -31,6 +31,9 @@ function Pomodoro() {
   const [longBreak, setLongBreak] = useState(15);
   const [longBreakInterval, setLongBreakInterval] = useState(4);
   const [timerTextSize, setTimerTextSize] = useState(() => readTimerTextSize(localStorage));
+  const [tone, setTone] = useState<CardTone>('focus');
+  const [progress, setProgress] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
   const settingsUi = useCardSettings();
 
   const saveTimerOption = () => {
@@ -61,7 +64,9 @@ function Pomodoro() {
       setTimerText,
       setCurrentStateText,
       setStartStopButtonText,
-      setTimerTextColor
+      setTimerTextColor,
+      setCardTone: setTone,
+      setTimerProgress: setProgress
     });
     timerRef.current = timer;
     const settings = timer.getSettings();
@@ -96,15 +101,44 @@ function Pomodoro() {
     };
   }, []);
 
+  useEffect(() => {
+    const card = rootRef.current?.closest('section');
+    if (!(card instanceof HTMLElement)) {
+      return;
+    }
+    card.dataset.tone = tone;
+    return () => {
+      delete card.dataset.tone;
+    };
+  }, [tone]);
+
   return (
-    <div className={styles.rootDiv}>
+    <div className={styles.rootDiv} ref={rootRef}>
       <div className={styles.roundedCardDiv}>
-        <p
-          className={`${styles.timer} num`}
-          style={{color: timerTextColor, fontSize: `${timerTextSize}px`}}
-        >
-          {timerText}
-        </p>
+        <div className={styles.timerStack}>
+          <p
+            className={`${styles.timer} num`}
+            style={{color: timerTextColor, fontSize: `${timerTextSize}px`}}
+          >
+            {timerText}
+          </p>
+          <div
+            className={styles.track}
+            role="progressbar"
+            aria-label="구간 진행"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress * 100)}
+          >
+            <span
+              className={styles.fill}
+              style={{
+                width: `${Math.round(progress * 100)}%`,
+                background: timerTextColor
+              }}
+            />
+          </div>
+        </div>
         <div className={styles.focusIndex}>
           <h3>{currentStateText}</h3>
         </div>

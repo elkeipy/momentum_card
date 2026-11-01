@@ -11,6 +11,27 @@ test('renders the focus timer controls', () => {
   render(<Pomodoro />);
   expect(screen.getByRole('button', {name: 'Start'})).toBeInTheDocument();
   expect(screen.getByRole('button', {name: 'Stop Alarm'})).toBeInTheDocument();
+  expect(screen.getByRole('progressbar', {name: '구간 진행'})).toHaveAttribute(
+    'aria-valuenow',
+    '0'
+  );
+});
+
+test('paints the card for the current period', () => {
+  render(
+    <FeatureCard
+      id="pomodoro"
+      title="뽀모도로"
+      defaultLayout={{x: 24, y: 96, width: 400, height: 300, pinned: false}}
+      onClose={() => undefined}
+    >
+      <Pomodoro />
+    </FeatureCard>
+  );
+  expect(screen.getByRole('region', {name: '뽀모도로'})).toHaveAttribute(
+    'data-tone',
+    'focus'
+  );
 });
 
 test('keeps the focus history table in a scroll region', () => {

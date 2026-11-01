@@ -1,11 +1,15 @@
 import {publishNtfy} from './notify/ntfy';
 import {formatElapsed} from './pomodoro/formatElapsed';
 
+export type CardTone = 'focus' | 'break' | 'lost';
+
 interface PomodoroTimerProps {
   setTimerText: (timer: string) => void;
   setCurrentStateText: (index: string) => void;
   setStartStopButtonText: (text: string) => void;
   setTimerTextColor: (color: string) => void;
+  setCardTone?: (tone: CardTone) => void;
+  setTimerProgress?: (ratio: number) => void;
 }
 
 export type TimerSettings = {
@@ -56,6 +60,9 @@ class PomodoroTimer {
   private _checkAwayFromDeskTimerId: NodeJS.Timeout | null = null;
   private _awayFromDeskTimerId: NodeJS.Timeout | null = null;
   private _currentTimerMinutes: number = 25;
+  private _budgetSeconds: number = 25 * 60;
+  private _spanSeconds: number = 25 * 60;
+  private _paused: boolean = false;
   private _focusCount: number = 1;
   private _periodType: PeriodTypes = PeriodType.Break;
   private _timePeriod: Array<string> = [];
@@ -75,7 +82,7 @@ class PomodoroTimer {
   private readonly PERIOD_PATTERN: RegExp =
     /^(Focus|Break|Lost),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
   private readonly BTN_START_TEXT: string = 'Start';
-  private readonly BTN_STOP_TEXT: string = 'Stop';
+  private readonly BTN_PAUSE_TEXT: string = 'Pause';
   private readonly COLOR_FOCUS: string = 'var(--accent)';
   private readonly COLOR_UNMANAGED: string = 'var(--warning)';
   private readonly COLOR_BREAK: string = 'var(--text)';
@@ -89,12 +96,16 @@ class PomodoroTimer {
   private setCurrentStateText: (index: string) => void;
   private setStartStopButtonText: (text: string) => void;
   private setTimerTextColor: (color: string) => void;
+  private setCardTone?: (tone: CardTone) => void;
+  private setTimerProgress?: (ratio: number) => void;
 
-  constructor({setTimerText, setCurrentStateText, setStartStopButtonText, setTimerTextColor} : PomodoroTimerProps) {
+  constructor({setTimerText, setCurrentStateText, setStartStopButtonText, setTimerTextColor, setCardTone, setTimerProgress} : PomodoroTimerProps) {
     this.setTimerText = setTimerText;
     this.setCurrentStateText = setCurrentStateText;
     this.setStartStopButtonText = setStartStopButtonText;
     this.setTimerTextColor = setTimerTextColor;
+    this.setCardTone = setCardTone;
+    this.setTimerProgress = setTimerProgress;
 
     this.audio = new Audio(`${process.env.PUBLIC_URL}/alarmSound.mp3`);
 
@@ -334,7 +345,7 @@ class PomodoroTimer {
     }
     let curDate = new Date();
     let elapsed = curDate.getTime() - this._startDate.getTime();
-    let focusRemainSeconds = this._currentTimerMinutes * 60 - elapsed / 1000;
+    let focusRemainSeconds = this._budgetSeconds - elapsed / 1000;
 
     if (focusRemainSeconds < 0) {
       const startedAt = this._startDate;
@@ -352,17 +363,58 @@ class PomodoroTimer {
       this._currentTimerMinutes = this.getNextTimerMinutes(nextPeriodType, this._focusCount);
       this._awayFromDeskDate = new Date();
       this.setTimerTextColor(this.COLOR_UNMANAGED);
+      this.publishProgress(0);
       this.setCurrentStateText('Unmanaged');
       this.startAwayFromDeskTimer();
       this.awayFromDeskTimer();
       this.startCheckAwayFromDeskTimer();
       return;
     }
-    let result = this.convertSecondToTime(focusRemainSeconds);
+    this.renderRemain(focusRemainSeconds);
+  }
+
+  private remainingSeconds(): number {
+    if (this._startDate === null) {
+      return Math.max(0, this._budgetSeconds);
+    }
+    const elapsed = (Date.now() - this._startDate.getTime()) / 1000;
+    return Math.max(0, this._budgetSeconds - elapsed);
+  }
+
+  private renderRemain(seconds: number) {
+    const result = this.convertSecondToTime(Math.max(0, seconds));
     const min = String(result.minutes).padStart(2, '0');
     const sec = String(result.seconds).padStart(2, '0');
-
     this.setTimerText(`${min}:${sec}`);
+    this.publishProgress(seconds);
+  }
+
+  private publishProgress(remainSeconds: number) {
+    if (this._spanSeconds <= 0) {
+      this.setTimerProgress?.(0);
+      return;
+    }
+    const ratio = 1 - Math.max(0, remainSeconds) / this._spanSeconds;
+    this.setTimerProgress?.(Math.min(1, Math.max(0, ratio)));
+  }
+
+  private pauseTimer() {
+    this._budgetSeconds = this.remainingSeconds();
+    this.clearTimerInterval();
+    this._startDate = null;
+    this._paused = true;
+    this.renderRemain(this._budgetSeconds);
+    this.setStartStopButtonText(this.BTN_START_TEXT);
+  }
+
+  private resumeTimer() {
+    this.stopAudio();
+    this._paused = false;
+    this.clearCheckAwayFromDeskTimerInterval();
+    this.clearAwayFromDeskTimerInterval();
+    this._awayFromDeskDate = null;
+    this.startTimerInterval();
+    this.setStartStopButtonText(this.BTN_PAUSE_TEXT);
   }
 
   // 집중 상태에 따른 타이머 컬러설정
@@ -383,6 +435,13 @@ class PomodoroTimer {
         break;
     }
     this.setTimerTextColor(colorStr);
+    const tone: CardTone =
+      periodType === PeriodType.Focus
+        ? 'focus'
+        : periodType === PeriodType.Break
+          ? 'break'
+          : 'lost';
+    this.setCardTone?.(tone);
   }
 
   private getNextPeriodType(periodType: PeriodTypes): PeriodTypes {
@@ -407,6 +466,15 @@ class PomodoroTimer {
   }
 
   public startStop() {
+    if (this.isTimerRunning()) {
+      this.pauseTimer();
+      return;
+    }
+    if (this._paused) {
+      this.resumeTimer();
+      return;
+    }
+
     if (this._periodType === PeriodType.Lost && this._awayFromDeskDate) {
       let periodType = this.loadLatestPeriodType();
       if (periodType === PeriodType.Focus) {
@@ -420,12 +488,6 @@ class PomodoroTimer {
       this._periodType = this.loadLatestPeriodType();
     }
 
-    if (this.isTimerRunning()) {
-      this.stopTimerInterval();
-      this.setStartStopButtonText(this.BTN_START_TEXT);
-      return;
-    } 
-
     this.stopAudio();
 
     this._periodType = this.getNextPeriodType(this._periodType);
@@ -437,8 +499,9 @@ class PomodoroTimer {
     this.clearCheckAwayFromDeskTimerInterval();
     this.clearAwayFromDeskTimerInterval();
   
+    this._paused = false;
     this.startTimerInterval();
-    this.setStartStopButtonText(this._timerID !== null ? this.BTN_STOP_TEXT : this.BTN_START_TEXT);
+    this.setStartStopButtonText(this._timerID !== null ? this.BTN_PAUSE_TEXT : this.BTN_START_TEXT);
   }
 
   private stopTimerInterval() {
@@ -506,8 +569,12 @@ class PomodoroTimer {
   private resetTimer() {
     this.clearTimerInterval();
     this._startDate = null;
+    this._paused = false;
+    this._budgetSeconds = this._currentTimerMinutes * 60;
+    this._spanSeconds = this._budgetSeconds;
     const min = String(this._currentTimerMinutes).padStart(2, '0');
     this.setTimerText(`${min}:00`);
+    this.publishProgress(this._budgetSeconds);
   }
 
   private convertSecondToTime(sec: number) {

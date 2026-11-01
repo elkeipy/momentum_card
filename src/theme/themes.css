@@ -25,6 +25,9 @@
   --chart-1: #1f201d;
   --chart-2: #1b6e66;
   --chart-3: #8c8c88;
+  --tone-focus: #e5f5f1;
+  --tone-break: #e3eefb;
+  --tone-lost: #fdecea;
   --font: "Instrument Sans", "Segoe UI", sans-serif;
   --serif: "Instrument Serif", Georgia, serif;
   --fs-title: 24px;

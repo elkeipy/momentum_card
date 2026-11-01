@@ -16,6 +16,26 @@
   width: 100%;
 }
 
+.timerStack {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--raised);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
 .timer {
   flex: none;
   margin: 0;
