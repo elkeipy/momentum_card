@@ -55,6 +55,64 @@ export function stripDueTrigger(value: string): string {
   return value.replace(/@/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+export function stripEventTrigger(value: string): string {
+  return value.replace(/#/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+export function todayIso(now = new Date()): string {
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+const EVENT_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const EVENT_TIME_PATTERN = /^(\d{2}):(\d{2})$/;
+
+function compactDate(date: Date): string {
+  return todayIso(date).replace(/-/g, '');
+}
+
+/**
+ * Google Calendar template link. Opens a prefilled editor in whichever account
+ * the browser is signed in to. Without a time the event is all-day.
+ */
+export function calendarEventUrl(
+  title: string,
+  date: string,
+  time: string,
+  now = new Date()
+): string | null {
+  const text = sanitizeTodoText(stripEventTrigger(title));
+  const dateParts = EVENT_DATE_PATTERN.exec(date);
+  if (!text || !dateParts || date < todayIso(now)) {
+    return null;
+  }
+  const [year, month, day] = dateParts.slice(1).map(Number);
+  const start = new Date(year, month - 1, day);
+  if (compactDate(start) !== date.replace(/-/g, '')) {
+    return null;
+  }
+  let dates: string;
+  if (time === '') {
+    const next = new Date(year, month - 1, day + 1);
+    dates = `${compactDate(start)}/${compactDate(next)}`;
+  } else {
+    const timeParts = EVENT_TIME_PATTERN.exec(time);
+    if (!timeParts || Number(timeParts[1]) > 23 || Number(timeParts[2]) > 59) {
+      return null;
+    }
+    const begin = new Date(year, month - 1, day, Number(timeParts[1]), Number(timeParts[2]));
+    const end = new Date(begin.getTime() + 60 * 60 * 1000);
+    const stamp = (value: Date) =>
+      `${compactDate(value)}T${String(value.getHours()).padStart(2, '0')}${String(
+        value.getMinutes()
+      ).padStart(2, '0')}00`;
+    dates = `${stamp(begin)}/${stamp(end)}`;
+  }
+  const query = new URLSearchParams({action: 'TEMPLATE', text, dates});
+  return `https://calendar.google.com/calendar/render?${query.toString()}`;
+}
+
 export function minDueHour(nowMinutes: number): number {
   return Math.floor(nowMinutes / 60);
 }

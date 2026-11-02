@@ -6,6 +6,7 @@ import {
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
 import {
   addTodo,
+  calendarEventUrl,
   clampDueParts,
   currentExactMinutes,
   currentMinutes,
@@ -19,7 +20,8 @@ import {
   readTodoList,
   removeTodo,
   TODO_STORAGE_KEY,
-  toggleTodo
+  toggleTodo,
+  todayIso
 } from '../todos/todos';
 import AlarmDialog from './AlarmDialog';
 import DisplaySettingsFields from './DisplaySettingsFields';
@@ -52,7 +54,10 @@ export default function TodoCard() {
   const nowMinutes = currentMinutes(now);
   const nowExact = currentExactMinutes(now);
   const remaining = items.filter(item => !item.done).length;
-  const showDue = draft.includes('@');
+  const showEvent = draft.includes('#');
+  const showDue = draft.includes('@') && !showEvent;
+  const [eventDate, setEventDate] = useState(() => todayIso());
+  const [eventTime, setEventTime] = useState('');
   const ringing = dueTodos(items, nowMinutes);
   const hourMin = minDueHour(nowMinutes);
   const minuteMin = minDueMinute(dueHour, nowMinutes);
@@ -80,6 +85,10 @@ export default function TodoCard() {
   }, [showDue, dueHour, dueMinute, nowMinutes]);
 
   const onDraftChange = (value: string) => {
+    if (!draft.includes('#') && value.includes('#')) {
+      setEventDate(todayIso());
+      setEventTime('');
+    }
     if (!draft.includes('@') && value.includes('@')) {
       const now = currentMinutes();
       const next = clampDueParts(0, 0, now);
@@ -96,6 +105,15 @@ export default function TodoCard() {
   };
 
   const saveItem = () => {
+    if (showEvent) {
+      const url = calendarEventUrl(draft, eventDate, eventTime);
+      if (url === null) {
+        return;
+      }
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setDraft('');
+      return;
+    }
     const clamped = showDue
       ? clampDueParts(dueHour, dueMinute, currentMinutes())
       : null;
@@ -136,12 +154,39 @@ export default function TodoCard() {
             id="new-todo"
             value={draft}
             onChange={event => onDraftChange(event.target.value)}
-            placeholder="오늘 끝낼 일 @시간"
+            placeholder="오늘 끝낼 일 @시간 · 일정 #날짜"
           />
           <button className="app-button" type="submit">
-            추가
+            {showEvent ? '캘린더에 추가' : '추가'}
           </button>
         </div>
+        {showEvent ? (
+          <div className={styles.due}>
+            <label>
+              날짜
+              <input
+                type="date"
+                min={todayIso(now)}
+                value={eventDate}
+                aria-label="일정 날짜"
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setEventDate(event.target.value)
+                }
+              />
+            </label>
+            <label>
+              시각
+              <input
+                type="time"
+                value={eventTime}
+                aria-label="일정 시각 (비우면 종일)"
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setEventTime(event.target.value)
+                }
+              />
+            </label>
+          </div>
+        ) : null}
         {showDue ? (
           <div className={styles.due}>
             <label>

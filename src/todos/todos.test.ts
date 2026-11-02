@@ -1,5 +1,6 @@
 import {
   addTodo,
+  calendarEventUrl,
   clampDueParts,
   dueProgress,
   dueTodos,
@@ -96,4 +97,41 @@ test('clamps due parts so they cannot be earlier than now', () => {
     minute: 30
   });
   expect(clampDueParts(11, 5, 10 * 60 + 30)).toEqual({hour: 11, minute: 5});
+});
+
+describe('calendarEventUrl', () => {
+  const now = new Date(2026, 10, 2, 9, 0);
+  const url = (title: string, date: string, time: string) => {
+    const result = calendarEventUrl(title, date, time, now);
+    return result === null ? null : new URL(result);
+  };
+
+  test('makes an all-day event ending the next day', () => {
+    const link = url('치과 #', '2026-11-30', '');
+    expect(link?.origin).toBe('https://calendar.google.com');
+    expect(link?.searchParams.get('action')).toBe('TEMPLATE');
+    expect(link?.searchParams.get('text')).toBe('치과');
+    expect(link?.searchParams.get('dates')).toBe('20261130/20261201');
+  });
+
+  test('makes a one hour event from the given time', () => {
+    expect(url('회의', '2026-11-05', '14:30')?.searchParams.get('dates')).toBe(
+      '20261105T143000/20261105T153000'
+    );
+    expect(url('회의', '2026-11-05', '23:30')?.searchParams.get('dates')).toBe(
+      '20261105T233000/20261106T003000'
+    );
+  });
+
+  test('rejects past dates, impossible dates, bad times and empty titles', () => {
+    expect(url('x', '2026-11-01', '')).toBeNull();
+    expect(url('x', '2026-02-31', '')).toBeNull();
+    expect(url('x', '2026-11-05', '25:00')).toBeNull();
+    expect(url(' # ', '2026-11-05', '')).toBeNull();
+    expect(url('x', '', '')).toBeNull();
+  });
+
+  test('allows today', () => {
+    expect(url('x', '2026-11-02', '')).not.toBeNull();
+  });
 });

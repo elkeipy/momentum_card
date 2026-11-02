@@ -94,3 +94,19 @@ test('stacks a toast for each overdue todo', () => {
   expect(screen.getByRole('status', {name: '할 일 알람 call'})).toBeInTheDocument();
   expect(screen.getByRole('status', {name: '할 일 알람 mail'})).toBeInTheDocument();
 });
+
+test('opens a prefilled Google Calendar link for a # entry without adding a todo', () => {
+  const open = jest.spyOn(window, 'open').mockImplementation(() => null);
+  render(<TodoCard />);
+  fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: '치과 #'}});
+  fireEvent.change(screen.getByLabelText('일정 날짜'), {target: {value: '2999-01-02'}});
+  fireEvent.click(screen.getByRole('button', {name: '캘린더에 추가'}));
+
+  expect(open).toHaveBeenCalledTimes(1);
+  const link = new URL(String(open.mock.calls[0][0]));
+  expect(link.searchParams.get('text')).toBe('치과');
+  expect(link.searchParams.get('dates')).toBe('29990102/29990103');
+  expect(open.mock.calls[0][2]).toBe('noopener,noreferrer');
+  expect(screen.getByText('할 일을 추가하면 여기에 쌓인다.')).toBeInTheDocument();
+  expect(screen.getByLabelText('할 일 추가')).toHaveValue('');
+});

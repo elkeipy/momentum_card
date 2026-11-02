@@ -51,6 +51,7 @@
 
 .due {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -63,6 +64,7 @@
 
 .due input {
   width: 64px;
+  min-width: 0;
   height: var(--control-height);
   padding: 0 8px;
   color: inherit;
@@ -71,6 +73,11 @@
   background: var(--surface);
   border: 1px solid var(--control);
   border-radius: var(--radius-control);
+}
+
+.due input[type='date'],
+.due input[type='time'] {
+  width: auto;
 }
 
 .dueStamp {
