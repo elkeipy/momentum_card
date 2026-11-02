@@ -8,7 +8,7 @@ import {
 test('keeps a size inside the allowed range', () => {
   expect(parseTimerTextSize(64)).toBe(64);
   expect(parseTimerTextSize(23)).toBe(TIMER_TEXT_SIZE_DEFAULT);
-  expect(parseTimerTextSize(97)).toBe(TIMER_TEXT_SIZE_DEFAULT);
+  expect(parseTimerTextSize(129)).toBe(TIMER_TEXT_SIZE_DEFAULT);
   expect(parseTimerTextSize('48')).toBe(TIMER_TEXT_SIZE_DEFAULT);
 });
 

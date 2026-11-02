@@ -171,6 +171,7 @@ body {
 .desk {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-rows: 1fr auto;
   gap: var(--gap);
   align-items: stretch;
   padding: 8px var(--pad) 40px;
@@ -178,6 +179,8 @@ body {
 
 .pomo-slot {
   display: flex;
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
 }
 
@@ -186,7 +189,8 @@ body {
 }
 
 .band {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  grid-row: 2;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--gap);
@@ -199,6 +203,8 @@ body {
 
 .stack {
   display: flex;
+  grid-column: 2;
+  grid-row: 1 / span 2;
   flex-direction: column;
   gap: var(--gap);
   min-width: 0;
@@ -296,10 +302,19 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .desk {
+    grid-template-rows: none;
+  }
+
   .stack {
     display: flex;
     grid-column: 1 / -1;
+    grid-row: auto;
     height: auto;
+  }
+
+  .band {
+    grid-row: auto;
   }
 
   .stack > :last-child {
@@ -308,9 +323,7 @@ body {
 
   .pomo-slot {
     grid-column: 1 / -1;
-  }
-
-  .pomo-slot {
+    grid-row: auto;
     order: -1;
   }
 

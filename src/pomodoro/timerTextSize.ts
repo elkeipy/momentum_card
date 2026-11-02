@@ -1,7 +1,7 @@
 export const TIMER_TEXT_SIZE_KEY = 'PomodoroTimerTextSize';
 export const TIMER_TEXT_SIZE_MIN = 24;
-export const TIMER_TEXT_SIZE_MAX = 96;
-export const TIMER_TEXT_SIZE_DEFAULT = 48;
+export const TIMER_TEXT_SIZE_MAX = 128;
+export const TIMER_TEXT_SIZE_DEFAULT = 80;
 
 export function parseTimerTextSize(value: unknown): number {
   if (

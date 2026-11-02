@@ -48,6 +48,21 @@
   gap: 4px;
 }
 
+@media (hover: hover) {
+  .actions :global(.icon-button) {
+    color: var(--muted);
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .actions :global(.icon-button:hover),
+  .actions :global(.icon-button:focus-visible),
+  .actions :global(.icon-button[aria-pressed='true']) {
+    color: var(--text);
+    background: var(--active);
+  }
+}
+
 .title {
   margin: 0;
   font-family: var(--font);

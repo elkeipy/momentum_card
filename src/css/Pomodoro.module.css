@@ -11,7 +11,7 @@
   flex: 1 1 0;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 20px;
   min-height: 0;
   width: 100%;
 }
@@ -20,11 +20,12 @@
   display: flex;
   flex: none;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+  margin-top: auto;
 }
 
 .track {
-  height: 8px;
+  height: 10px;
   overflow: hidden;
   border-radius: 999px;
   background: var(--raised);
@@ -42,8 +43,8 @@
   color: var(--text);
   font-size: var(--fs-kpi);
   font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  letter-spacing: -0.03em;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -54,12 +55,14 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-top: -6px;
 }
 
 .focusIndex h2,
 .focusIndex h3 {
   margin: 0;
   font-family: var(--font);
+  color: var(--muted);
   font-size: var(--fs-body);
   font-weight: 500;
   line-height: 20px;
@@ -71,6 +74,13 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+  margin-bottom: auto;
+}
+
+.timerButtonDiv button {
+  min-width: 112px;
+  height: 44px;
+  font-size: 16px;
 }
 
 .title {
