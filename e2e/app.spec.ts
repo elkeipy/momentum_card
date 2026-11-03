@@ -198,6 +198,81 @@ test('keeps action buttons and timer settings above the cards', async ({page}) =
   expect(timerSize).toBe('64px');
 });
 
+test('changes only the pomodoro history height with the card', async ({page}) => {
+  await page.setViewportSize({width: 1280, height: 900});
+  await page.goto('/');
+  const card = page.getByRole('region', {name: '뽀모도로'});
+  const timer = card.getByText('25:00');
+  const history = card.locator('[class*="empty"], [class*="tableWrap"]');
+  const beforeTimer = await timer.boundingBox();
+  const beforeHistory = await history.boundingBox();
+  const handle = card.locator('[class*="resize"]');
+  const handleBox = await handle.boundingBox();
+  if (!beforeTimer || !beforeHistory || !handleBox) {
+    throw new Error('pomodoro geometry missing');
+  }
+  const gripX = handleBox.x + handleBox.width / 2;
+  const gripY = handleBox.y + handleBox.height / 2;
+  await page.mouse.move(gripX, gripY);
+  await page.mouse.down();
+  await page.mouse.move(gripX, gripY - 160);
+  await page.mouse.up();
+  const shrunkTimer = await timer.boundingBox();
+  const shrunkHistory = await history.boundingBox();
+  if (!shrunkTimer || !shrunkHistory) {
+    throw new Error('pomodoro geometry missing after shrink');
+  }
+  expect(Math.abs(shrunkTimer.height - beforeTimer.height)).toBeLessThan(2);
+  expect(shrunkHistory.height).toBeLessThan(beforeHistory.height - 80);
+  const shrunkHandle = await handle.boundingBox();
+  if (!shrunkHandle) {
+    throw new Error('resize handle missing');
+  }
+  const growX = shrunkHandle.x + shrunkHandle.width / 2;
+  const growY = shrunkHandle.y + shrunkHandle.height / 2;
+  await page.mouse.move(growX, growY);
+  await page.mouse.down();
+  await page.mouse.move(growX, growY + 160);
+  await page.mouse.up();
+  const grownTimer = await timer.boundingBox();
+  const grownHistory = await history.boundingBox();
+  if (!grownTimer || !grownHistory) {
+    throw new Error('pomodoro geometry missing after grow');
+  }
+  expect(Math.abs(grownTimer.height - beforeTimer.height)).toBeLessThan(2);
+  expect(grownHistory.height).toBeGreaterThan(shrunkHistory.height + 80);
+});
+
+test('switches the board theme and restores the default', async ({page}) => {
+  await page.goto('/');
+  const theme = page.getByLabel('테마');
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
+  await theme.selectOption('flat');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'flat');
+  const radius = await page
+    .getByRole('button', {name: 'Start', exact: true})
+    .evaluate(element => getComputedStyle(element).borderRadius);
+  expect(radius).toBe('0px');
+  await theme.selectOption('icons3d');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'icons3d');
+  await theme.selectOption('default');
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
+  const stored = await page.evaluate(() => localStorage.getItem('momentum-theme'));
+  expect(stored).toBe('default');
+});
+
+test('renames a todo by double clicking its text', async ({page}) => {
+  await page.goto('/');
+  const card = page.getByRole('region', {name: '할 일'});
+  await card.getByLabel('할 일 추가').fill('write tests');
+  await card.getByRole('button', {name: '추가'}).click();
+  await card.getByText('write tests').dblclick();
+  const field = card.getByRole('textbox', {name: 'write tests 수정'});
+  await field.fill('rewrite tests');
+  await field.press('Enter');
+  await expect(card.getByText('rewrite tests')).toBeVisible();
+});
+
 test('adds and completes a todo on the board', async ({page}) => {
   await page.goto('/');
   const card = page.getByRole('region', {name: '할 일'});

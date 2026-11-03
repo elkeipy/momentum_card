@@ -7,6 +7,7 @@ import Weather from '../components/Weather';
 import TodoCard from '../components/TodoCard';
 import WordCard from '../components/WordCard';
 import NtfySettings from '../notify/NtfySettings';
+import {applyTheme, isThemeId, readTheme, THEMES, type ThemeId} from '../theme/theme';
 import type {CardLayout} from '../featureCard/cardLayout';
 import {
   readTodayFocusHistory,
@@ -121,6 +122,7 @@ function TodayFact() {
 export default function Board() {
   const [visible, setVisible] = useState<CardId[]>(() => readVisibleCards(localStorage));
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<ThemeId>(() => readTheme(localStorage));
   const [frontNonce, setFrontNonce] = useState<Partial<Record<CardId, number>>>({});
   const cardById = (id: CardId) => CARDS.find(card => card.id === id);
 
@@ -176,6 +178,26 @@ export default function Board() {
           <TodayFact />
         </div>
         <div className="card-adder">
+          <label className="theme-pick">
+            테마
+            <select
+              value={theme}
+              onChange={event => {
+                const next = event.target.value;
+                if (!isThemeId(next)) {
+                  return;
+                }
+                setTheme(next);
+                applyTheme(next, localStorage);
+              }}
+            >
+              {THEMES.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <NtfySettings />
           <button
             type="button"

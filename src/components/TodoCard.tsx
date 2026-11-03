@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React, {ChangeEvent, useEffect, useRef, useState} from 'react';
 import {
   FONT_SIZE_DEFAULT,
   REFRESH_SEC_DEFAULT
@@ -19,6 +19,7 @@ import {
   parseDueMinutes,
   readTodoList,
   removeTodo,
+  renameTodo,
   TODO_STORAGE_KEY,
   toggleTodo,
   todayIso
@@ -46,6 +47,9 @@ export default function TodoCard() {
   const settings = useDisplaySettings('todos', TODO_DEFAULTS);
   const [items, setItems] = useState(() => readTodoList(localStorage));
   const [draft, setDraft] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState('');
+  const skipEditSave = useRef(false);
   const [now, setNow] = useState(() => new Date());
   const [dueHour, setDueHour] = useState(() => minDueHour(currentMinutes()));
   const [dueMinute, setDueMinute] = useState(
@@ -136,6 +140,30 @@ export default function TodoCard() {
 
   const ackAlarm = (id: string) => {
     setItems(current => markAlarmed(current, id));
+  };
+
+  const beginEdit = (id: string, text: string) => {
+    skipEditSave.current = false;
+    setEditingId(id);
+    setEditDraft(text);
+  };
+
+  const cancelEdit = () => {
+    skipEditSave.current = true;
+    setEditingId(null);
+  };
+
+  const commitEdit = () => {
+    if (skipEditSave.current) {
+      skipEditSave.current = false;
+      return;
+    }
+    if (editingId === null) {
+      return;
+    }
+    const id = editingId;
+    setItems(current => renameTodo(current, id, editDraft));
+    setEditingId(null);
   };
 
   return (
@@ -240,19 +268,42 @@ export default function TodoCard() {
             return (
               <li key={item.id}>
                 <div className={styles.itemRow}>
-                  <label className={styles.check}>
+                  <div className={styles.check}>
                     <input
                       type="checkbox"
+                      aria-label={item.text}
                       checked={item.done}
                       onChange={() => setItems(current => toggleTodo(current, item.id))}
                     />
-                    <span className={item.done ? `${styles.label} ${styles.done}` : styles.label}>
-                      {item.text}
-                    </span>
+                    {editingId === item.id ? (
+                      <input
+                        className={styles.edit}
+                        aria-label={`${item.text} 수정`}
+                        value={editDraft}
+                        autoFocus
+                        onChange={event => setEditDraft(event.target.value)}
+                        onBlur={commitEdit}
+                        onKeyDown={event => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            event.currentTarget.blur();
+                          } else if (event.key === 'Escape') {
+                            cancelEdit();
+                          }
+                        }}
+                      />
+                    ) : (
+                      <span
+                        className={item.done ? `${styles.label} ${styles.done}` : styles.label}
+                        onDoubleClick={() => beginEdit(item.id, item.text)}
+                      >
+                        {item.text}
+                      </span>
+                    )}
                     {due !== null ? (
                       <span className={styles.dueStamp}>{formatDueMinutes(due)}</span>
                     ) : null}
-                  </label>
+                  </div>
                   <button
                     className="text-button"
                     type="button"

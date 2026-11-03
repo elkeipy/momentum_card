@@ -49,6 +49,9 @@
   --card-blur: none;
   --button-primary-bg: var(--primary);
   --button-primary-fg: var(--primary-ink);
+  --button-primary-hover: #000000;
+  --button-shadow: none;
+  --dialog-shadow: 0 8px 24px rgba(31, 32, 29, 0.12);
   --button-secondary-bg: var(--surface);
   --button-secondary-fg: var(--text);
   --button-border: 1px solid var(--control);
@@ -153,9 +156,10 @@ body {
   padding: 8px;
   color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: 0 8px 24px rgba(31, 32, 29, 0.12);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--dialog-shadow);
+  backdrop-filter: var(--card-blur);
 }
 
 .card-menu p {
@@ -226,6 +230,7 @@ body {
   cursor: pointer;
   border-radius: var(--button-radius);
   border: var(--button-border);
+  box-shadow: var(--button-shadow);
 }
 
 .app-button,
@@ -246,7 +251,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: #000000;
+  background: var(--button-primary-hover);
 }
 
 .icon-button {
@@ -261,6 +266,7 @@ body {
   background: var(--surface);
   border: var(--button-border);
   border-radius: var(--button-radius);
+  box-shadow: var(--button-shadow);
 }
 
 .icon-button:hover,
@@ -334,6 +340,26 @@ body {
   }
 }
 
+.theme-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+
+.theme-pick select {
+  height: var(--control-height);
+  padding: 0 12px;
+  color: var(--text);
+  font: inherit;
+  background: var(--surface);
+  border: var(--button-border);
+  border-radius: var(--button-radius);
+  box-shadow: var(--button-shadow);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app-button:active,
   .btn-primary:active,
@@ -341,4 +367,269 @@ body {
   .icon-button:active {
     transform: none;
   }
+}
+
+[data-theme='skeu'] {
+  --ground: #d9c3a6;
+  --surface: #f7f1e7;
+  --raised: #efe4d2;
+  --active: #e6d5ba;
+  --border: #b08968;
+  --rule: #e4d3ba;
+  --control: #a87858;
+  --text: #2b2118;
+  --muted: #6a5344;
+  --faint: #6a5344;
+  --accent: #1f6b4a;
+  --primary: #6a3b22;
+  --primary-ink: #fff8f2;
+  --tone-focus: #e7f3ea;
+  --tone-break: #e7eef8;
+  --tone-lost: #f8e6e1;
+  --radius-card: 16px;
+  --radius-control: 10px;
+  --card-radius: 16px;
+  --button-radius: 10px;
+  --card-border: 1px solid #b08968;
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 8px 16px rgba(90, 55, 25, 0.18);
+  --button-primary-bg: linear-gradient(#8d5338, #6a3b22);
+  --button-primary-fg: #fff8f2;
+  --button-primary-hover: #5a311c;
+  --button-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 2px rgba(70, 40, 20, 0.35);
+  --dialog-bg: #f7f1e7;
+  --dialog-shadow: 0 16px 32px rgba(70, 40, 20, 0.28);
+}
+
+[data-theme='flat'] {
+  --ground: #ffffff;
+  --surface: #ffffff;
+  --raised: #f2f2f2;
+  --active: #e6e6e6;
+  --border: #111111;
+  --rule: #111111;
+  --control: #111111;
+  --text: #111111;
+  --muted: #444444;
+  --faint: #444444;
+  --accent: #0b57d0;
+  --primary: #111111;
+  --primary-ink: #ffffff;
+  --tone-focus: #e8f0ff;
+  --tone-break: #f2f2f2;
+  --tone-lost: #ffe8e8;
+  --radius-card: 0px;
+  --radius-control: 0px;
+  --card-radius: 0px;
+  --button-radius: 0px;
+  --card-border: 2px solid #111111;
+  --card-shadow: none;
+  --card-blur: none;
+  --button-border: 2px solid #111111;
+  --button-primary-hover: #333333;
+  --button-shadow: none;
+  --dialog-shadow: none;
+  --font: "Segoe UI", sans-serif;
+  --serif: "Segoe UI", sans-serif;
+}
+
+[data-theme='material'] {
+  --ground: #f5f5f5;
+  --surface: #ffffff;
+  --raised: #eeeeee;
+  --active: #e8def8;
+  --border: #e0e0e0;
+  --rule: #eeeeee;
+  --control: #cac4d0;
+  --text: #1c1b1f;
+  --muted: #49454f;
+  --faint: #49454f;
+  --accent: #006a6a;
+  --primary: #6750a4;
+  --primary-ink: #ffffff;
+  --tone-focus: #e8f5f3;
+  --tone-break: #f3edf7;
+  --tone-lost: #f9dedc;
+  --radius-card: 12px;
+  --radius-control: 20px;
+  --card-radius: 12px;
+  --button-radius: 20px;
+  --card-border: 0 solid transparent;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --button-primary-bg: #6750a4;
+  --button-primary-fg: #ffffff;
+  --button-primary-hover: #5a4490;
+  --button-border: 0 solid transparent;
+  --button-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --dialog-bg: #ffffff;
+  --dialog-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --font: "Segoe UI", Roboto, sans-serif;
+  --serif: "Segoe UI", Roboto, sans-serif;
+}
+
+[data-theme='neu'] {
+  --ground: #e6ebf2;
+  --surface: #e6ebf2;
+  --raised: #e6ebf2;
+  --active: #dde3ec;
+  --border: transparent;
+  --rule: #d5dbe4;
+  --control: transparent;
+  --text: #2a313a;
+  --muted: #4e5966;
+  --faint: #4e5966;
+  --accent: #2f6280;
+  --primary: #2f6280;
+  --primary-ink: #ffffff;
+  --tone-focus: #dceee8;
+  --tone-break: #dde6f2;
+  --tone-lost: #f3e4e2;
+  --card-border: none;
+  --card-shadow: 8px 8px 16px #c8d0da, -8px -8px 16px #ffffff;
+  --button-border: none;
+  --button-primary-bg: #2f6280;
+  --button-primary-fg: #ffffff;
+  --button-primary-hover: #274f68;
+  --button-shadow: 6px 6px 12px #c8d0da, -6px -6px 12px #ffffff;
+  --dialog-bg: #e6ebf2;
+  --dialog-shadow: 8px 8px 16px #c8d0da, -8px -8px 16px #ffffff;
+  --overlay: rgba(42, 49, 58, 0.28);
+}
+
+[data-theme='glass'] {
+  --ground: linear-gradient(160deg, #7ec8c3 0%, #f3c6d4 46%, #c9d4f5 100%);
+  --surface: rgba(255, 255, 255, 0.55);
+  --raised: rgba(255, 255, 255, 0.35);
+  --active: rgba(255, 255, 255, 0.72);
+  --border: rgba(255, 255, 255, 0.7);
+  --rule: rgba(255, 255, 255, 0.45);
+  --control: rgba(255, 255, 255, 0.8);
+  --text: #1c2422;
+  --muted: #3e4a47;
+  --faint: #3e4a47;
+  --accent: #0f6e62;
+  --primary: #16302c;
+  --primary-ink: #ffffff;
+  --tone-focus: rgba(229, 245, 241, 0.62);
+  --tone-break: rgba(227, 238, 251, 0.62);
+  --tone-lost: rgba(253, 236, 234, 0.7);
+  --card-border: 1px solid rgba(255, 255, 255, 0.7);
+  --card-shadow: 0 10px 30px rgba(40, 60, 70, 0.12);
+  --card-blur: blur(16px);
+  --button-secondary-bg: rgba(255, 255, 255, 0.45);
+  --button-primary-hover: #0c2420;
+  --dialog-bg: rgba(255, 255, 255, 0.72);
+  --dialog-shadow: 0 16px 40px rgba(40, 60, 70, 0.18);
+  --overlay: rgba(22, 48, 44, 0.28);
+}
+
+[data-theme='clay'] {
+  --ground: #f6e3ef;
+  --surface: #fff7fb;
+  --raised: #f8e4ef;
+  --active: #f3d5e6;
+  --border: transparent;
+  --rule: #f0d0e2;
+  --control: #e7bfd4;
+  --text: #3a2030;
+  --muted: #7a4d63;
+  --faint: #7a4d63;
+  --accent: #c2185b;
+  --primary: #c2185b;
+  --primary-ink: #ffffff;
+  --tone-focus: #e7f6ef;
+  --tone-break: #f3e8fb;
+  --tone-lost: #fde7e4;
+  --radius-card: 28px;
+  --radius-control: 999px;
+  --card-radius: 28px;
+  --button-radius: 999px;
+  --card-border: none;
+  --card-shadow: 0 8px 0 #e7c6da, 0 16px 24px rgba(160, 90, 120, 0.16);
+  --button-border: none;
+  --button-primary-bg: #e84b86;
+  --button-primary-fg: #ffffff;
+  --button-primary-hover: #d63a76;
+  --button-shadow: 0 4px 0 #c9a0b8;
+  --dialog-bg: #fff7fb;
+  --dialog-shadow: 0 8px 0 #e7c6da;
+}
+
+[data-theme='brutal'] {
+  --ground: #fff4cc;
+  --surface: #ffffff;
+  --raised: #fff4cc;
+  --active: #ffe14a;
+  --border: #111111;
+  --rule: #111111;
+  --control: #111111;
+  --text: #111111;
+  --muted: #333333;
+  --faint: #333333;
+  --accent: #e10600;
+  --primary: #111111;
+  --primary-ink: #ffffff;
+  --positive: #087a2a;
+  --negative: #e10600;
+  --warning: #9a3412;
+  --tone-focus: #d8ffe4;
+  --tone-break: #d6ecff;
+  --tone-lost: #ffd0d0;
+  --radius-card: 0px;
+  --radius-control: 0px;
+  --card-radius: 0px;
+  --button-radius: 0px;
+  --card-border: 3px solid #111111;
+  --card-shadow: 5px 5px 0 #111111;
+  --button-border: 3px solid #111111;
+  --button-primary-bg: #111111;
+  --button-primary-fg: #ffffff;
+  --button-primary-hover: #333333;
+  --button-secondary-bg: #ffe14a;
+  --button-shadow: 3px 3px 0 #111111;
+  --dialog-bg: #ffffff;
+  --dialog-shadow: 6px 6px 0 #111111;
+  --font: "Arial Black", "Segoe UI", sans-serif;
+  --serif: "Arial Black", "Segoe UI", sans-serif;
+}
+
+[data-theme='liquid'] {
+  --ground: radial-gradient(900px 480px at 8% -10%, #d7f6ff 0%, transparent 55%),
+    radial-gradient(800px 420px at 100% 0%, #f6d7ff 0%, transparent 50%),
+    #d5e6f4;
+  --surface: rgba(255, 255, 255, 0.38);
+  --raised: rgba(255, 255, 255, 0.28);
+  --active: rgba(255, 255, 255, 0.55);
+  --border: rgba(255, 255, 255, 0.72);
+  --rule: rgba(255, 255, 255, 0.4);
+  --control: rgba(255, 255, 255, 0.8);
+  --text: #1b2833;
+  --muted: #3d5160;
+  --faint: #3d5160;
+  --accent: #0f6f86;
+  --primary: #143042;
+  --primary-ink: #ffffff;
+  --tone-focus: rgba(226, 246, 242, 0.55);
+  --tone-break: rgba(226, 238, 252, 0.55);
+  --tone-lost: rgba(252, 232, 230, 0.62);
+  --radius-card: 28px;
+  --card-radius: 28px;
+  --button-radius: 999px;
+  --card-border: 1px solid rgba(255, 255, 255, 0.75);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 32px rgba(40, 70, 100, 0.14);
+  --card-blur: blur(22px) saturate(1.5);
+  --button-secondary-bg: rgba(255, 255, 255, 0.4);
+  --button-primary-hover: #0d2433;
+  --dialog-bg: rgba(255, 255, 255, 0.62);
+  --dialog-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 16px 40px rgba(40, 70, 100, 0.18);
+  --overlay: rgba(20, 48, 66, 0.28);
+}
+
+[data-theme='icons3d'] {
+  --card-shadow: 0 10px 18px rgba(31, 32, 29, 0.1);
+}
+
+[data-theme='icons3d'] .icon-button svg,
+[data-theme='icons3d'] .brand svg {
+  filter: drop-shadow(0.5px 0.5px 0 rgba(255, 255, 255, 0.95))
+    drop-shadow(1px 2px 0 rgba(31, 32, 29, 0.45));
 }

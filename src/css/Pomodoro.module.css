@@ -21,7 +21,6 @@
   flex: none;
   flex-direction: column;
   gap: 14px;
-  margin-top: auto;
 }
 
 .track {
@@ -74,7 +73,6 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin-bottom: auto;
 }
 
 .timerButtonDiv button {

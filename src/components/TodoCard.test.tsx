@@ -34,6 +34,24 @@ test('adds, completes, and removes a todo', () => {
   expect(screen.getByText('할 일을 추가하면 여기에 쌓인다.')).toBeInTheDocument();
 });
 
+test('renames a todo from a double click and keeps the old text on escape', () => {
+  render(<TodoCard />);
+  fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: 'write tests'}});
+  fireEvent.click(screen.getByRole('button', {name: '추가'}));
+  fireEvent.doubleClick(screen.getByText('write tests'));
+  const field = screen.getByRole('textbox', {name: 'write tests 수정'});
+  fireEvent.change(field, {target: {value: 'rewrite tests'}});
+  fireEvent.keyDown(field, {key: 'Enter'});
+  expect(screen.getByText('rewrite tests')).toBeInTheDocument();
+
+  fireEvent.doubleClick(screen.getByText('rewrite tests'));
+  const again = screen.getByRole('textbox', {name: 'rewrite tests 수정'});
+  fireEvent.change(again, {target: {value: 'nope'}});
+  fireEvent.keyDown(again, {key: 'Escape'});
+  expect(screen.getByText('rewrite tests')).toBeInTheDocument();
+  expect(screen.queryByRole('textbox', {name: 'rewrite tests 수정'})).not.toBeInTheDocument();
+});
+
 test('shows hour and minute fields after @ and rings when due', () => {
   jest.useFakeTimers();
   jest.setSystemTime(new Date('2026-10-28T10:00:00'));

@@ -11,6 +11,7 @@ import {
   parseTodoItem,
   readTodoList,
   removeTodo,
+  renameTodo,
   sanitizeTodoText,
   stripDueTrigger,
   toggleTodo
@@ -43,6 +44,8 @@ test('adds, toggles, and removes todos without growing past the cap', () => {
   expect(addTodo(added, '   ')).toEqual(added);
   expect(toggleTodo(added, 'id-1')[0].done).toBe(true);
   expect(removeTodo(added, 'id-1')).toEqual([]);
+  expect(renameTodo(added, 'id-1', '  ship later  ')[0].text).toBe('ship later');
+  expect(renameTodo(added, 'id-1', '   ')).toEqual(added);
   const full = Array.from({length: 40}, (_, index) => ({
     id: `n${index}`,
     text: 'task',

@@ -246,3 +246,11 @@ export function toggleTodo(items: TodoItem[], id: string): TodoItem[] {
 export function removeTodo(items: TodoItem[], id: string): TodoItem[] {
   return items.filter(item => item.id !== id);
 }
+
+export function renameTodo(items: TodoItem[], id: string, value: string): TodoItem[] {
+  const text = sanitizeTodoText(value);
+  if (!text) {
+    return items;
+  }
+  return items.map(item => (item.id === id ? {...item, text} : item));
+}

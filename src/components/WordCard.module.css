@@ -46,7 +46,7 @@
   background: var(--surface);
   border: 1px solid var(--control);
   border-right: 0;
-  border-radius: 999px 0 0 999px;
+  border-radius: var(--button-radius) 0 0 var(--button-radius);
 }
 
 .join input::placeholder {
@@ -54,7 +54,7 @@
 }
 
 .join button {
-  border-radius: 0 999px 999px 0;
+  border-radius: 0 var(--button-radius) var(--button-radius) 0;
 }
 
 .listToggle {
