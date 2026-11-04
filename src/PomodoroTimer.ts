@@ -23,8 +23,10 @@ const PeriodType = {
   Focus: "Focus", // Focus Time
   Break: "Break", // Break Time
   Lost: "Lost",  // Lost Time
+  Pause: "Pause", // Pause during Focus/Break
 } as const;
 type PeriodTypes = (typeof PeriodType)[keyof typeof PeriodType];
+type ActivePeriodTypes = typeof PeriodType.Focus | typeof PeriodType.Break | typeof PeriodType.Lost;
 
 type PeriodData = {
   periodType: PeriodTypes;
@@ -63,8 +65,10 @@ class PomodoroTimer {
   private _budgetSeconds: number = 25 * 60;
   private _spanSeconds: number = 25 * 60;
   private _paused: boolean = false;
+  private _pauseStartedAt: Date | null = null;
+  private _termChunks: string[] = [];
   private _focusCount: number = 1;
-  private _periodType: PeriodTypes = PeriodType.Break;
+  private _periodType: ActivePeriodTypes = PeriodType.Break;
   private _timePeriod: Array<string> = [];
   
   private readonly FOCUS_MIN: number = 25;
@@ -80,7 +84,7 @@ class PomodoroTimer {
   private readonly TIMER_TICK_MS: number = 300;
   private readonly AWAY_CHECK_MS: number = 60 * 1000;
   private readonly PERIOD_PATTERN: RegExp =
-    /^(Focus|Break|Lost),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
+    /^(Focus|Break|Lost|Pause),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
   private readonly BTN_START_TEXT: string = 'Start';
   private readonly BTN_PAUSE_TEXT: string = 'Pause';
   private readonly COLOR_FOCUS: string = 'var(--accent)';
@@ -116,14 +120,14 @@ class PomodoroTimer {
     return this._settingsData;
   }
 
-  private loadLatestPeriodType(): PeriodTypes {
-    let periodType: PeriodTypes = PeriodType.Break;
-    if (this._timePeriod.length > 0) {
-      let periodData = this.parseStringToPeriodData(this._timePeriod[this._timePeriod.length - 1]);
-      return periodData.periodType;
+  private loadLatestPeriodType(): ActivePeriodTypes {
+    for (let index = this._timePeriod.length - 1; index >= 0; index -= 1) {
+      const periodData = this.parseStringToPeriodData(this._timePeriod[index]);
+      if (periodData.periodType !== PeriodType.Pause) {
+        return periodData.periodType as ActivePeriodTypes;
+      }
     }
-
-    return periodType;
+    return PeriodType.Break;
   }
 
   private existSavedPeriodData(): boolean {
@@ -133,7 +137,7 @@ class PomodoroTimer {
   private init() {
     this.loadLocalStorageFocusData();
     this.loadSettings();
-    let nextPeriodType: PeriodTypes = PeriodType.Focus;
+    let nextPeriodType: ActivePeriodTypes = PeriodType.Focus;
     if (this.existSavedPeriodData()) {
       nextPeriodType = this.getNextPeriodType(this.loadLatestPeriodType());
     }
@@ -143,7 +147,7 @@ class PomodoroTimer {
     this.resetTimer();
   }
 
-  private makeCurrentStateText(periodType: PeriodTypes): string {
+  private makeCurrentStateText(periodType: ActivePeriodTypes): string {
     return `[${periodType.toString()}] #${this._focusCount}`;
   }
 
@@ -214,21 +218,59 @@ class PomodoroTimer {
     return typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max;
   }
 
-  private saveLocalStorageFocusData(periodType: PeriodTypes, startDate: Date, finishDate: Date) {
-    if (startDate && finishDate) {
-      let periodStr = this.makeDateTimePeriodString(periodType, startDate, finishDate);
-      this._timePeriod.push(periodStr);
-      if (this._timePeriod.length > this.MAX_STORED_PERIODS) {
-        this._timePeriod = this._timePeriod.slice(-this.MAX_STORED_PERIODS);
-      }
-      let saveData = {
-        dateId: [startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate()].join('-'),
-        focusCount: this._focusCount,
-        focusPeriod: this._timePeriod
-      };
-
-      localStorage.setItem(this.PomodoroFocusLocalStorageKey, JSON.stringify(saveData));
+  private persistFocusPeriods(anchorDate: Date) {
+    if (this._timePeriod.length > this.MAX_STORED_PERIODS) {
+      this._timePeriod = this._timePeriod.slice(-this.MAX_STORED_PERIODS);
     }
+    const saveData = {
+      dateId: [
+        anchorDate.getFullYear(),
+        anchorDate.getMonth() + 1,
+        anchorDate.getDate()
+      ].join('-'),
+      focusCount: this._focusCount,
+      focusPeriod: this._timePeriod
+    };
+    localStorage.setItem(this.PomodoroFocusLocalStorageKey, JSON.stringify(saveData));
+  }
+
+  private queueTermChunk(
+    periodType: PeriodTypes,
+    startDate: Date,
+    finishDate: Date
+  ) {
+    if (finishDate.getTime() <= startDate.getTime()) {
+      return;
+    }
+    this._termChunks.push(
+      this.makeDateTimePeriodString(periodType, startDate, finishDate)
+    );
+  }
+
+  private flushTermChunks(anchorDate: Date) {
+    if (this._termChunks.length === 0) {
+      return;
+    }
+    this._timePeriod.push(...this._termChunks);
+    this._termChunks = [];
+    this.persistFocusPeriods(anchorDate);
+  }
+
+  private saveLocalStorageFocusData(
+    periodType: PeriodTypes,
+    startDate: Date,
+    finishDate: Date
+  ) {
+    if (!startDate || !finishDate) {
+      return;
+    }
+    if (finishDate.getTime() <= startDate.getTime()) {
+      return;
+    }
+    this._timePeriod.push(
+      this.makeDateTimePeriodString(periodType, startDate, finishDate)
+    );
+    this.persistFocusPeriods(startDate);
   }
 
   private loadLocalStorageFocusData() {
@@ -349,6 +391,7 @@ class PomodoroTimer {
 
     if (focusRemainSeconds < 0) {
       const startedAt = this._startDate;
+      const endedAt = new Date();
       this.clearTimerInterval();
       this._startDate = null;
       this.playAlarmSound();
@@ -356,8 +399,9 @@ class PomodoroTimer {
         this.incrementFocusCount();
       }
       if (startedAt) {
-        this.saveLocalStorageFocusData(this._periodType, startedAt, new Date());
+        this.queueTermChunk(this._periodType, startedAt, endedAt);
       }
+      this.flushTermChunks(endedAt);
       this.setStartStopButtonText(this.BTN_START_TEXT);
       const nextPeriodType = this.getNextPeriodType(this._periodType);
       this._currentTimerMinutes = this.getNextTimerMinutes(nextPeriodType, this._focusCount);
@@ -399,15 +443,25 @@ class PomodoroTimer {
   }
 
   private pauseTimer() {
+    const pausedAt = new Date();
+    if (this._startDate) {
+      this.queueTermChunk(this._periodType, this._startDate, pausedAt);
+    }
     this._budgetSeconds = this.remainingSeconds();
     this.clearTimerInterval();
     this._startDate = null;
+    this._pauseStartedAt = pausedAt;
     this._paused = true;
     this.renderRemain(this._budgetSeconds);
     this.setStartStopButtonText(this.BTN_START_TEXT);
   }
 
   private resumeTimer() {
+    const resumedAt = new Date();
+    if (this._pauseStartedAt) {
+      this.queueTermChunk(PeriodType.Pause, this._pauseStartedAt, resumedAt);
+      this._pauseStartedAt = null;
+    }
     this.stopAudio();
     this._paused = false;
     this.clearCheckAwayFromDeskTimerInterval();
@@ -418,7 +472,7 @@ class PomodoroTimer {
   }
 
   // 집중 상태에 따른 타이머 컬러설정
-  private changeTimerTextColorByFocused(periodType: PeriodTypes) {
+  private changeTimerTextColorByFocused(periodType: ActivePeriodTypes) {
     let colorStr = this.COLOR_FOCUS;
     switch (periodType)
     {
@@ -444,13 +498,11 @@ class PomodoroTimer {
     this.setCardTone?.(tone);
   }
 
-  private getNextPeriodType(periodType: PeriodTypes): PeriodTypes {
-    let rtnPeriodType: PeriodTypes = PeriodType.Break;
-    rtnPeriodType = periodType === PeriodType.Focus ? PeriodType.Break : PeriodType.Focus;
-    return rtnPeriodType;
+  private getNextPeriodType(periodType: ActivePeriodTypes): ActivePeriodTypes {
+    return periodType === PeriodType.Focus ? PeriodType.Break : PeriodType.Focus;
   }
 
-  private getNextTimerMinutes(periodType: PeriodTypes, focusCount: number): number {
+  private getNextTimerMinutes(periodType: ActivePeriodTypes, focusCount: number): number {
     if (periodType === PeriodType.Focus) {
       return this._settingsData.focusTime;
     } else if (periodType === PeriodType.Break) {
@@ -499,7 +551,6 @@ class PomodoroTimer {
     this.clearCheckAwayFromDeskTimerInterval();
     this.clearAwayFromDeskTimerInterval();
   
-    this._paused = false;
     this.startTimerInterval();
     this.setStartStopButtonText(this._timerID !== null ? this.BTN_PAUSE_TEXT : this.BTN_START_TEXT);
   }
@@ -570,6 +621,8 @@ class PomodoroTimer {
     this.clearTimerInterval();
     this._startDate = null;
     this._paused = false;
+    this._pauseStartedAt = null;
+    this._termChunks = [];
     this._budgetSeconds = this._currentTimerMinutes * 60;
     this._spanSeconds = this._budgetSeconds;
     const min = String(this._currentTimerMinutes).padStart(2, '0');

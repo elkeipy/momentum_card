@@ -77,6 +77,50 @@ test('pause keeps the remaining time and resume continues it', () => {
   }
 });
 
+test('writes Pause chunks when a paused Focus term ends', () => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date('2026-11-04T10:00:00'));
+  jest.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(
+    () => Promise.resolve()
+  );
+  jest.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(
+    () => undefined
+  );
+  const timer = new PomodoroTimer({
+    setTimerText: () => undefined,
+    setCurrentStateText: () => undefined,
+    setStartStopButtonText: () => undefined,
+    setTimerTextColor: () => undefined
+  });
+  try {
+    timer.saveLocalStorageSettings({
+      focusTime: 1,
+      shortBreak: 1,
+      longBreak: 1,
+      longBreakInterval: 1
+    });
+    timer.startStop();
+    jest.advanceTimersByTime(20000);
+    timer.startStop();
+    expect(localStorage.getItem('PomodoroFocusData')).toBeNull();
+    jest.advanceTimersByTime(5000);
+    timer.startStop();
+    jest.advanceTimersByTime(40300);
+    const raw = localStorage.getItem('PomodoroFocusData');
+    expect(raw).not.toBeNull();
+    const stored = JSON.parse(raw as string) as {focusPeriod: string[]};
+    expect(stored.focusPeriod).toEqual([
+      'Focus,10:00:00,10:00:20',
+      'Pause,10:00:20,10:00:25',
+      'Focus,10:00:25,10:01:05'
+    ]);
+  } finally {
+    timer.dispose();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  }
+});
+
 test('progress fills across the period and holds while paused', () => {
   jest.useFakeTimers();
   const ratios: number[] = [];

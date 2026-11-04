@@ -8,7 +8,12 @@ import {
 import styles from './FocusHistory.module.css';
 
 const HISTORY_REFRESH_MS = 5000;
-const BAR_KINDS: (keyof PeriodMinutes)[] = ['Focus', 'Break', 'Lost'];
+const BAR_KINDS: (keyof PeriodMinutes)[] = [
+  'Focus',
+  'Break',
+  'Pause',
+  'Lost'
+];
 
 export default function FocusHistory() {
   const [rows, setRows] = useState<FocusPeriod[]>([]);
@@ -21,7 +26,8 @@ export default function FocusHistory() {
   }, []);
 
   const minutes = summarizePeriodMinutes(rows);
-  const total = minutes.Focus + minutes.Break + minutes.Lost;
+  const total =
+    minutes.Focus + minutes.Break + minutes.Pause + minutes.Lost;
 
   return (
     <div className={styles.day}>

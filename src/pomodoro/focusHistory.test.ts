@@ -1,13 +1,15 @@
 import {readTodayFocusHistory, summarizePeriodMinutes} from './focusHistory';
 
-test('sums Focus, Break, and Lost minutes, including midnight wrap', () => {
+test('sums Focus, Break, Pause, and Lost minutes, including midnight wrap', () => {
   expect(
     summarizePeriodMinutes([
-      {periodType: 'Focus', start: '09:00:00', finish: '09:25:00'},
-      {periodType: 'Break', start: '09:25:00', finish: '09:30:00'},
+      {periodType: 'Focus', start: '09:00:00', finish: '09:20:00'},
+      {periodType: 'Pause', start: '09:20:00', finish: '09:23:00'},
+      {periodType: 'Focus', start: '09:23:00', finish: '09:28:00'},
+      {periodType: 'Break', start: '09:28:00', finish: '09:33:00'},
       {periodType: 'Lost', start: '23:50:00', finish: '00:10:00'}
     ])
-  ).toEqual({Focus: 25, Break: 5, Lost: 20});
+  ).toEqual({Focus: 25, Break: 5, Pause: 3, Lost: 20});
 });
 
 test('reads only today periods with a valid time pair', () => {

@@ -1,12 +1,13 @@
 export const POMODORO_FOCUS_STORAGE_KEY = 'PomodoroFocusData';
 
 export type FocusPeriod = {
-  periodType: 'Focus' | 'Break' | 'Lost';
+  periodType: 'Focus' | 'Break' | 'Lost' | 'Pause';
   start: string;
   finish: string;
 };
 
-const PERIOD_PATTERN = /^(Focus|Break|Lost),(\d{2}:\d{2}:\d{2}),(\d{2}:\d{2}:\d{2})$/;
+const PERIOD_PATTERN =
+  /^(Focus|Break|Lost|Pause),(\d{2}:\d{2}:\d{2}),(\d{2}:\d{2}:\d{2})$/;
 
 function dateId(date: Date): string {
   return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
@@ -28,6 +29,7 @@ export type PeriodMinutes = {
   Focus: number;
   Break: number;
   Lost: number;
+  Pause: number;
 };
 
 function secondsOf(time: string): number {
@@ -36,7 +38,7 @@ function secondsOf(time: string): number {
 }
 
 export function summarizePeriodMinutes(periods: FocusPeriod[]): PeriodMinutes {
-  const totals = {Focus: 0, Break: 0, Lost: 0};
+  const totals = {Focus: 0, Break: 0, Lost: 0, Pause: 0};
   periods.forEach(period => {
     let delta = secondsOf(period.finish) - secondsOf(period.start);
     if (delta < 0) {
@@ -47,7 +49,8 @@ export function summarizePeriodMinutes(periods: FocusPeriod[]): PeriodMinutes {
   return {
     Focus: Math.round(totals.Focus / 60),
     Break: Math.round(totals.Break / 60),
-    Lost: Math.round(totals.Lost / 60)
+    Lost: Math.round(totals.Lost / 60),
+    Pause: Math.round(totals.Pause / 60)
   };
 }
 
