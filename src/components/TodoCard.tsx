@@ -25,6 +25,7 @@ import {
   todayIso
 } from '../todos/todos';
 import AlarmDialog from './AlarmDialog';
+import {TrashIcon} from './icons';
 import DisplaySettingsFields from './DisplaySettingsFields';
 import SettingsModal from './SettingsModal';
 import styles from './TodoCard.module.css';
@@ -50,6 +51,7 @@ export default function TodoCard() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
   const skipEditSave = useRef(false);
+  const draftRef = useRef<HTMLInputElement>(null);
   const [now, setNow] = useState(() => new Date());
   const [dueHour, setDueHour] = useState(() => minDueHour(currentMinutes()));
   const [dueMinute, setDueMinute] = useState(
@@ -69,6 +71,25 @@ export default function TodoCard() {
   useEffect(() => {
     localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if (event.altKey && event.code === 'KeyT') {
+        event.preventDefault();
+        draftRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  }, []);
 
   useEffect(() => {
     const tick = () => setNow(new Date());
@@ -180,6 +201,7 @@ export default function TodoCard() {
         <div className={styles.join}>
           <input
             id="new-todo"
+            ref={draftRef}
             value={draft}
             onChange={event => onDraftChange(event.target.value)}
             placeholder="오늘 끝낼 일 @시간 · 일정 #날짜"
@@ -295,6 +317,7 @@ export default function TodoCard() {
                     ) : (
                       <span
                         className={item.done ? `${styles.label} ${styles.done}` : styles.label}
+                        title={item.text}
                         onDoubleClick={() => beginEdit(item.id, item.text)}
                       >
                         {item.text}
@@ -305,12 +328,12 @@ export default function TodoCard() {
                     ) : null}
                   </div>
                   <button
-                    className="text-button"
+                    className="icon-button"
                     type="button"
                     aria-label={`${item.text} 삭제`}
                     onClick={() => setItems(current => removeTodo(current, item.id))}
                   >
-                    삭제
+                    <TrashIcon />
                   </button>
                 </div>
                 {due !== null ? (

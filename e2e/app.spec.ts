@@ -261,13 +261,27 @@ test('switches the board theme and restores the default', async ({page}) => {
   expect(stored).toBe('default');
 });
 
+test('focuses the todo field with alt+t', async ({page}) => {
+  await page.goto('/');
+  await page.locator('body').click();
+  await page.keyboard.press('Alt+t');
+  await expect(page.getByLabel('할 일 추가')).toBeFocused();
+});
+
 test('renames a todo by double clicking its text', async ({page}) => {
   await page.goto('/');
   const card = page.getByRole('region', {name: '할 일'});
   await card.getByLabel('할 일 추가').fill('write tests');
   await card.getByRole('button', {name: '추가'}).click();
+  await expect(card.getByText('write tests')).toHaveAttribute('title', 'write tests');
   await card.getByText('write tests').dblclick();
   const field = card.getByRole('textbox', {name: 'write tests 수정'});
+  const fieldBox = await field.boundingBox();
+  const rowBox = await field.locator('xpath=ancestor::li').boundingBox();
+  if (!fieldBox || !rowBox) {
+    throw new Error('todo editor geometry missing');
+  }
+  expect(fieldBox.width).toBeGreaterThan(rowBox.width * 0.6);
   await field.fill('rewrite tests');
   await field.press('Enter');
   await expect(card.getByText('rewrite tests')).toBeVisible();

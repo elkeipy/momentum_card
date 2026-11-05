@@ -34,6 +34,34 @@ test('adds, completes, and removes a todo', () => {
   expect(screen.getByText('할 일을 추가하면 여기에 쌓인다.')).toBeInTheDocument();
 });
 
+test('focuses the new todo field on alt+t unless typing elsewhere', () => {
+  render(<TodoCard />);
+  const field = screen.getByLabelText('할 일 추가');
+  fireEvent.keyDown(document, {altKey: true, code: 'KeyT'});
+  expect(field).toHaveFocus();
+
+  const other = document.createElement('input');
+  document.body.appendChild(other);
+  other.focus();
+  fireEvent.keyDown(other, {altKey: true, code: 'KeyT'});
+  expect(other).toHaveFocus();
+  other.remove();
+});
+
+test('shows the full todo text in a tooltip and deletes with an icon', () => {
+  render(<TodoCard />);
+  fireEvent.change(screen.getByLabelText('할 일 추가'), {
+    target: {value: 'write a much longer note'}
+  });
+  fireEvent.click(screen.getByRole('button', {name: '추가'}));
+  expect(screen.getByText('write a much longer note')).toHaveAttribute(
+    'title',
+    'write a much longer note'
+  );
+  const remove = screen.getByRole('button', {name: 'write a much longer note 삭제'});
+  expect(remove).not.toHaveTextContent('삭제');
+});
+
 test('renames a todo from a double click and keeps the old text on escape', () => {
   render(<TodoCard />);
   fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: 'write tests'}});
