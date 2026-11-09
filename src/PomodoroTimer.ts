@@ -95,7 +95,6 @@ class PomodoroTimer {
   private readonly BTN_START_TEXT: string = 'Start';
   private readonly BTN_PAUSE_TEXT: string = 'Pause';
   private readonly COLOR_UNMANAGED: string = 'var(--warning)';
-  private readonly COLOR_LOST: string = 'var(--negative)';
   private readonly PomodoroFocusLocalStorageKey: string = 'PomodoroFocusData';
   private readonly PomodoroSettingsLocalStorageKey: string = 'PomodoroSettings';
 
@@ -509,7 +508,7 @@ class PomodoroTimer {
         colorStr = colors.breakColor;
         break;
       case PeriodType.Lost:
-        colorStr = this.COLOR_LOST;
+        colorStr = colors.lostColor;
         break;
       default:
         break;

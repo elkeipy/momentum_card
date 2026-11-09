@@ -60,14 +60,12 @@ export default function FocusHistory() {
       </div>
       <ul className={styles.legend} aria-label="오늘 시간 요약">
         {BAR_KINDS.map(kind => {
-          const color = kind === 'Lost' ? undefined : periodTextColor(kind, colors);
+          const color = periodTextColor(kind, colors);
+          const numColor = kind === 'Lost' && minutes.Lost === 0 ? undefined : color;
           return (
-            <li key={kind} style={color ? {color} : undefined}>
+            <li key={kind} style={kind === 'Lost' ? undefined : {color}}>
               {kind}{' '}
-              <span
-                className={kind === 'Lost' && minutes.Lost > 0 ? styles.lostNum : undefined}
-                style={color ? {color} : undefined}
-              >
+              <span style={numColor ? {color: numColor} : undefined}>
                 {minutes[kind]}분
               </span>
             </li>

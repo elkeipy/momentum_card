@@ -3,7 +3,9 @@ import {
   CARD_TOP_INSET,
   clampCardLayout,
   parseCardLayout,
+  snapCardRect,
   type CardLayout,
+  type CardRect,
   type ViewportSize
 } from '../featureCard/cardLayout';
 import {CardSettingsProvider} from '../featureCard/cardSettingsContext';
@@ -28,6 +30,8 @@ type DragState = {
   startWidth: number;
   startHeight: number;
   mode: 'move' | 'resize';
+  others: CardRect[];
+  gap: number;
 };
 
 function viewportSize(): ViewportSize {
@@ -40,6 +44,24 @@ function cardTopInset(): number {
     return CARD_TOP_INSET;
   }
   return Math.ceil(mast.getBoundingClientRect().bottom);
+}
+
+const DEFAULT_CARD_GAP = 16;
+
+function cardGap(): number {
+  const value = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--gap')
+  );
+  return Number.isFinite(value) ? value : DEFAULT_CARD_GAP;
+}
+
+function otherCardRects(self: HTMLElement): CardRect[] {
+  return Array.from(document.querySelectorAll(`.${styles.card}`))
+    .filter(element => element !== self)
+    .map(element => {
+      const rect = element.getBoundingClientRect();
+      return {x: rect.left, y: rect.top, width: rect.width, height: rect.height};
+    });
 }
 
 function boundCardLayout(layout: CardLayout): CardLayout {
@@ -147,10 +169,11 @@ export default function FeatureCard({
       if (mode === 'move' && target instanceof Element && target.closest('button')) {
         return;
       }
-      const rect = sectionRef.current?.getBoundingClientRect();
-      if (!rect) {
+      const section = sectionRef.current;
+      if (!section) {
         return;
       }
+      const rect = section.getBoundingClientRect();
       event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
         pointerId: event.pointerId,
@@ -160,7 +183,9 @@ export default function FeatureCard({
         startY: rect.top,
         startWidth: rect.width,
         startHeight: rect.height,
-        mode
+        mode,
+        others: otherCardRects(section),
+        gap: cardGap()
       };
       if (!placed) {
         setLayout(current => ({
@@ -197,7 +222,8 @@ export default function FeatureCard({
             width: drag.startWidth + dx,
             height: drag.startHeight + dy
           };
-    setLayout(current => boundCardLayout({...current, ...next}));
+    const snapped = snapCardRect(next, drag.others, drag.mode, drag.gap);
+    setLayout(current => boundCardLayout({...current, ...snapped}));
   };
 
   const endPointer = (event: React.PointerEvent<HTMLElement>) => {

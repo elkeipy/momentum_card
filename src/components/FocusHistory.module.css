@@ -58,10 +58,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.lostNum {
-  color: var(--negative);
-}
-
 .empty {
   flex: 1 1 auto;
   min-height: 0;

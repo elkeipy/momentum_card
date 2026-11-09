@@ -4,13 +4,15 @@ export const POMODORO_SETTINGS_KEY = 'PomodoroSettings';
 export const DEFAULT_PERIOD_COLORS = {
   focusColor: '#1b6e66',
   breakColor: '#1f201d',
-  pauseColor: '#636361'
+  pauseColor: '#636361',
+  lostColor: '#b42318'
 } as const;
 
 export type PeriodColors = {
   focusColor: string;
   breakColor: string;
   pauseColor: string;
+  lostColor: string;
 };
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
@@ -26,7 +28,8 @@ export function periodColorsFrom(value: unknown): PeriodColors {
   return {
     focusColor: colorOrDefault(raw.focusColor, DEFAULT_PERIOD_COLORS.focusColor),
     breakColor: colorOrDefault(raw.breakColor, DEFAULT_PERIOD_COLORS.breakColor),
-    pauseColor: colorOrDefault(raw.pauseColor, DEFAULT_PERIOD_COLORS.pauseColor)
+    pauseColor: colorOrDefault(raw.pauseColor, DEFAULT_PERIOD_COLORS.pauseColor),
+    lostColor: colorOrDefault(raw.lostColor, DEFAULT_PERIOD_COLORS.lostColor)
   };
 }
 
@@ -55,7 +58,7 @@ export function periodTextColor(
   if (kind === 'Pause') {
     return colors.pauseColor;
   }
-  return 'var(--negative)';
+  return colors.lostColor;
 }
 
 export function publishPeriodColors(): void {

@@ -66,3 +66,63 @@ export function parseCardLayout(value: unknown, fallback: CardLayout): CardLayou
     pinned: raw.pinned
   };
 }
+
+export const CARD_SNAP_DISTANCE = 8;
+
+export type CardRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+// 다른 카드의 변과 그 변에서 간격만큼 떨어진 선이 붙을 자리다.
+function snapLines(others: CardRect[], axis: 'x' | 'y', gap: number): number[] {
+  const size = axis === 'x' ? 'width' : 'height';
+  return others.flatMap(other => {
+    const start = other[axis];
+    const end = start + other[size];
+    return [start, end, end + gap, start - gap];
+  });
+}
+
+function snapDelta(edges: number[], lines: number[], distance: number): number {
+  let best = 0;
+  let bestGap = distance + 1;
+  for (const edge of edges) {
+    for (const line of lines) {
+      const gap = Math.abs(line - edge);
+      if (gap <= distance && gap < bestGap) {
+        best = line - edge;
+        bestGap = gap;
+      }
+    }
+  }
+  return best;
+}
+
+// 옮기면 위치를, 크기를 바꾸면 오른쪽·아래 변을 주위 카드 선에 맞춘다.
+export function snapCardRect(
+  rect: CardRect,
+  others: CardRect[],
+  mode: 'move' | 'resize',
+  gap: number,
+  distance = CARD_SNAP_DISTANCE
+): CardRect {
+  const linesX = snapLines(others, 'x', gap);
+  const linesY = snapLines(others, 'y', gap);
+  const right = rect.x + rect.width;
+  const bottom = rect.y + rect.height;
+  if (mode === 'move') {
+    return {
+      ...rect,
+      x: rect.x + snapDelta([rect.x, right], linesX, distance),
+      y: rect.y + snapDelta([rect.y, bottom], linesY, distance)
+    };
+  }
+  return {
+    ...rect,
+    width: rect.width + snapDelta([right], linesX, distance),
+    height: rect.height + snapDelta([bottom], linesY, distance)
+  };
+}

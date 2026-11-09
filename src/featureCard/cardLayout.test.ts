@@ -1,4 +1,9 @@
-import {clampCardLayout, parseCardLayout, type CardLayout} from './cardLayout';
+import {
+  clampCardLayout,
+  parseCardLayout,
+  snapCardRect,
+  type CardLayout
+} from './cardLayout';
 
 const fallback: CardLayout = {
   x: 10,
@@ -55,4 +60,29 @@ test('shortens a tall card so it still fits below the top inset', () => {
 test('rejects a stored layout that is not a card', () => {
   expect(parseCardLayout({x: 1, pinned: 'yes'}, fallback)).toEqual(fallback);
   expect(parseCardLayout('nope', fallback)).toEqual(fallback);
+});
+
+const neighbor = {x: 100, y: 100, width: 300, height: 200};
+
+test('snaps a moved card to a nearby card edge or the gap beside it', () => {
+  expect(
+    snapCardRect({x: 105, y: 322, width: 200, height: 100}, [neighbor], 'move', 16)
+  ).toEqual({x: 100, y: 316, width: 200, height: 100});
+  expect(
+    snapCardRect({x: 413, y: 94, width: 200, height: 100}, [neighbor], 'move', 16)
+  ).toEqual({x: 416, y: 100, width: 200, height: 100});
+});
+
+test('leaves a moved card alone when no edge is close', () => {
+  const rect = {x: 150, y: 450, width: 200, height: 100};
+  expect(snapCardRect(rect, [neighbor], 'move', 16)).toEqual(rect);
+});
+
+test('snaps only the right and bottom edges while resizing', () => {
+  expect(
+    snapCardRect({x: 200, y: 100, width: 205, height: 196}, [neighbor], 'resize', 16)
+  ).toEqual({x: 200, y: 100, width: 200, height: 200});
+  expect(
+    snapCardRect({x: 100, y: 330, width: 294, height: 100}, [neighbor], 'resize', 16)
+  ).toEqual({x: 100, y: 330, width: 300, height: 100});
 });

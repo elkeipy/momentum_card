@@ -62,6 +62,7 @@ function Pomodoro() {
   const [focusColor, setFocusColor] = useState<string>(DEFAULT_PERIOD_COLORS.focusColor);
   const [breakColor, setBreakColor] = useState<string>(DEFAULT_PERIOD_COLORS.breakColor);
   const [pauseColor, setPauseColor] = useState<string>(DEFAULT_PERIOD_COLORS.pauseColor);
+  const [lostColor, setLostColor] = useState<string>(DEFAULT_PERIOD_COLORS.lostColor);
   const [timerTextSize, setTimerTextSize] = useState(() => readTimerTextSize(localStorage));
   const [tone, setTone] = useState<CardTone>('focus');
   const [progress, setProgress] = useState(0);
@@ -76,7 +77,8 @@ function Pomodoro() {
       longBreakInterval,
       focusColor,
       breakColor,
-      pauseColor
+      pauseColor,
+      lostColor
     };
     timerRef.current?.saveLocalStorageSettings(settings);
     writeTimerTextSize(localStorage, timerTextSize);
@@ -92,6 +94,7 @@ function Pomodoro() {
       setFocusColor(settings.focusColor);
       setBreakColor(settings.breakColor);
       setPauseColor(settings.pauseColor);
+      setLostColor(settings.lostColor);
     }
     setTimerTextSize(readTimerTextSize(localStorage));
     settingsUi.close();
@@ -115,6 +118,7 @@ function Pomodoro() {
     setFocusColor(settings.focusColor);
     setBreakColor(settings.breakColor);
     setPauseColor(settings.pauseColor);
+    setLostColor(settings.lostColor);
 
     const handleKeydown = (event: KeyboardEvent) => {
       const target = event.target;
@@ -228,6 +232,7 @@ function Pomodoro() {
             <ColorField id="focusColor" label="Focus 색" value={focusColor} onValue={setFocusColor} />
             <ColorField id="breakColor" label="Break 색" value={breakColor} onValue={setBreakColor} />
             <ColorField id="pauseColor" label="Pause 색" value={pauseColor} onValue={setPauseColor} />
+            <ColorField id="lostColor" label="Lost 색" value={lostColor} onValue={setLostColor} />
           </SettingsModal>
         ) : null}
         <div className={styles.timerButtonDiv}>
