@@ -1,5 +1,11 @@
 import {publishNtfy} from './notify/ntfy';
 import {formatElapsed} from './pomodoro/formatElapsed';
+import {
+  DEFAULT_PERIOD_COLORS,
+  periodColorsFrom,
+  publishPeriodColors,
+  type PeriodColors
+} from './pomodoro/periodColors';
 
 export type CardTone = 'focus' | 'break' | 'lost';
 
@@ -12,7 +18,7 @@ interface PomodoroTimerProps {
   setTimerProgress?: (ratio: number) => void;
 }
 
-export type TimerSettings = {
+export type TimerSettings = PeriodColors & {
   focusTime: number;
   shortBreak: number;
   longBreak: number;
@@ -69,6 +75,7 @@ class PomodoroTimer {
   private _termChunks: string[] = [];
   private _focusCount: number = 1;
   private _periodType: ActivePeriodTypes = PeriodType.Break;
+  private _shownPeriod: ActivePeriodTypes = PeriodType.Focus;
   private _timePeriod: Array<string> = [];
   
   private readonly FOCUS_MIN: number = 25;
@@ -87,9 +94,7 @@ class PomodoroTimer {
     /^(Focus|Break|Lost|Pause),\d{2}:\d{2}:\d{2},\d{2}:\d{2}:\d{2}$/;
   private readonly BTN_START_TEXT: string = 'Start';
   private readonly BTN_PAUSE_TEXT: string = 'Pause';
-  private readonly COLOR_FOCUS: string = 'var(--accent)';
   private readonly COLOR_UNMANAGED: string = 'var(--warning)';
-  private readonly COLOR_BREAK: string = 'var(--text)';
   private readonly COLOR_LOST: string = 'var(--negative)';
   private readonly PomodoroFocusLocalStorageKey: string = 'PomodoroFocusData';
   private readonly PomodoroSettingsLocalStorageKey: string = 'PomodoroSettings';
@@ -214,6 +219,20 @@ class PomodoroTimer {
     );
   }
 
+  private withPeriodColors(settings: TimerSettings): TimerSettings {
+    return {...settings, ...periodColorsFrom(settings)};
+  }
+
+  private defaultSettings(): TimerSettings {
+    return {
+      focusTime: this.FOCUS_MIN,
+      shortBreak: this.SHORT_BREAK_MIN,
+      longBreak: this.LONG_BREAK_MIN,
+      longBreakInterval: this.LONG_BREAK_INTERVAL,
+      ...DEFAULT_PERIOD_COLORS
+    };
+  }
+
   private isBoundedInteger(value: unknown, min: number, max: number): value is number {
     return typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max;
   }
@@ -307,9 +326,14 @@ class PomodoroTimer {
     if (!this.isValidSettingsData(settings)) {
       return;
     }
-    this._settingsData = settings;
-    this._currentTimerMinutes = settings.focusTime;
-    localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(settings));
+    const next = this.withPeriodColors(settings);
+    this._settingsData = next;
+    this._currentTimerMinutes = next.focusTime;
+    localStorage.setItem(this.PomodoroSettingsLocalStorageKey, JSON.stringify(next));
+    if (!this._awayFromDeskDate) {
+      this.changeTimerTextColorByFocused(this._shownPeriod);
+    }
+    publishPeriodColors();
   }
 
   private isTimerRunning() {
@@ -473,14 +497,16 @@ class PomodoroTimer {
 
   // 집중 상태에 따른 타이머 컬러설정
   private changeTimerTextColorByFocused(periodType: ActivePeriodTypes) {
-    let colorStr = this.COLOR_FOCUS;
+    this._shownPeriod = periodType;
+    const colors = periodColorsFrom(this._settingsData);
+    let colorStr = colors.focusColor;
     switch (periodType)
     {
       case PeriodType.Focus:
-        colorStr = this.COLOR_FOCUS;
+        colorStr = colors.focusColor;
         break;
       case PeriodType.Break:
-        colorStr = this.COLOR_BREAK;
+        colorStr = colors.breakColor;
         break;
       case PeriodType.Lost:
         colorStr = this.COLOR_LOST;
@@ -597,23 +623,13 @@ class PomodoroTimer {
       }
 
       if (this.isValidSettingsData(parsedSettings)) {
-        this._settingsData = parsedSettings;
+        this._settingsData = this.withPeriodColors(parsedSettings);
         this._currentTimerMinutes = this._settingsData.focusTime ? this._settingsData.focusTime : 7;
       } else {
-        this._settingsData = {
-          focusTime: this.FOCUS_MIN,
-          shortBreak: this.SHORT_BREAK_MIN,
-          longBreak: this.LONG_BREAK_MIN,
-          longBreakInterval: this.LONG_BREAK_INTERVAL,
-        };
+        this._settingsData = this.defaultSettings();
       }
     } else {
-      this._settingsData = {
-        focusTime: this.FOCUS_MIN,
-        shortBreak: this.SHORT_BREAK_MIN,
-        longBreak: this.LONG_BREAK_MIN,
-        longBreakInterval: this.LONG_BREAK_INTERVAL,
-      };
+      this._settingsData = this.defaultSettings();
     }
   }
 

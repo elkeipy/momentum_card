@@ -52,6 +52,38 @@ test('keeps the focus history table in a scroll region', () => {
   expect(table.parentElement?.className).toMatch(/tableWrap/);
 });
 
+test('paints history rows with the saved period colors', () => {
+  const now = new Date();
+  const dateId = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-');
+  localStorage.setItem(
+    'PomodoroSettings',
+    JSON.stringify({
+      focusTime: 25,
+      shortBreak: 5,
+      longBreak: 15,
+      longBreakInterval: 4,
+      focusColor: '#112233',
+      breakColor: '#445566',
+      pauseColor: '#778899'
+    })
+  );
+  localStorage.setItem(
+    'PomodoroFocusData',
+    JSON.stringify({
+      dateId,
+      focusCount: 1,
+      focusPeriod: ['Focus,09:00:00,09:25:00', 'Pause,09:25:00,09:26:00']
+    })
+  );
+  render(<Pomodoro />);
+  expect(screen.getByRole('cell', {name: 'Focus'}).closest('tr')).toHaveStyle({
+    color: '#112233'
+  });
+  expect(screen.getByRole('cell', {name: 'Pause'}).closest('tr')).toHaveStyle({
+    color: '#778899'
+  });
+});
+
 test('saves timer text size from the settings dialog', () => {
   render(
     <FeatureCard
@@ -65,6 +97,10 @@ test('saves timer text size from the settings dialog', () => {
   );
   fireEvent.click(screen.getByRole('button', {name: '뽀모도로 설정'}));
   fireEvent.change(screen.getByLabelText('Timer Text'), {target: {value: '64'}});
+  fireEvent.change(screen.getByLabelText('Focus 색'), {target: {value: '#abcdef'}});
   fireEvent.click(screen.getByRole('button', {name: 'Save'}));
-  expect(screen.getByText('25:00')).toHaveStyle({fontSize: '64px'});
+  expect(screen.getByText('25:00')).toHaveStyle({fontSize: '64px', color: '#abcdef'});
+  expect(JSON.parse(localStorage.getItem('PomodoroSettings') ?? '{}').focusColor).toBe(
+    '#abcdef'
+  );
 });

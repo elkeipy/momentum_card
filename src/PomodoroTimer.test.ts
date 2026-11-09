@@ -1,4 +1,5 @@
 import PomodoroTimer, {TimerSettings} from './PomodoroTimer';
+import {DEFAULT_PERIOD_COLORS} from './pomodoro/periodColors';
 
 function createTimer(): PomodoroTimer {
   return new PomodoroTimer({
@@ -20,8 +21,36 @@ test('falls back when stored settings are not a valid timer', () => {
     focusTime: 25,
     shortBreak: 5,
     longBreak: 15,
-    longBreakInterval: 4
+    longBreakInterval: 4,
+    ...DEFAULT_PERIOD_COLORS
   });
+  timer.dispose();
+});
+
+test('uses a saved focus color for the timer and keeps old settings without colors', () => {
+  localStorage.setItem(
+    'PomodoroSettings',
+    JSON.stringify({
+      focusTime: 20,
+      shortBreak: 5,
+      longBreak: 15,
+      longBreakInterval: 4,
+      focusColor: '#112233'
+    })
+  );
+  const colors: string[] = [];
+  const timer = new PomodoroTimer({
+    setTimerText: () => undefined,
+    setCurrentStateText: () => undefined,
+    setStartStopButtonText: () => undefined,
+    setTimerTextColor: value => {
+      colors.push(value);
+    }
+  });
+  expect(timer.getSettings().focusTime).toBe(20);
+  expect(timer.getSettings().focusColor).toBe('#112233');
+  expect(timer.getSettings().breakColor).toBe(DEFAULT_PERIOD_COLORS.breakColor);
+  expect(colors[colors.length - 1]).toBe('#112233');
   timer.dispose();
 });
 
@@ -31,7 +60,8 @@ test('ignores settings outside the allowed range', () => {
     focusTime: 0,
     shortBreak: 5,
     longBreak: 15,
-    longBreakInterval: 4
+    longBreakInterval: 4,
+    ...DEFAULT_PERIOD_COLORS
   };
   timer.saveLocalStorageSettings(invalidSettings);
   expect(timer.getSettings().focusTime).toBe(25);
@@ -97,7 +127,8 @@ test('writes Pause chunks when a paused Focus term ends', () => {
       focusTime: 1,
       shortBreak: 1,
       longBreak: 1,
-      longBreakInterval: 1
+      longBreakInterval: 1,
+      ...DEFAULT_PERIOD_COLORS
     });
     timer.startStop();
     jest.advanceTimersByTime(20000);
@@ -138,7 +169,8 @@ test('progress fills across the period and holds while paused', () => {
       focusTime: 1,
       shortBreak: 1,
       longBreak: 1,
-      longBreakInterval: 1
+      longBreakInterval: 1,
+      ...DEFAULT_PERIOD_COLORS
     });
     timer.startStop();
     expect(ratios[ratios.length - 1]).toBe(0);

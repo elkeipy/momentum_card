@@ -5,6 +5,12 @@ import {
   type FocusPeriod,
   type PeriodMinutes
 } from '../pomodoro/focusHistory';
+import {
+  PERIOD_COLORS_EVENT,
+  periodTextColor,
+  readPeriodColors,
+  type PeriodColors
+} from '../pomodoro/periodColors';
 import styles from './FocusHistory.module.css';
 
 const HISTORY_REFRESH_MS = 5000;
@@ -17,12 +23,20 @@ const BAR_KINDS: (keyof PeriodMinutes)[] = [
 
 export default function FocusHistory() {
   const [rows, setRows] = useState<FocusPeriod[]>([]);
+  const [colors, setColors] = useState<PeriodColors>(() => readPeriodColors(localStorage));
 
   useEffect(() => {
-    const update = () => setRows(readTodayFocusHistory(localStorage, new Date()));
+    const update = () => {
+      setRows(readTodayFocusHistory(localStorage, new Date()));
+      setColors(readPeriodColors(localStorage));
+    };
     update();
     const timerId = window.setInterval(update, HISTORY_REFRESH_MS);
-    return () => window.clearInterval(timerId);
+    window.addEventListener(PERIOD_COLORS_EVENT, update);
+    return () => {
+      window.clearInterval(timerId);
+      window.removeEventListener(PERIOD_COLORS_EVENT, update);
+    };
   }, []);
 
   const minutes = summarizePeriodMinutes(rows);
@@ -45,14 +59,20 @@ export default function FocusHistory() {
           : null}
       </div>
       <ul className={styles.legend} aria-label="오늘 시간 요약">
-        {BAR_KINDS.map(kind => (
-          <li key={kind}>
-            {kind}{' '}
-            <span className={kind === 'Lost' && minutes.Lost > 0 ? styles.lostNum : undefined}>
-              {minutes[kind]}분
-            </span>
-          </li>
-        ))}
+        {BAR_KINDS.map(kind => {
+          const color = kind === 'Lost' ? undefined : periodTextColor(kind, colors);
+          return (
+            <li key={kind} style={color ? {color} : undefined}>
+              {kind}{' '}
+              <span
+                className={kind === 'Lost' && minutes.Lost > 0 ? styles.lostNum : undefined}
+                style={color ? {color} : undefined}
+              >
+                {minutes[kind]}분
+              </span>
+            </li>
+          );
+        })}
       </ul>
       {rows.length === 0 ? (
         <p className={styles.empty}>오늘 이력이 없습니다.</p>
@@ -71,6 +91,7 @@ export default function FocusHistory() {
               {rows.map((row, index) => (
                 <tr
                   key={`${row.periodType}-${row.start}-${row.finish}-${index}`}
+                  style={{color: periodTextColor(row.periodType, colors)}}
                 >
                   <td>{row.periodType}</td>
                   <td>{row.start}</td>

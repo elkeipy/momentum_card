@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import PomodoroTimer, {CardTone, TimerSettings} from '../PomodoroTimer';
+import {DEFAULT_PERIOD_COLORS} from '../pomodoro/periodColors';
 import {useCardSettings} from '../featureCard/cardSettingsContext';
 import {
   readTimerTextSize,
@@ -8,6 +9,7 @@ import {
   writeTimerTextSize
 } from '../pomodoro/timerTextSize';
 import styles from '../css/Pomodoro.module.css';
+import modalStyles from '../css/SettingsModal.module.css';
 import FocusHistory from './FocusHistory';
 import OptionField from './OptionField';
 import SettingsModal from './SettingsModal';
@@ -20,6 +22,33 @@ const LIMITS = {
   timerTextSize: {min: TIMER_TEXT_SIZE_MIN, max: TIMER_TEXT_SIZE_MAX}
 } as const;
 
+function ColorField({
+  id,
+  label,
+  value,
+  onValue
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onValue: (value: string) => void;
+}) {
+  return (
+    <div className={modalStyles.optionDiv}>
+      <label htmlFor={id} className={modalStyles.optionLabel}>
+        {label}
+      </label>
+      <input
+        id={id}
+        className={modalStyles.colorValue}
+        type="color"
+        value={value}
+        onChange={event => onValue(event.target.value)}
+      />
+    </div>
+  );
+}
+
 function Pomodoro() {
   const timerRef = useRef<PomodoroTimer | null>(null);
   const [timerText, setTimerText] = useState('25:00');
@@ -30,6 +59,9 @@ function Pomodoro() {
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
   const [longBreakInterval, setLongBreakInterval] = useState(4);
+  const [focusColor, setFocusColor] = useState<string>(DEFAULT_PERIOD_COLORS.focusColor);
+  const [breakColor, setBreakColor] = useState<string>(DEFAULT_PERIOD_COLORS.breakColor);
+  const [pauseColor, setPauseColor] = useState<string>(DEFAULT_PERIOD_COLORS.pauseColor);
   const [timerTextSize, setTimerTextSize] = useState(() => readTimerTextSize(localStorage));
   const [tone, setTone] = useState<CardTone>('focus');
   const [progress, setProgress] = useState(0);
@@ -41,7 +73,10 @@ function Pomodoro() {
       focusTime,
       shortBreak,
       longBreak,
-      longBreakInterval
+      longBreakInterval,
+      focusColor,
+      breakColor,
+      pauseColor
     };
     timerRef.current?.saveLocalStorageSettings(settings);
     writeTimerTextSize(localStorage, timerTextSize);
@@ -54,6 +89,9 @@ function Pomodoro() {
       setShortBreak(settings.shortBreak);
       setLongBreak(settings.longBreak);
       setLongBreakInterval(settings.longBreakInterval);
+      setFocusColor(settings.focusColor);
+      setBreakColor(settings.breakColor);
+      setPauseColor(settings.pauseColor);
     }
     setTimerTextSize(readTimerTextSize(localStorage));
     settingsUi.close();
@@ -74,6 +112,9 @@ function Pomodoro() {
     setShortBreak(settings.shortBreak);
     setLongBreak(settings.longBreak);
     setLongBreakInterval(settings.longBreakInterval);
+    setFocusColor(settings.focusColor);
+    setBreakColor(settings.breakColor);
+    setPauseColor(settings.pauseColor);
 
     const handleKeydown = (event: KeyboardEvent) => {
       const target = event.target;
@@ -184,6 +225,9 @@ function Pomodoro() {
               value={timerTextSize}
               onValue={setTimerTextSize}
             />
+            <ColorField id="focusColor" label="Focus 색" value={focusColor} onValue={setFocusColor} />
+            <ColorField id="breakColor" label="Break 색" value={breakColor} onValue={setBreakColor} />
+            <ColorField id="pauseColor" label="Pause 색" value={pauseColor} onValue={setPauseColor} />
           </SettingsModal>
         ) : null}
         <div className={styles.timerButtonDiv}>

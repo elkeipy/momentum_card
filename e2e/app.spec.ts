@@ -190,12 +190,14 @@ test('keeps action buttons and timer settings above the cards', async ({page}) =
   );
   expect(Number(overlayZ)).toBeGreaterThan(100);
   await dialog.getByRole('spinbutton', {name: 'Timer Text'}).fill('64');
+  await dialog.locator('#focusColor').fill('#ff00aa');
   await page.getByRole('button', {name: 'Save'}).click();
   await expect(dialog).toHaveCount(0);
-  const timerSize = await page.getByText('25:00').evaluate(
-    element => getComputedStyle(element).fontSize
-  );
+  const timer = page.getByText('25:00');
+  const timerSize = await timer.evaluate(element => getComputedStyle(element).fontSize);
+  const timerColor = await timer.evaluate(element => getComputedStyle(element).color);
   expect(timerSize).toBe('64px');
+  expect(timerColor).toBe('rgb(255, 0, 170)');
 });
 
 test('changes only the pomodoro history height with the card', async ({page}) => {

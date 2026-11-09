@@ -126,6 +126,15 @@
   line-height: 20px;
 }
 
+.colorValue {
+  width: 44px;
+  height: var(--control-height);
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+}
+
 .buttonDiv {
   display: flex;
   flex-wrap: wrap;
