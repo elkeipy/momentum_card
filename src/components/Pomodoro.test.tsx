@@ -76,10 +76,10 @@ test('paints history rows with the saved period colors', () => {
     })
   );
   render(<Pomodoro />);
-  expect(screen.getByRole('cell', {name: 'Focus'}).closest('tr')).toHaveStyle({
+  expect(screen.getByRole('cell', {name: 'Focus #1(25분)'}).closest('tr')).toHaveStyle({
     color: '#112233'
   });
-  expect(screen.getByRole('cell', {name: 'Pause'}).closest('tr')).toHaveStyle({
+  expect(screen.getByRole('cell', {name: 'Pause (60초)'}).closest('tr')).toHaveStyle({
     color: '#778899'
   });
 });

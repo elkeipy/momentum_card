@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  labelFocusHistory,
   readTodayFocusHistory,
   summarizePeriodMinutes,
   type FocusPeriod,
@@ -40,6 +41,7 @@ export default function FocusHistory() {
   }, []);
 
   const minutes = summarizePeriodMinutes(rows);
+  const labels = labelFocusHistory(rows);
   const total =
     minutes.Focus + minutes.Break + minutes.Pause + minutes.Lost;
 
@@ -91,7 +93,7 @@ export default function FocusHistory() {
                   key={`${row.periodType}-${row.start}-${row.finish}-${index}`}
                   style={{color: periodTextColor(row.periodType, colors)}}
                 >
-                  <td>{row.periodType}</td>
+                  <td>{labels[index]}</td>
                   <td>{row.start}</td>
                   <td>{row.finish}</td>
                 </tr>
