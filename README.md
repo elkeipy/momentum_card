@@ -44,3 +44,23 @@ npm run deploy
 ```
 
 `npm run deploy`는 빌드한 뒤 GitHub Pages에 올린다.
+
+## 데스크톱 앱
+
+크롬 없이 작은 창으로 띄우는 Tauri 앱이다. 윈도우에 깔린 WebView2가 배포 주소를 그대로 열기 때문에 `npm run deploy`만 하면 앱도 최신이 된다. 인터넷이 끊기면 화면이 뜨지 않는다.
+
+- 구글 캘린더 일정 작성 화면(`calendar.google.com/calendar/render`)은 PC 기본 브라우저에서 연다. 그 브라우저에 로그인된 계정으로 뜬다. 다른 새 창은 열지 않는다.
+- 위치 권한은 앱 주소가 보내는 요청만 허용한다. 날씨 카드가 쓴다. 윈도우 설정에서 위치 서비스가 꺼져 있으면 날씨가 뜨지 않는다.
+- 배포 사이트에는 앱 기능을 부르는 권한을 주지 않는다.
+- 창 크기와 위치는 정상으로 닫을 때 저장하고 다시 켜면 그대로 뜬다. 최대화한 채 닫으면 최대화로 뜬다.
+- 카드 배치, 할 일, 집중 기록, 테마, ntfy 토픽은 앱 전용 저장소에 따로 쌓인다. 크롬에 있던 것은 옮겨지지 않는다.
+
+Rust, Visual Studio C++ 빌드 도구, WebView2가 있어야 한다.
+
+```bash
+npm run tauri build -- --no-bundle
+```
+
+`src-tauri/target/release/momentum.exe`가 생긴다. 환경 변수 `MOMENTUM_URL`에 주소를 주고 실행하면 배포 주소 대신 그 주소를 연다. 그 주소의 위치 요청도 허용한다.
+
+아이콘 원본은 `public/favicon.svg` 한 파일이다. 고친 뒤 `npm run icons`를 실행하면 탭 아이콘, 매니페스트용 PNG, 앱 아이콘을 모두 다시 만든다.

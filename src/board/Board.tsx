@@ -84,17 +84,30 @@ function todaySentence(minutes: PeriodMinutes, day: string): string {
 function Mark() {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <rect
-        x="3.5"
-        y="4.5"
-        width="17"
-        height="15"
-        rx="3"
+      <circle
+        cx="12"
+        cy="12"
+        r="8"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeOpacity="0.28"
+        strokeWidth="2"
       />
-      <rect x="6" y="13" width="12" height="3" rx="1.5" fill="var(--accent)" />
+      <path
+        d="M12 4A8 8 0 1 1 4 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 12V7.5M12 12H15.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <circle cx="4" cy="12" r="1.8" fill="var(--accent)" />
     </svg>
   );
 }

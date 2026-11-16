@@ -12,6 +12,10 @@
 /blob-report/
 /playwright/.cache/
 
+# playwright mcp output
+/.playwright-mcp/
+/screenshots/
+
 # production
 /build
 
