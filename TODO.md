@@ -19,11 +19,16 @@
 
 ## 작업
 
+- [x] exe 파일을 직접 빌드하게 할순없으니 momentum.exe 파일도 assets 에 배포해줘
+
+
 - [x] 깃에 올리고 배포해줘
 
 ## 답변
 
-v0.2.16으로 올렸다. 윈도우 데스크톱 앱(Tauri), 닫을 때의 창 크기·위치 복원, 진행 링 모양의 새 아이콘, Playwright 테스트 케이스 문서(`e2e/TEST_CASES.md`)가 들어간다. 앱은 배포 주소를 열기 때문에 이 배포로 앱 화면도 함께 최신이 된다.
+`momentum.exe`를 GitHub Releases의 Assets로 올렸다. README에 받는 곳(`releases/latest`)과 SmartScreen 안내를 적었다. 서명하지 않은 파일이라 릴리스 노트에 SHA256을 함께 적었다. 이름을 늘 `momentum.exe`로 두어 `releases/latest/download/momentum.exe` 주소가 항상 최신 파일을 가리킨다.
 
-알려진 문제 하나는 고치지 않고 올렸다. 마감이 있는 할 일의 막대가 넣은 직후 0이 아니라 그 분의 경과 초만큼 차 있다. `startMinutes`를 분 단위로 잘라 저장하는데 진행률은 초까지 넣어 계산하기 때문이다.
+exe 파일 정보의 버전이 0.1.0에 고정돼 있어서 `tauri.conf.json`의 `version`을 `../package.json`으로 바꿨다. 이제 릴리스 버전과 같다.
+
+다음 릴리스부터는 `npm run tauri build -- --no-bundle`로 exe를 만든 뒤 `gh release create vX.Y.Z --title vX.Y.Z --notes-file <노트> src-tauri/target/release/momentum.exe`로 올린다. 앱은 배포 주소를 열기 때문에 웹만 바뀐 릴리스에는 exe를 다시 올리지 않아도 된다. 창 크기 저장이나 캘린더 열기처럼 `src-tauri`가 바뀐 릴리스에만 다시 올린다.
 

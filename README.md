@@ -55,7 +55,9 @@ npm run deploy
 - 창 크기와 위치는 정상으로 닫을 때 저장하고 다시 켜면 그대로 뜬다. 최대화한 채 닫으면 최대화로 뜬다.
 - 카드 배치, 할 일, 집중 기록, 테마, ntfy 토픽은 앱 전용 저장소에 따로 쌓인다. 크롬에 있던 것은 옮겨지지 않는다.
 
-Rust, Visual Studio C++ 빌드 도구, WebView2가 있어야 한다.
+직접 빌드하지 않아도 [Releases](https://github.com/elkeipy/momentum_card/releases/latest)의 Assets에서 `momentum.exe`를 받아 실행하면 된다. WebView2 런타임이 있어야 한다(윈도우 11에는 기본으로 깔려 있다). 서명하지 않은 파일이라 처음 실행할 때 SmartScreen이 막으면 `추가 정보`, `실행`을 누른다. 릴리스 노트에 SHA256이 있다.
+
+직접 빌드하려면 Rust와 Visual Studio C++ 빌드 도구가 더 필요하다.
 
 ```bash
 npm run tauri build -- --no-bundle
