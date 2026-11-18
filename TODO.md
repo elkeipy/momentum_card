@@ -12,6 +12,7 @@
   - 완료되면 체크박스를 체크한다.
   - `## 답변` 영역에 발생 원인 및 간략한 구현 내용을 작성해라.
 - CHANGELOG.md 와 README.md 파일을 늘 최신으로 유지해라
+  - README.md 를 고치면 영어판 README.en.md 도 같이 고쳐라.
 - `깃에 올려` 라고 하면 적당한 메시지를 추가해서 git commit/push 해라
 - `배포해` 라고 하면 master 에 병합하고, 태그 추가하고, gh pages 배포해라
   - 먼저 `git fetch` 하고 `origin/master` 를 develop 에 머지해라. Dependabot PR 이 master 로 바로 머지되므로 develop 이 뒤처져 있으면 `--ff-only` 병합이 실패한다.
@@ -20,10 +21,15 @@
 
 ## 작업
 
+- [x] @README.md 영어버전도 만들어서 링크 걸어줘
+
 - [x] 깃에 올리고, 배포해
 
 ## 답변
 
-v0.2.18로 올렸다. README를 기능 소개 페이지 형식으로 다시 썼고(화면 이미지는 `docs/`), 앞서 넣은 GitHub Actions CI가 master에 들어갔다. 이제 Dependabot PR도 master로 머지하기 전에 타입체크, 단위 테스트, 빌드 검사를 거친다.
+영어판은 `README.en.md`로 만들었다. 한국어판과 제목, 표, 접이식, 이미지 구성을 같게 맞췄고 한도 숫자(분 단위, 20개, 40개, 8px 등)도 같다. 맨 위 `한국어 · English` 줄로 서로 링크한다. 앱 화면은 한국어라서 영어판에는 그 사실과 화면 속 한국어 이름(뽀모도로, 할 일, 카드 목록, 푸시 알림, 캘린더에 추가)을 영어와 함께 적었다. 이력 예시(`Focus #1(25분)`)는 화면 그대로 한국어 단위를 두고 뜻을 풀어 썼다.
 
-`src-tauri`는 바뀌지 않아서 `momentum.exe`는 다시 올리지 않았고, GitHub Release도 만들지 않고 태그만 붙였다. 새 릴리스를 만들면 `releases/latest`가 exe 없는 릴리스를 가리켜 README의 다운로드 주소가 깨진다.
+`README.md`를 고칠 때 영어판이 어긋나지 않도록 지침에 한 줄을 추가했다.
+
+v0.2.19로 올렸다. 문서 변경뿐이라 `momentum.exe`는 다시 올리지 않았고 GitHub Release도 만들지 않고 태그만 붙였다(`releases/latest`가 exe가 있는 v0.2.17을 가리키게 둔다).
+

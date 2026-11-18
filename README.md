@@ -1,4 +1,8 @@
 <p align="center">
+  <b>한국어</b> · <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
   <img src="public/favicon.svg" width="96" alt="Momentum 아이콘">
 </p>
 

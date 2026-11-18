@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 영어 README(`README.en.md`)를 추가하고 두 README가 서로 링크한다.
+
 ## 0.2.18 - 2026-11-18
 
 - GitHub Actions가 푸시와 PR마다 타입체크, 단위 테스트, 빌드를 돈다.
