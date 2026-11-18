@@ -45,6 +45,8 @@ npm run deploy
 
 `npm run deploy`는 빌드한 뒤 GitHub Pages에 올린다.
 
+푸시와 PR마다 GitHub Actions가 타입체크, 단위 테스트, 빌드를 돈다(`.github/workflows/ci.yml`). Dependabot PR도 master로 머지하기 전에 이 검사를 거친다.
+
 ## 데스크톱 앱
 
 크롬 없이 작은 창으로 띄우는 Tauri 앱이다. 윈도우에 깔린 WebView2가 배포 주소를 그대로 열기 때문에 `npm run deploy`만 하면 앱도 최신이 된다. 인터넷이 끊기면 화면이 뜨지 않는다.

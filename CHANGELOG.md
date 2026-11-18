@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- GitHub Actions가 푸시와 PR마다 타입체크, 단위 테스트, 빌드를 돈다.
+
 ## 0.2.17 - 2026-11-16
 
 - 데스크톱 앱 `momentum.exe`를 GitHub Releases의 Assets로 올려 직접 빌드하지 않고 받아 쓴다.
