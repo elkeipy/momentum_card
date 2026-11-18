@@ -6,6 +6,7 @@ import QuoteCard from '../components/QuoteCard';
 import Weather from '../components/Weather';
 import TodoCard from '../components/TodoCard';
 import WordCard from '../components/WordCard';
+import {isLang, LANGS, setLang, t, useLang, useT} from '../i18n/i18n';
 import NtfySettings from '../notify/NtfySettings';
 import {applyTheme, isThemeId, readTheme, THEMES, type ThemeId} from '../theme/theme';
 import type {CardLayout} from '../featureCard/cardLayout';
@@ -24,46 +25,33 @@ import {
 
 type CardSpec = {
   id: CardId;
-  title: string;
   layout: CardLayout;
   content: React.ReactNode;
 };
 
 const CARDS: CardSpec[] = [
   {
-    id: 'weather',
-    title: '날씨',
-    layout: {x: 24, y: 96, width: 420, height: 168, pinned: false},
+    id: 'weather',    layout: {x: 24, y: 96, width: 420, height: 168, pinned: false},
     content: <Weather />
   },
   {
-    id: 'clock',
-    title: '시계',
-    layout: {x: 460, y: 96, width: 420, height: 168, pinned: false},
+    id: 'clock',    layout: {x: 460, y: 96, width: 420, height: 168, pinned: false},
     content: <Clock />
   },
   {
-    id: 'pomodoro',
-    title: '뽀모도로',
-    layout: {x: 24, y: 280, width: 640, height: 520, pinned: false},
+    id: 'pomodoro',    layout: {x: 24, y: 280, width: 640, height: 520, pinned: false},
     content: <Pomodoro />
   },
   {
-    id: 'quote',
-    title: '명언',
-    layout: {x: 680, y: 280, width: 420, height: 220, pinned: false},
+    id: 'quote',    layout: {x: 680, y: 280, width: 420, height: 220, pinned: false},
     content: <QuoteCard />
   },
   {
-    id: 'words',
-    title: '단어',
-    layout: {x: 680, y: 516, width: 420, height: 280, pinned: false},
+    id: 'words',    layout: {x: 680, y: 516, width: 420, height: 280, pinned: false},
     content: <WordCard />
   },
   {
-    id: 'todos',
-    title: '할 일',
-    layout: {x: 680, y: 812, width: 420, height: 320, pinned: false},
+    id: 'todos',    layout: {x: 680, y: 812, width: 420, height: 320, pinned: false},
     content: <TodoCard />
   }
 ];
@@ -77,8 +65,9 @@ function formatDay(date: Date): string {
 }
 
 function todaySentence(minutes: PeriodMinutes, day: string): string {
-  const lost = minutes.Lost > 0 ? `, 놓친 ${minutes.Lost}분` : '';
-  return `오늘 집중 ${minutes.Focus}분${lost} · ${day}`;
+  const lost =
+    minutes.Lost > 0 ? t('today.lost', {lost: t('minutes', {n: minutes.Lost})}) : '';
+  return t('today', {focus: t('minutes', {n: minutes.Focus}), lost, day});
 }
 
 function Mark() {
@@ -112,30 +101,34 @@ function Mark() {
   );
 }
 
+function readFact(): {minutes: PeriodMinutes; day: string} {
+  const now = new Date();
+  return {
+    minutes: summarizePeriodMinutes(readTodayFocusHistory(localStorage, now)),
+    day: formatDay(now)
+  };
+}
+
 function TodayFact() {
-  const [line, setLine] = useState(() => todaySentence(
-    summarizePeriodMinutes(readTodayFocusHistory(localStorage, new Date())),
-    formatDay(new Date())
-  ));
+  useLang();
+  const [fact, setFact] = useState(readFact);
 
   useEffect(() => {
-    const update = () => {
-      const now = new Date();
-      const minutes = summarizePeriodMinutes(readTodayFocusHistory(localStorage, now));
-      setLine(todaySentence(minutes, formatDay(now)));
-    };
+    const update = () => setFact(readFact());
     update();
     const timerId = window.setInterval(update, HISTORY_REFRESH_MS);
     return () => window.clearInterval(timerId);
   }, []);
 
-  return <p className="mast-sub">{line}</p>;
+  return <p className="mast-sub">{todaySentence(fact.minutes, fact.day)}</p>;
 }
 
 export default function Board() {
   const [visible, setVisible] = useState<CardId[]>(() => readVisibleCards(localStorage));
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeId>(() => readTheme(localStorage));
+  const lang = useLang();
+  const t = useT();
   const [frontNonce, setFrontNonce] = useState<Partial<Record<CardId, number>>>({});
   const cardById = (id: CardId) => CARDS.find(card => card.id === id);
 
@@ -165,7 +158,7 @@ export default function Board() {
       <FeatureCard
         key={card.id}
         id={card.id}
-        title={card.title}
+        title={t(`card.${card.id}`)}
         defaultLayout={card.layout}
         frontNonce={frontNonce[card.id] ?? 0}
         onClose={() => setVisible(current => hideCard(current, card.id))}
@@ -192,7 +185,25 @@ export default function Board() {
         </div>
         <div className="card-adder">
           <label className="theme-pick">
-            테마
+            {t('lang.label')}
+            <select
+              value={lang}
+              onChange={event => {
+                const next = event.target.value;
+                if (isLang(next)) {
+                  setLang(next);
+                }
+              }}
+            >
+              {LANGS.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="theme-pick">
+            {t('theme.label')}
             <select
               value={theme}
               onChange={event => {
@@ -206,7 +217,7 @@ export default function Board() {
             >
               {THEMES.map(item => (
                 <option key={item.id} value={item.id}>
-                  {item.label}
+                  {t(`theme.${item.id}`)}
                 </option>
               ))}
             </select>
@@ -219,7 +230,7 @@ export default function Board() {
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(open => !open)}
           >
-            카드 목록
+            {t('cardList')}
           </button>
           {menuOpen ? (
             <div className="card-menu" role="menu">
@@ -242,7 +253,7 @@ export default function Board() {
                       }
                     }}
                   >
-                    {card.title}
+                    {t(`card.${card.id}`)}
                   </button>
                 );
               })}

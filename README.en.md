@@ -24,28 +24,29 @@
 </p>
 
 <p align="center">
-  <img src="docs/board.png" width="880" alt="The Momentum board. Pomodoro, quote, word, to-do, weather, and clock cards on one screen.">
+  <img src="docs/board.en.png" width="880" alt="The Momentum board. Pomodoro, quote, word, to-do, weather, and clock cards on one screen.">
 </p>
 
-> The interface is in Korean. Below, each card is named in English with its on-screen Korean label in parentheses.
+> The interface is available in English and Korean. It follows your browser's language, and you can switch it with **Language** at the top right.
 
 ## Why Momentum
 
 - **No sign-up.** No account, no server. Card layout, to-dos, and focus history stay in the browser you use.
 - **Everything on one screen.** The focus timer, today's to-dos, the weather, and the clock share one board. No tab hopping.
 - **Arrange it your way.** Drag and resize cards, and close the ones you don't need. There are ten themes.
+- **Two languages.** The interface comes in English and Korean. It follows your browser's language, and you switch it with **Language** at the top right.
 - **Light.** It is a small static page. Even as a Windows app, all of its processes together used about 110–130 MB (private working set, measured on one development PC).
 
 ## Cards
 
 | Card | What it does |
 |---|---|
-| **Pomodoro** (뽀모도로) | Focus/break timer and today's focus history. Defaults: 25 min focus, 5 min short break, 15 min long break. |
-| **To-do** (할 일) | Write what you want to finish today. `@` sets a deadline alert; `#` creates a Google Calendar event. |
-| **Weather** (날씨) | City, temperature, and feels-like temperature for your location, refreshed every hour. |
-| **Clock** (시계) | Shows this device's time. |
-| **Quote** (명언) | Five short lines that rotate every minute. Refresh to skip ahead. |
-| **Word** (단어) | An English word and its meaning, shuffled every minute. The list holds up to 20 words. |
+| **Pomodoro** | Focus/break timer and today's focus history. Defaults: 25 min focus, 5 min short break, 15 min long break. |
+| **To-do** | Write what you want to finish today. `@` sets a deadline alert; `#` creates a Google Calendar event. |
+| **Weather** | City, temperature, and feels-like temperature for your location, refreshed every hour. |
+| **Clock** | Shows this device's time. |
+| **Quote** | Five short lines that rotate every minute. Refresh to skip ahead. |
+| **Words** | An English word and its meaning, shuffled every minute. The list holds up to 20 words. |
 
 Change the font size from the gear icon in each card header. The − / + buttons preview the value on the card before you save. Quote and Word also let you change the refresh interval.
 
@@ -57,32 +58,33 @@ Change the font size from the gear icon in each card header. The − / + buttons
 - **See your day as one strip.** Today's Focus, Break, Pause, and Lost are split into one color-coded track, with the interval list below it.
 
   ```
-  Focus #1(25분)   Break #1(5분)   Focus #2(9분)   Pause (2분)   Focus #2(16분)   Lost (10초)
+  Focus #1(25 min)   Break #1(5 min)   Focus #2(9 min)   Pause (2 min)   Focus #2(16 min)   Lost (10 s)
   ```
 
-  Focus and Break show which term of the day it is plus its length; Pause and Lost show only the length. A term interrupted by Pause keeps the same number. Lengths are written in Korean units (분 = minutes, 초 = seconds): up to one minute in seconds, longer as minutes and seconds like `1분2초`. Time you paused during Focus or Break is added to the history when that term ends.
+  Focus and Break show which term of the day it is plus its length; Pause and Lost show only the length. A term interrupted by Pause keeps the same number. Lengths up to one minute are written in seconds; longer ones in minutes and seconds, like `1 min 2 s`. Time you paused during Focus or Break is added to the history when that term ends.
 - **Tell them apart at a glance.** The card background changes with Focus, Break, and Lost. Pick text colors for Focus, Break, Pause, and Lost to apply them to the timer and the history.
 - **Grow the card, grow the history.** The timer stays as it is; only the history table gets longer.
 
 ## To-do: write it and it becomes a deadline or an event
 
 - **`@` sets a deadline.** Type `@` in the input to pick a deadline hour and minute. A time earlier than now can't be entered. An item with a deadline shows a bar that fills over time. If the time arrives and the item isn't done, the bar turns red, a notice stacks at the bottom right, and a Mixkit alert sound plays.
-- **`#` creates an event.** Type `#`, pick a date and time (leave the time blank for all-day), and press **캘린더에 추가** (Add to Calendar). The Google Calendar event editor opens with the title and time filled in, using the account signed in to that browser, and you press save yourself. The event is not added to the to-do list, and the app never accesses your Google account.
+- **`#` creates an event.** Type `#`, pick a date and time (leave the time blank for all-day), and press **Add to Calendar**. The Google Calendar event editor opens with the title and time filled in, using the account signed in to that browser, and you press save yourself. The event is not added to the to-do list, and the app never accesses your Google account.
 - **Edit in place.** Double-click the text to edit it on that line. Enter saves and Esc cancels. Long text is ellipsized and shows in full on hover. Delete with the trash button. The list holds up to 40 items.
 
 ## Phone notifications too
 
-Enter an [ntfy](https://ntfy.sh) topic under **푸시 알림** (Push notifications) at the top right, and the app sends one line to `https://ntfy.sh/<topic>` when a Pomodoro interval ends or a to-do deadline passes. Subscribe to the same topic in the ntfy phone app (or at ntfy.sh/app). Messages go out only while the board tab is open. The topic name works as the password, so make it long.
+Enter an [ntfy](https://ntfy.sh) topic under **Push notifications** at the top right, and the app sends one line to `https://ntfy.sh/<topic>` when a Pomodoro interval ends or a to-do deadline passes. Subscribe to the same topic in the ntfy phone app (or at ntfy.sh/app). Messages go out only while the board tab is open. The topic name works as the password, so make it long.
 
 ## Arrange the board your way
 
 - **Drag, resize, snap.** Drag a header to move a card and the bottom-right corner to resize it. An edge within 8 px of another card's edge, or of the gap spot next to it, snaps to that line. Positions are remembered.
-- **Pin, close, bring back.** Pinning locks moving and resizing. Closing only hides a card from the screen; turn it back on from **카드 목록** (Card list) at the top right, and it comes to the front.
+- **Pin, close, bring back.** Pinning locks moving and resizing. Closing only hides a card from the screen; turn it back on from **Card list** at the top right, and it comes to the front.
+- **Pick a language.** **Language** at the top right switches between English and Korean. At first it is Korean only when your browser's first language is Korean, and English otherwise. Your choice is remembered. The city name in the weather card, the clock format, and the push notification text follow it too.
 - **Ten themes.** Default, Skeuomorphism, Flat, Material, Neumorphism, Glassmorphism, Claymorphism, Neo-brutalism, Liquid Glass, and 3D Icons. Your choice is remembered.
 
 | Glassmorphism | Neo-brutalism | Material |
 |:---:|:---:|:---:|
-| <img src="docs/theme-glass.png" width="280" alt="Glassmorphism theme"> | <img src="docs/theme-brutal.png" width="280" alt="Neo-brutalism theme"> | <img src="docs/theme-material.png" width="280" alt="Material theme"> |
+| <img src="docs/theme-glass.en.png" width="280" alt="Glassmorphism theme"> | <img src="docs/theme-brutal.en.png" width="280" alt="Neo-brutalism theme"> | <img src="docs/theme-material.en.png" width="280" alt="Material theme"> |
 
 ### Shortcuts
 
@@ -95,14 +97,14 @@ Enter an [ntfy](https://ntfy.sh) topic under **푸시 알림** (Push notificatio
 
 ## Your data stays yours
 
-There are no accounts. Card layout, visible cards, timer settings, today's focus history, the word list, to-dos, the ntfy topic, and the theme all live only in this browser's `localStorage`. Nothing syncs to other devices.
+There are no accounts. Card layout, visible cards, timer settings, today's focus history, the word list, to-dos, the ntfy topic, the theme, and the language all live only in this browser's `localStorage`. Nothing syncs to other devices.
 
 These are the only requests that leave your machine:
 
 | Request | When | What is sent |
 |---|---|---|
 | `api.open-meteo.com` | Weather card | Latitude and longitude rounded to two decimals |
-| `api.bigdatacloud.net` | Weather card | The same coordinates (returns the city name) |
+| `api.bigdatacloud.net` | Weather card | The same coordinates and the interface language code (returns the city name in that language) |
 | `api.dictionaryapi.dev` | Word card | The English word being shown |
 | `ntfy.sh` | Only when push notifications are on | One line of notification text |
 | Google Fonts | When the page opens | Font file requests |
@@ -165,6 +167,10 @@ npm run deploy
 `npm run deploy` builds the app and publishes it to GitHub Pages.
 
 On every push and pull request, GitHub Actions runs the type check, the unit tests, and the build (`.github/workflows/ci.yml`). Dependabot PRs go through the same checks before they are merged into master.
+
+### Adding a language
+
+The interface text lives in `src/i18n/messages.ts`. To add a language, add a dictionary there and register it in `Lang`, `LANGS`, and `localeOf` in `src/i18n/i18n.ts`. A missing key is a type error. The unit tests are pinned to Korean in `src/setupTests.ts`, and the e2e tests use the `ko-KR` locale in `playwright.config.ts`.
 
 ### Building the desktop app
 

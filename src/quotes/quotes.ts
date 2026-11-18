@@ -1,16 +1,36 @@
+import type {Lang} from '../i18n/i18n';
+
 export const QUOTE_REFRESH_MS = 60 * 1000;
 
 export type Quote = {
-  text: string;
+  text: Record<Lang, string>;
   from: string;
 };
 
 export const QUOTES: Quote[] = [
-  {text: '한 구간만 끝내면 다음이 가벼워진다.', from: 'momentum'},
-  {text: '시작은 작게, 끝은 오늘 안으로.', from: 'momentum'},
-  {text: '흐트러지면 다시 25분이다.', from: 'momentum'},
-  {text: '자리로 돌아오는 것도 일이다.', from: 'momentum'},
-  {text: '끝난 시간을 세지 말고 다음 시작을 눌러라.', from: 'momentum'}
+  {
+    text: {ko: '한 구간만 끝내면 다음이 가벼워진다.', en: 'Finish one interval and the next one feels lighter.'},
+    from: 'momentum'
+  },
+  {
+    text: {ko: '시작은 작게, 끝은 오늘 안으로.', en: 'Start small. Finish today.'},
+    from: 'momentum'
+  },
+  {
+    text: {ko: '흐트러지면 다시 25분이다.', en: 'Lose focus, and it is another 25 minutes.'},
+    from: 'momentum'
+  },
+  {
+    text: {ko: '자리로 돌아오는 것도 일이다.', en: 'Coming back to your desk is work too.'},
+    from: 'momentum'
+  },
+  {
+    text: {
+      ko: '끝난 시간을 세지 말고 다음 시작을 눌러라.',
+      en: 'Do not count the time that is over. Press start on the next one.'
+    },
+    from: 'momentum'
+  }
 ];
 
 export function remainingQuoteSeconds(elapsedMs: number): number {

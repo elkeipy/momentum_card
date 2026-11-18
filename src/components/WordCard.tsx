@@ -4,6 +4,7 @@ import {
   REFRESH_SEC_DEFAULT
 } from '../featureCard/cardSettings';
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
+import {useT} from '../i18n/i18n';
 import {
   addWord,
   nextRandomIndex,
@@ -25,11 +26,13 @@ const WORD_DEFAULTS = {
 
 export default function WordCard() {
   const settings = useDisplaySettings('words', WORD_DEFAULTS);
+  const t = useT();
   const [words, setWords] = useState<string[]>(() => readWordList(localStorage));
   const [index, setIndex] = useState(0);
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [draft, setDraft] = useState('');
-  const [definition, setDefinition] = useState('');
+  // null은 뜻을 찾지 못했다는 뜻이다. 문구는 그릴 때 현재 언어로 옮긴다.
+  const [definition, setDefinition] = useState<string | null>('');
   const [showAll, setShowAll] = useState(false);
   const selected = words[index] ?? words[0] ?? '';
   const intervalMs = settings.shown.refreshSec * 1000;
@@ -68,17 +71,17 @@ export default function WordCard() {
           {signal: controller.signal}
         );
         if (!response.ok) {
-          setDefinition('뜻을 찾지 못했습니다.');
+          setDefinition(null);
           return;
         }
         const payload: unknown = await response.json();
         const nextDefinition = readDefinition(payload);
-        setDefinition(nextDefinition || '뜻을 찾지 못했습니다.');
+        setDefinition(nextDefinition || null);
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
           return;
         }
-        setDefinition('뜻을 찾지 못했습니다.');
+        setDefinition(null);
       }
     };
     void load();
@@ -108,17 +111,17 @@ export default function WordCard() {
   return (
     <div className={styles.root}>
       <p className={styles.word} style={{fontSize: `${settings.shown.fontSize}px`}}>
-        {selected || '단어가 없습니다.'}
+        {selected || t('word.none')}
       </p>
       <p className={selected ? styles.definition : styles.empty}>
-        {selected ? definition : '영어 단어를 추가하면 뜻이 여기에 붙는다.'}
+        {selected ? (definition ?? t('word.notFound')) : t('word.emptyHint')}
       </p>
       {words.length > 0 ? (
         <RemainBar
           durationMs={intervalMs}
           startedAt={startedAt}
-          label="단어 남은 시간"
-          refreshLabel="단어 새로고침"
+          label={t('word.remaining')}
+          refreshLabel={t('word.refresh')}
           onRefresh={refresh}
         />
       ) : null}
@@ -129,7 +132,7 @@ export default function WordCard() {
           saveWord();
         }}
       >
-        <label htmlFor="new-word">단어 추가</label>
+        <label htmlFor="new-word">{t('word.addLabel')}</label>
         <div className={styles.join}>
           <input
             id="new-word"
@@ -138,7 +141,7 @@ export default function WordCard() {
             placeholder="english"
           />
           <button className="app-button" type="submit">
-            추가
+            {t('word.add')}
           </button>
         </div>
       </form>
@@ -147,7 +150,7 @@ export default function WordCard() {
         type="button"
         onClick={() => setShowAll(current => !current)}
       >
-        전체 목록
+        {t('word.all')}
       </button>
       {showAll ? (
         <ul className={styles.list}>
@@ -166,7 +169,7 @@ export default function WordCard() {
               <button
                 className="text-button"
                 type="button"
-                aria-label={`${word} 삭제`}
+                aria-label={t('word.deleteAria', {word})}
                 onClick={() => {
                   const nextWords = removeWord(words, word);
                   setWords(nextWords);
@@ -176,14 +179,14 @@ export default function WordCard() {
                   }
                 }}
               >
-                삭제
+                {t('word.delete')}
               </button>
             </li>
           ))}
         </ul>
       ) : null}
       {settings.isOpen ? (
-        <SettingsModal title="단어 설정" onSave={settings.save} onClose={settings.close}>
+        <SettingsModal title={t('settings.words')} onSave={settings.save} onClose={settings.close}>
           <DisplaySettingsFields
             value={settings.draft}
             onChange={settings.setDraft}

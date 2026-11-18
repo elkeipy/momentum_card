@@ -1,16 +1,16 @@
 export const THEME_STORAGE_KEY = 'momentum-theme';
 
 export const THEMES = [
-  {id: 'default', label: '기본'},
-  {id: 'skeu', label: '스큐어모피즘'},
-  {id: 'flat', label: '플랫'},
-  {id: 'material', label: '머티리얼'},
-  {id: 'neu', label: '뉴모피즘'},
-  {id: 'glass', label: '글래스모피즘'},
-  {id: 'clay', label: '클레이모피즘'},
-  {id: 'brutal', label: '네오 브루탈리즘'},
-  {id: 'liquid', label: '리퀴드 글래스'},
-  {id: 'icons3d', label: '3D 아이콘'}
+  {id: 'default'},
+  {id: 'skeu'},
+  {id: 'flat'},
+  {id: 'material'},
+  {id: 'neu'},
+  {id: 'glass'},
+  {id: 'clay'},
+  {id: 'brutal'},
+  {id: 'liquid'},
+  {id: 'icons3d'}
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]['id'];

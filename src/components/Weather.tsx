@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {REFRESH_SEC_DEFAULT, WEATHER_FONT_DEFAULT} from '../featureCard/cardSettings';
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
+import {useLang, useT} from '../i18n/i18n';
+import type {MessageKey} from '../i18n/messages';
 import styles from '../css/Weather.module.css';
 import DisplaySettingsFields from './DisplaySettingsFields';
 import SettingsModal from './SettingsModal';
@@ -14,7 +16,6 @@ interface WeatherInfoMap {
 const WEATHER_REFRESH_MS = 60 * 60 * 1000;
 const GEO_DECIMAL_PLACES = 2;
 const MAX_LOCATION_LENGTH = 80;
-const UNKNOWN_LOCATION = '알 수 없는 위치';
 
 function roundCoordinate(value: number): number {
   const factor = 10 ** GEO_DECIMAL_PLACES;
@@ -27,7 +28,7 @@ function readTemperature(value: unknown): number | null {
 
 function readLocationName(value: unknown): string {
   if (typeof value !== 'string') {
-    return UNKNOWN_LOCATION;
+    return '';
   }
   const cleaned = Array.from(value)
     .filter(char => {
@@ -37,7 +38,7 @@ function readLocationName(value: unknown): string {
     .join('')
     .trim();
   if (!cleaned) {
-    return UNKNOWN_LOCATION;
+    return '';
   }
   return cleaned.slice(0, MAX_LOCATION_LENGTH);
 }
@@ -49,8 +50,10 @@ const WEATHER_DEFAULTS = {
 
 function Weather() {
   const settings = useDisplaySettings('weather', WEATHER_DEFAULTS);
+  const lang = useLang();
+  const t = useT();
   const [weatherInfo, setWeatherInfo] = useState<WeatherInfoMap | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -59,14 +62,14 @@ function Weather() {
     const resolveLocationName = async (lat: number, lon: number) => {
       try {
         const geoResponse = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`
         );
         if (!geoResponse.ok) {
-          return UNKNOWN_LOCATION;
+          return '';
         }
         const geoData: unknown = await geoResponse.json();
         if (!geoData || typeof geoData !== 'object') {
-          return UNKNOWN_LOCATION;
+          return '';
         }
         const place = geoData as {
           city?: unknown;
@@ -77,7 +80,7 @@ function Weather() {
           place.city || place.locality || place.principalSubdivision
         );
       } catch {
-        return UNKNOWN_LOCATION;
+        return '';
       }
     };
 
@@ -105,10 +108,10 @@ function Weather() {
           feelsLike: readTemperature(current?.apparent_temperature),
           location
         });
-        setErrorMessage('');
+        setErrorKey(null);
       } catch {
         if (isActive) {
-          setErrorMessage('날씨 정보를 불러오지 못했습니다.');
+          setErrorKey('weather.error');
         }
       }
     };
@@ -126,13 +129,13 @@ function Weather() {
     };
 
     if (!navigator.geolocation) {
-      setErrorMessage('이 브라우저는 위치 정보를 지원하지 않습니다.');
+      setErrorKey('weather.noGeo');
       return;
     }
 
     navigator.geolocation.getCurrentPosition(startRefresh, () => {
       if (isActive) {
-        setErrorMessage('위치 권한이 필요합니다. 브라우저 권한을 확인해 주세요.');
+        setErrorKey('weather.denied');
       }
     });
 
@@ -142,18 +145,18 @@ function Weather() {
         window.clearInterval(refreshTimerId);
       }
     };
-  }, []);
+  }, [lang]);
 
   const settingsModal = settings.isOpen ? (
-    <SettingsModal title="날씨 설정" onSave={settings.save} onClose={settings.close}>
+    <SettingsModal title={t('settings.weather')} onSave={settings.save} onClose={settings.close}>
       <DisplaySettingsFields value={settings.draft} onChange={settings.setDraft} />
     </SettingsModal>
   ) : null;
 
-  if (errorMessage) {
+  if (errorKey) {
     return (
       <>
-        <p className={styles.error}>{errorMessage}</p>
+        <p className={styles.error}>{t(errorKey)}</p>
         {settingsModal}
       </>
     );
@@ -164,7 +167,7 @@ function Weather() {
 
   return (
     <div className={styles.rootDiv}>
-      <p className={styles.place}>{weatherInfo?.location ?? '위치 확인 중'}</p>
+      <p className={styles.place}>{weatherInfo ? weatherInfo.location || t('weather.unknown') : t('weather.locating')}</p>
       {typeof temperature === 'number' ? (
         <p className={styles.temp} style={{fontSize: `${settings.shown.fontSize}px`}}>
           <span className="num">{temperature}</span>
@@ -174,7 +177,7 @@ function Weather() {
         <p className={styles.missing}>—</p>
       )}
       <p className={styles.meta}>
-        {typeof feelsLike === 'number' ? `체감온도: ${feelsLike}°C` : '체감온도: —'}
+        {t('weather.feels', {value: typeof feelsLike === 'number' ? `${feelsLike}°C` : '—'})}
       </p>
       {settingsModal}
     </div>

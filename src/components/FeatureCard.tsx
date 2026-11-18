@@ -9,6 +9,7 @@ import {
   type ViewportSize
 } from '../featureCard/cardLayout';
 import {CardSettingsProvider} from '../featureCard/cardSettingsContext';
+import {useT} from '../i18n/i18n';
 import {CloseIcon, GearIcon, PinIcon} from './icons';
 import styles from './FeatureCard.module.css';
 
@@ -112,6 +113,7 @@ export default function FeatureCard({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const dragRef = useRef<DragState | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const t = useT();
 
   const bringToFront = () => {
     const rect = sectionRef.current?.getBoundingClientRect();
@@ -265,7 +267,7 @@ export default function FeatureCard({
             <button
               type="button"
               className="icon-button"
-              aria-label={`${title} 설정`}
+              aria-label={t('card.settings', {title})}
               onClick={() => setSettingsOpen(true)}
             >
               <GearIcon />
@@ -274,7 +276,7 @@ export default function FeatureCard({
               type="button"
               className="icon-button"
               aria-pressed={layout.pinned}
-              aria-label={`${title} 고정`}
+              aria-label={t('card.pin', {title})}
               onClick={() => setLayout(current => ({...current, pinned: !current.pinned}))}
             >
               <PinIcon filled={layout.pinned} />
@@ -282,7 +284,7 @@ export default function FeatureCard({
             <button
               type="button"
               className="icon-button"
-              aria-label={`${title} 닫기`}
+              aria-label={t('card.close', {title})}
               onClick={onClose}
             >
               <CloseIcon />

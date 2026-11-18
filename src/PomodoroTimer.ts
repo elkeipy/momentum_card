@@ -1,3 +1,4 @@
+import {t} from './i18n/i18n';
 import {publishNtfy} from './notify/ntfy';
 import {formatElapsed} from './pomodoro/formatElapsed';
 import {
@@ -591,8 +592,8 @@ class PomodoroTimer {
       void this.audio.play().catch(() => undefined);
     }
     const ended =
-      this._periodType === PeriodType.Focus ? 'Focus 끝' : 'Break 끝';
-    publishNtfy('뽀모도로', ended);
+      this._periodType === PeriodType.Focus ? t('ntfy.focusEnded') : t('ntfy.breakEnded');
+    publishNtfy(t('ntfy.pomodoro'), ended);
   }
 
   private isPlayingAlarmSound(): boolean {

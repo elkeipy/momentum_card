@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {CLOCK_FONT_DEFAULT, REFRESH_SEC_DEFAULT} from '../featureCard/cardSettings';
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
+import {localeOf, useLang, useT} from '../i18n/i18n';
 import styles from '../css/Clock.module.css';
 import DisplaySettingsFields from './DisplaySettingsFields';
 import SettingsModal from './SettingsModal';
@@ -11,17 +12,15 @@ const CLOCK_DEFAULTS = {
   refreshSec: REFRESH_SEC_DEFAULT
 };
 
-function formatCurrentTime(): string {
-  return new Date().toLocaleTimeString();
-}
-
 function Clock() {
   const settings = useDisplaySettings('clock', CLOCK_DEFAULTS);
-  const [time, setTime] = useState(formatCurrentTime);
+  const lang = useLang();
+  const t = useT();
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setTime(formatCurrentTime());
+      setNow(new Date());
     }, CLOCK_TIMEOUT_MS);
     return () => window.clearInterval(intervalId);
   }, []);
@@ -32,10 +31,10 @@ function Clock() {
         className={`${styles.time} num`}
         style={{fontSize: `${settings.shown.fontSize}px`}}
       >
-        {time}
+        {now.toLocaleTimeString(localeOf(lang))}
       </p>
       {settings.isOpen ? (
-        <SettingsModal title="시계 설정" onSave={settings.save} onClose={settings.close}>
+        <SettingsModal title={t('settings.clock')} onSave={settings.save} onClose={settings.close}>
           <DisplaySettingsFields value={settings.draft} onChange={settings.setDraft} />
         </SettingsModal>
       ) : null}

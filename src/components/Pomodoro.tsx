@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import PomodoroTimer, {CardTone, TimerSettings} from '../PomodoroTimer';
 import {DEFAULT_PERIOD_COLORS} from '../pomodoro/periodColors';
 import {useCardSettings} from '../featureCard/cardSettingsContext';
+import {useT} from '../i18n/i18n';
 import {
   readTimerTextSize,
   TIMER_TEXT_SIZE_MAX,
@@ -68,6 +69,7 @@ function Pomodoro() {
   const [progress, setProgress] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const settingsUi = useCardSettings();
+  const t = useT();
 
   const saveTimerOption = () => {
     const settings: TimerSettings = {
@@ -170,7 +172,7 @@ function Pomodoro() {
           <div
             className={styles.track}
             role="progressbar"
-            aria-label="구간 진행"
+            aria-label={t('pomodoro.progress')}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(progress * 100)}
@@ -188,7 +190,7 @@ function Pomodoro() {
           <h3>{currentStateText}</h3>
         </div>
         {settingsUi.isOpen ? (
-          <SettingsModal title="구간 길이" onSave={saveTimerOption} onClose={closeTimerOption}>
+          <SettingsModal title={t('settings.pomodoro')} onSave={saveTimerOption} onClose={closeTimerOption}>
             <OptionField
               id="focusTime"
               label="Focus Time"
@@ -229,10 +231,10 @@ function Pomodoro() {
               value={timerTextSize}
               onValue={setTimerTextSize}
             />
-            <ColorField id="focusColor" label="Focus 색" value={focusColor} onValue={setFocusColor} />
-            <ColorField id="breakColor" label="Break 색" value={breakColor} onValue={setBreakColor} />
-            <ColorField id="pauseColor" label="Pause 색" value={pauseColor} onValue={setPauseColor} />
-            <ColorField id="lostColor" label="Lost 색" value={lostColor} onValue={setLostColor} />
+            <ColorField id="focusColor" label={t('pomodoro.focusColor')} value={focusColor} onValue={setFocusColor} />
+            <ColorField id="breakColor" label={t('pomodoro.breakColor')} value={breakColor} onValue={setBreakColor} />
+            <ColorField id="pauseColor" label={t('pomodoro.pauseColor')} value={pauseColor} onValue={setPauseColor} />
+            <ColorField id="lostColor" label={t('pomodoro.lostColor')} value={lostColor} onValue={setLostColor} />
           </SettingsModal>
         ) : null}
         <div className={styles.timerButtonDiv}>

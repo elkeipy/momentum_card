@@ -26,6 +26,7 @@ import {
 } from '../todos/todos';
 import AlarmDialog from './AlarmDialog';
 import {TrashIcon} from './icons';
+import {useT} from '../i18n/i18n';
 import DisplaySettingsFields from './DisplaySettingsFields';
 import SettingsModal from './SettingsModal';
 import styles from './TodoCard.module.css';
@@ -46,6 +47,7 @@ function readClockPart(value: string, max: number): number | null {
 
 export default function TodoCard() {
   const settings = useDisplaySettings('todos', TODO_DEFAULTS);
+  const t = useT();
   const [items, setItems] = useState(() => readTodoList(localStorage));
   const [draft, setDraft] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -189,7 +191,7 @@ export default function TodoCard() {
 
   return (
     <div className={styles.root}>
-      <p className={styles.summary}>남은 {remaining} · 전체 {items.length}</p>
+      <p className={styles.summary}>{t('todo.summary', {remaining, total: items.length})}</p>
       <form
         className={styles.form}
         onSubmit={event => {
@@ -197,39 +199,39 @@ export default function TodoCard() {
           saveItem();
         }}
       >
-        <label htmlFor="new-todo">할 일 추가</label>
+        <label htmlFor="new-todo">{t('todo.addLabel')}</label>
         <div className={styles.join}>
           <input
             id="new-todo"
             ref={draftRef}
             value={draft}
             onChange={event => onDraftChange(event.target.value)}
-            placeholder="오늘 끝낼 일 @시간 · 일정 #날짜"
+            placeholder={t('todo.placeholder')}
           />
           <button className="app-button" type="submit">
-            {showEvent ? '캘린더에 추가' : '추가'}
+            {showEvent ? t('todo.addEvent') : t('todo.add')}
           </button>
         </div>
         {showEvent ? (
           <div className={styles.due}>
             <label>
-              날짜
+              {t('todo.date')}
               <input
                 type="date"
                 min={todayIso(now)}
                 value={eventDate}
-                aria-label="일정 날짜"
+                aria-label={t('todo.eventDateAria')}
                 onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   setEventDate(event.target.value)
                 }
               />
             </label>
             <label>
-              시각
+              {t('todo.time')}
               <input
                 type="time"
                 value={eventTime}
-                aria-label="일정 시각 (비우면 종일)"
+                aria-label={t('todo.eventTimeAria')}
                 onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   setEventTime(event.target.value)
                 }
@@ -240,14 +242,14 @@ export default function TodoCard() {
         {showDue ? (
           <div className={styles.due}>
             <label>
-              시
+              {t('todo.hour')}
               <input
                 type="number"
                 min={hourMin}
                 max={23}
                 step={1}
                 value={dueHour}
-                aria-label="마감 시"
+                aria-label={t('todo.hourAria')}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   const next = readClockPart(event.target.value, 23);
                   if (next !== null) {
@@ -257,14 +259,14 @@ export default function TodoCard() {
               />
             </label>
             <label>
-              분
+              {t('todo.minute')}
               <input
                 type="number"
                 min={minuteMin}
                 max={59}
                 step={1}
                 value={dueMinute}
-                aria-label="마감 분"
+                aria-label={t('todo.minuteAria')}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   const next = readClockPart(event.target.value, 59);
                   if (next !== null) {
@@ -277,7 +279,7 @@ export default function TodoCard() {
         ) : null}
       </form>
       {items.length === 0 ? (
-        <p className={styles.empty}>할 일을 추가하면 여기에 쌓인다.</p>
+        <p className={styles.empty}>{t('todo.empty')}</p>
       ) : (
         <ul className={styles.list} style={{fontSize: `${settings.shown.fontSize}px`}}>
           {items.map(item => {
@@ -300,7 +302,7 @@ export default function TodoCard() {
                     {editingId === item.id ? (
                       <input
                         className={styles.edit}
-                        aria-label={`${item.text} 수정`}
+                        aria-label={t('todo.editAria', {text: item.text})}
                         value={editDraft}
                         autoFocus
                         onChange={event => setEditDraft(event.target.value)}
@@ -330,7 +332,7 @@ export default function TodoCard() {
                   <button
                     className="icon-button"
                     type="button"
-                    aria-label={`${item.text} 삭제`}
+                    aria-label={t('todo.deleteAria', {text: item.text})}
                     onClick={() => setItems(current => removeTodo(current, item.id))}
                   >
                     <TrashIcon />
@@ -340,7 +342,7 @@ export default function TodoCard() {
                   <div
                     className={styles.track}
                     role="progressbar"
-                    aria-label={`${item.text} 마감`}
+                    aria-label={t('todo.dueAria', {text: item.text})}
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={Math.round(ratio * 100)}
@@ -369,7 +371,7 @@ export default function TodoCard() {
         onAck={ackAlarm}
       />
       {settings.isOpen ? (
-        <SettingsModal title="할 일 설정" onSave={settings.save} onClose={settings.close}>
+        <SettingsModal title={t('settings.todos')} onSave={settings.save} onClose={settings.close}>
           <DisplaySettingsFields value={settings.draft} onChange={settings.setDraft} />
         </SettingsModal>
       ) : null}

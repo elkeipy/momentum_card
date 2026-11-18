@@ -12,6 +12,7 @@ import {
   readPeriodColors,
   type PeriodColors
 } from '../pomodoro/periodColors';
+import {useT} from '../i18n/i18n';
 import styles from './FocusHistory.module.css';
 
 const HISTORY_REFRESH_MS = 5000;
@@ -23,6 +24,7 @@ const BAR_KINDS: (keyof PeriodMinutes)[] = [
 ];
 
 export default function FocusHistory() {
+  const t = useT();
   const [rows, setRows] = useState<FocusPeriod[]>([]);
   const [colors, setColors] = useState<PeriodColors>(() => readPeriodColors(localStorage));
 
@@ -60,7 +62,7 @@ export default function FocusHistory() {
             )
           : null}
       </div>
-      <ul className={styles.legend} aria-label="오늘 시간 요약">
+      <ul className={styles.legend} aria-label={t('history.summary')}>
         {BAR_KINDS.map(kind => {
           const color = periodTextColor(kind, colors);
           const numColor = kind === 'Lost' && minutes.Lost === 0 ? undefined : color;
@@ -68,23 +70,23 @@ export default function FocusHistory() {
             <li key={kind} style={kind === 'Lost' ? undefined : {color}}>
               {kind}{' '}
               <span style={numColor ? {color: numColor} : undefined}>
-                {minutes[kind]}분
+                {t('minutes', {n: minutes[kind]})}
               </span>
             </li>
           );
         })}
       </ul>
       {rows.length === 0 ? (
-        <p className={styles.empty}>오늘 이력이 없습니다.</p>
+        <p className={styles.empty}>{t('history.empty')}</p>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
-            <caption>집중 이력</caption>
+            <caption>{t('history.caption')}</caption>
             <thead>
               <tr>
-                <th>구분</th>
-                <th>시작</th>
-                <th>종료</th>
+                <th>{t('history.kind')}</th>
+                <th>{t('history.start')}</th>
+                <th>{t('history.end')}</th>
               </tr>
             </thead>
             <tbody>

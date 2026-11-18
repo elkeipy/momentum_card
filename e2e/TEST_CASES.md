@@ -21,6 +21,8 @@
 
 ### 0.2 공통 준비 (Phase 1 시작 전에 한 번)
 
+이 문서의 케이스는 **한국어 화면**을 기준으로 쓰여 있다. 화면 언어는 브라우저 언어(첫 언어가 `ko`일 때만 한국어)와 `localStorage['momentum-lang']`로 정해진다. 영어 브라우저(Playwright 기본 `en-US`)로 열면 영어 화면이 뜨므로, 컨텍스트를 만들 때 `locale: 'ko-KR'`을 주거나 첫 로드 전에 `momentum-lang`을 `ko`로 저장한다. 언어 케이스(I18N)만 예외다.
+
 `browser_resize`로 1280×900을 맞추고, `browser_run_code_unsafe`로 아래를 실행한다. 외부 API는 항상 목으로 막는다. 실제 외부 서버에 요청을 보내지 않는다.
 
 ```js
@@ -97,7 +99,7 @@ async (page) => {
 | 카드 | `getByRole('region', {name: '날씨' \| '시계' \| '뽀모도로' \| '명언' \| '단어' \| '할 일'})` |
 | 카드 속성 | `data-pinned`(true/false), `data-placed`, 뽀모도로는 `data-tone`(focus/break/lost) |
 | 카드 버튼 | `<카드이름> 설정` / `<카드이름> 고정`(`aria-pressed`) / `<카드이름> 닫기` |
-| 상단 | `header.mast`, 제목 `This session`, 부제 `.mast-sub`, `테마` select, `푸시 알림`, `카드 목록`(`aria-expanded`) |
+| 상단 | `header.mast`, 제목 `This session`, 부제 `.mast-sub`, `언어` select(`한국어`/`English`), `테마` select, `푸시 알림`, `카드 목록`(`aria-expanded`) |
 | 카드 목록 메뉴 | `menuitemcheckbox`(`aria-checked`) 6개 |
 | 설정 모달 | `dialog` 이름: `날씨 설정`/`시계 설정`/`구간 길이`(뽀모도로)/`명언 설정`/`단어 설정`/`할 일 설정`/`푸시 알림`. 버튼 `Save`, `Close` |
 | 스텝 필드 | `<라벨> 줄이기` / `<라벨> 늘리기` 버튼과 `spinbutton`. 라벨: Font Size, Refresh (sec), Focus Time, Short Break, Long Break, Long Break Interval, Timer Text |
@@ -107,7 +109,7 @@ async (page) => {
 | 할 일 | 입력 `할 일 추가`, `마감 시`/`마감 분`, `일정 날짜`/`일정 시각 (비우면 종일)`, 체크박스(이름=항목 글자), `<글자> 삭제`, `<글자> 수정`, `progressbar '<글자> 마감'` |
 | 알람 | `region '할 일 알람'`, `status '할 일 알람 <글자>'`, 버튼 `확인` |
 
-`localStorage` 키: `feature-card:<weather|clock|pomodoro|quote|words|todos>`, `visible-cards`, `card-settings:<weather|clock|quote|words|todos>`, `PomodoroSettings`, `PomodoroTimerTextSize`, `PomodoroFocusData`, `todoList`, `wordList`, `ntfy-topic`, `momentum-theme`
+`localStorage` 키: `feature-card:<weather|clock|pomodoro|quote|words|todos>`, `visible-cards`, `card-settings:<weather|clock|quote|words|todos>`, `PomodoroSettings`, `PomodoroTimerTextSize`, `PomodoroFocusData`, `todoList`, `wordList`, `ntfy-topic`, `momentum-theme`, `momentum-lang`
 
 한도 요약: 글자 크기 12–72, 새로고침 5–600초, 뽀모도로 집중 1–60·짧은 휴식 1–30·긴 휴식 1–30·간격 1–10·타이머 글자 24–128(기본 80), 단어 20개·40자, 할 일 40개·80자, ntfy 토픽 `[A-Za-z0-9_-]` 64자, 카드 최소 220×140, 붙는 거리 8px.
 
@@ -585,7 +587,43 @@ async (page) => {
 
 ---
 
-## 14. 참고: 문서와 구현이 맞는지 볼 항목
+## 14. I18N 화면 언어
+
+언어 케이스는 한국어 기준 전제의 예외다. 각 케이스는 초기화에서 시작한다.
+
+### I18N-01 영어 브라우저는 영어로 시작 P0 🖼
+- 준비: 컨텍스트 `locale: 'en-US'`, 초기화.
+- 절차: 로드.
+- 기대: `html[lang=en]`. 카드 제목이 `Weather, Clock, Pomodoro, Quote, Words, To-do`. 상단 `Language`, `Theme`, `Push notifications`, `Card list`. 부제 `Focus today: 0 min · YYYY-MM-DD`. 시계가 `h:mm:ss AM/PM`. 한국어 문구가 화면에 남지 않는다(언어 선택의 `한국어` 제외).
+
+### I18N-02 한국어 브라우저는 한국어로 시작 P0
+- 준비: 컨텍스트 `locale: 'ko-KR'`, 초기화.
+- 기대: `html[lang=ko]`, 카드 제목이 한국어, 부제 `오늘 집중 0분 · YYYY-MM-DD`. 한국어가 첫 언어가 아닌 `['en-US', 'ko']`는 영어로 시작한다(`INFO`: 컨텍스트 `locale`로 재현).
+
+### I18N-03 언어 전환과 저장 P0 🖼
+- 절차: `언어`에서 `English` 선택 → 카드·설정 모달·푸시 알림 모달·카드 목록을 확인 → reload → `Language`에서 `한국어` 선택.
+- 기대: 선택 즉시 새로고침 없이 모든 문구가 바뀐다(카드 제목, 버튼의 접근 이름 `Weather settings`/`Pin Weather`/`Close Weather`, 설정 모달 제목 `Weather settings`·`Interval lengths`·`Quote settings`·`Word settings`·`To-do settings`, 푸시 알림 모달 `Push notifications`·`ntfy topic`, 테마 이름 10개). `localStorage['momentum-lang']`가 `en`이고 reload 뒤에도 영어다. 한국어로 되돌리면 모두 한국어로 돌아온다. 카드 위치·고정·할 일 같은 데이터는 바뀌지 않는다.
+
+### I18N-04 영어 화면의 문구 점검 P1
+- 준비: 영어 선택, 오늘 이력 시드(`Focus 09:00–09:25`, `Break 09:25–09:30`, `Lost 09:30:00–09:30:10`, `Lost 09:31–09:32:02`).
+- 기대: 이력 라벨 `Focus #1(25 min)`, `Break #1(5 min)`, `Lost (10 s)`, `Lost (1 min 2 s)`. 이력 머리 `Type/Start/End`, 캡션 `Focus history`, 비었을 때 `No history today.`. 할 일 `0 left · 0 total`, 입력 `Add a to-do`, `#` 입력 시 `Add to Calendar`·`Event date`, `@` 입력 시 `Deadline hour/minute`. 단어 `Add a word`·`All words`·`Meaning not found.`(사전 404 목). 날씨 오류 `This browser does not support geolocation.` 등.
+
+### I18N-05 영어 화면의 날씨와 시계 P1
+- 절차: 영어로 로드하고 bigdatacloud 요청을 `network_requests`로 본다. 한국어로 바꾼 뒤 다시 본다.
+- 기대: 요청에 `localityLanguage=en`(한국어면 `ko`)이 붙는다. 언어를 바꾸면 날씨가 새 언어로 다시 요청된다(도시 이름이 `Seoul` ↔ `서울`). 시계 형식이 `h:mm:ss AM/PM` ↔ `오전/오후 h:mm:ss`. 체감온도 `Feels like: 20.1°C`.
+
+### I18N-06 ⏱ 영어 화면의 알림 문구 P1
+- 준비: 영어 선택, ntfy 토픽 `desk-test`, Focus Time 1.
+- 절차: 집중을 끝낸다(`runFor(61000)`). `meeting @`로 마감 10:02인 할 일을 만들고 마감을 지난다.
+- 기대: ntfy 본문이 `Pomodoro: Focus ended`, `To-do: meeting (10:02)`. 토스트가 `To-do alarm`·`OK`. 한국어로 바꾸면 `뽀모도로: Focus 끝`, `할 일: meeting (10:02)`.
+
+### I18N-07 헤더 줄바꿈 P2 🖼
+- 절차: 1920, 1280, 1024, 800 너비에서 두 언어로 로드한다.
+- 기대: 헤더가 좁으면 두 줄로 접히고, 모든 카드가 `header.mast` 아래에 있으며 가로 스크롤이 없다. (측정: 1280까지는 한 줄 77px, 영어 1024와 두 언어 800은 두 줄 123px.)
+
+---
+
+## 15. 참고: 문서와 구현이 맞는지 볼 항목
 
 케이스를 수행하다 아래가 눈에 띄면 `INFO`로 보고서에 남긴다. 판정 대상은 아니다.
 

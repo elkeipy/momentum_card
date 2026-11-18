@@ -4,6 +4,7 @@ import {
   REFRESH_SEC_DEFAULT
 } from '../featureCard/cardSettings';
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
+import {useLang, useT} from '../i18n/i18n';
 import {nextQuoteIndex, QUOTES} from '../quotes/quotes';
 import DisplaySettingsFields from './DisplaySettingsFields';
 import RemainBar from './RemainBar';
@@ -17,6 +18,8 @@ const QUOTE_DEFAULTS = {
 
 export default function QuoteCard() {
   const settings = useDisplaySettings('quote', QUOTE_DEFAULTS);
+  const lang = useLang();
+  const t = useT();
   const [index, setIndex] = useState(0);
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const quote = QUOTES[index] ?? QUOTES[0];
@@ -38,18 +41,18 @@ export default function QuoteCard() {
   return (
     <div>
       <p className={styles.quote} style={{fontSize: `${settings.shown.fontSize}px`}}>
-        {quote.text}
+        {quote.text[lang]}
       </p>
       <p className={styles.from}>{quote.from}</p>
       <RemainBar
         durationMs={intervalMs}
         startedAt={startedAt}
-        label="명언 남은 시간"
-        refreshLabel="명언 새로고침"
+        label={t('quote.remaining')}
+        refreshLabel={t('quote.refresh')}
         onRefresh={refresh}
       />
       {settings.isOpen ? (
-        <SettingsModal title="명언 설정" onSave={settings.save} onClose={settings.close}>
+        <SettingsModal title={t('settings.quote')} onSave={settings.save} onClose={settings.close}>
           <DisplaySettingsFields
             value={settings.draft}
             onChange={settings.setDraft}

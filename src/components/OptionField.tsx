@@ -1,4 +1,5 @@
 import React, {ChangeEvent} from 'react';
+import {useT} from '../i18n/i18n';
 import styles from '../css/SettingsModal.module.css';
 
 function readBoundedInteger(value: string, min: number, max: number): number | null {
@@ -33,6 +34,7 @@ export default function OptionField({
   value,
   onValue
 }: OptionFieldProps) {
+  const t = useT();
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = readBoundedInteger(event.target.value, min, max);
     if (nextValue !== null) {
@@ -48,7 +50,7 @@ export default function OptionField({
         <button
           type="button"
           className={styles.step}
-          aria-label={`${label} 줄이기`}
+          aria-label={t('option.decrease', {label})}
           disabled={value <= min}
           onClick={() => onValue(clampStep(value, -1, min, max))}
         >
@@ -69,7 +71,7 @@ export default function OptionField({
         <button
           type="button"
           className={styles.step}
-          aria-label={`${label} 늘리기`}
+          aria-label={t('option.increase', {label})}
           disabled={value >= max}
           onClick={() => onValue(clampStep(value, 1, min, max))}
         >

@@ -12,6 +12,7 @@ export default defineConfig({
   use: {
     baseURL: devServerUrl,
     trace: 'on-first-retry',
+    locale: 'ko-KR',
     geolocation: {latitude: 37.5665, longitude: 126.978},
     permissions: ['geolocation']
   },

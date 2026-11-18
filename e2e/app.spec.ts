@@ -305,6 +305,35 @@ test('adds and completes a todo on the board', async ({page}) => {
   await expect(card.getByLabel('마감 분')).toBeVisible();
 });
 
+test('switches the interface to English and remembers it', async ({page}) => {
+  await page.goto('/');
+  await page.getByLabel('언어').selectOption('en');
+  for (const name of ['Weather', 'Clock', 'Pomodoro', 'Quote', 'Words', 'To-do']) {
+    await expect(page.getByRole('region', {name, exact: true})).toBeVisible();
+  }
+  await expect(page.getByRole('button', {name: 'Card list'})).toBeVisible();
+  await expect(page.getByRole('region', {name: 'Weather'})).toContainText('Feels like: 20.1°C');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await page.reload();
+  await expect(page.getByRole('region', {name: 'Pomodoro'})).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('momentum-lang'))).toBe('en');
+  await page.getByLabel('Language').selectOption('ko');
+  await expect(page.getByRole('region', {name: '날씨'})).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ko');
+});
+
+test.describe('with an English browser', () => {
+  test.use({locale: 'en-US'});
+
+  test('starts in English when the browser language is not Korean', async ({page}) => {
+    await page.goto('/');
+    await expect(page.getByRole('region', {name: 'To-do'})).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByText(/^Focus today: 0 min · /)).toBeVisible();
+    await expect(page.getByRole('region', {name: 'Clock'})).toContainText(/\d{1,2}:\d{2}:\d{2}\s?(AM|PM)/);
+  });
+});
+
 test('saves an ntfy topic from the header', async ({page}) => {
   await page.goto('/');
   await page.getByRole('button', {name: '푸시 알림'}).click();

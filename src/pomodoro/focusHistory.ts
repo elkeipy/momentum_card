@@ -1,3 +1,5 @@
+import {getLang, translate, type Lang} from '../i18n/i18n';
+
 export const POMODORO_FOCUS_STORAGE_KEY = 'PomodoroFocusData';
 
 export type FocusPeriod = {
@@ -56,13 +58,15 @@ export function summarizePeriodMinutes(periods: FocusPeriod[]): PeriodMinutes {
 }
 
 // 1분까지는 초만, 넘으면 분과 초(0초는 생략)로 적는다.
-export function formatSpan(totalSeconds: number): string {
+export function formatSpan(totalSeconds: number, lang: Lang = getLang()): string {
   if (totalSeconds <= 60) {
-    return `${totalSeconds}초`;
+    return translate(lang, 'span.sec', {n: totalSeconds});
   }
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return seconds === 0 ? `${minutes}분` : `${minutes}분${seconds}초`;
+  return seconds === 0
+    ? translate(lang, 'span.min', {n: minutes})
+    : translate(lang, 'span.minSec', {m: minutes, s: seconds});
 }
 
 // Pause로 끊긴 텀은 Focus, Pause, Focus처럼 맞닿은 조각으로 남는다.
@@ -79,10 +83,10 @@ function continuesTerm(periods: FocusPeriod[], index: number): boolean {
 }
 
 // Focus와 Break는 오늘 몇 번째 텀인지와 그 줄의 길이를, Lost와 Pause는 길이만 붙인다.
-export function labelFocusHistory(periods: FocusPeriod[]): string[] {
+export function labelFocusHistory(periods: FocusPeriod[], lang: Lang = getLang()): string[] {
   const counts = {Focus: 0, Break: 0};
   return periods.map((period, index) => {
-    const span = formatSpan(periodSeconds(period));
+    const span = formatSpan(periodSeconds(period), lang);
     const kind = period.periodType;
     if (kind !== 'Focus' && kind !== 'Break') {
       return `${kind} (${span})`;
