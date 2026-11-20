@@ -161,3 +161,21 @@ test('opens a prefilled Google Calendar link for a # entry and keeps it on the l
   const stored = JSON.parse(localStorage.getItem('todoList') ?? '[]');
   expect(stored[0].event).toMatchObject({date: '2999-01-02', time: null});
 });
+
+test('releases the add field on escape and keeps the typed text', () => {
+  render(<TodoCard />);
+  const field = screen.getByLabelText('할 일 추가');
+  field.focus();
+  fireEvent.change(field, {target: {value: 'draft'}});
+  fireEvent.keyDown(field, {key: 'Escape'});
+  expect(field).not.toHaveFocus();
+  expect(field).toHaveValue('draft');
+});
+
+test('keeps the add field focused when escape ends an IME composition', () => {
+  render(<TodoCard />);
+  const field = screen.getByLabelText('할 일 추가');
+  field.focus();
+  fireEvent.keyDown(field, {key: 'Escape', isComposing: true});
+  expect(field).toHaveFocus();
+});

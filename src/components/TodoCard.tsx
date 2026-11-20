@@ -212,6 +212,11 @@ export default function TodoCard() {
             ref={draftRef}
             value={draft}
             onChange={event => onDraftChange(event.target.value)}
+            onKeyDown={event => {
+              if (event.key === 'Escape' && !event.nativeEvent.isComposing) {
+                event.currentTarget.blur();
+              }
+            }}
             placeholder={t('todo.placeholder')}
           />
           <button className="app-button" type="submit">

@@ -91,10 +91,10 @@ Enter an [ntfy](https://ntfy.sh) topic under **Push notifications** at the top r
 
 | Key | Action |
 |---|---|
-| `Alt+S` | Start / pause the Pomodoro |
-| `Alt+A` | Stop the Pomodoro alarm sound |
+| `Alt+S` | Start / pause the Pomodoro (works while the cursor is in a text field) |
+| `Alt+A` | Stop the Pomodoro alarm sound (works while the cursor is in a text field) |
 | `Alt+T` | Put the cursor in the to-do input |
-| `Esc` | Close settings or the card list; cancel editing a to-do |
+| `Esc` | Close settings or the card list; cancel editing a to-do; release the cursor from the to-do input |
 
 ## Your data stays yours
 

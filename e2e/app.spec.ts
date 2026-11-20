@@ -270,6 +270,22 @@ test('focuses the todo field with alt+t', async ({page}) => {
   await expect(page.getByLabel('할 일 추가')).toBeFocused();
 });
 
+test('runs alt+s from the todo field and releases the field with escape', async ({page}) => {
+  await page.goto('/');
+  const field = page.getByLabel('할 일 추가');
+  await field.click();
+  await field.fill('typing something');
+  await page.keyboard.press('Alt+s');
+  await expect(page.getByRole('button', {name: 'Pause', exact: true})).toBeVisible();
+  await expect(field).toBeFocused();
+  await expect(field).toHaveValue('typing something');
+  await page.keyboard.press('Escape');
+  await expect(field).not.toBeFocused();
+  await expect(field).toHaveValue('typing something');
+  await page.keyboard.press('Alt+s');
+  await expect(page.getByRole('button', {name: 'Start', exact: true})).toBeVisible();
+});
+
 test('renames a todo by double clicking its text', async ({page}) => {
   await page.goto('/');
   const card = page.getByRole('region', {name: '할 일'});

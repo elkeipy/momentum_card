@@ -122,19 +122,16 @@ function Pomodoro() {
     setPauseColor(settings.pauseColor);
     setLostColor(settings.lostColor);
 
+    // Alt 조합은 글자를 입력하지 않으므로 입력칸에 커서가 있어도 받는다.
+    // AltGr(Ctrl+Alt)과 Cmd 조합은 자판에 따라 글자를 입력하니 건드리지 않는다.
     const handleKeydown = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement
-      ) {
+      if (!event.altKey || event.ctrlKey || event.metaKey) {
         return;
       }
-      if (event.altKey && event.code === 'KeyA') {
+      if (event.code === 'KeyA') {
         event.preventDefault();
         timer.stopAudio();
-      } else if (event.altKey && event.code === 'KeyS') {
+      } else if (event.code === 'KeyS') {
         event.preventDefault();
         timer.startStop();
       }

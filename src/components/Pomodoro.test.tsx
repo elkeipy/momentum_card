@@ -104,3 +104,44 @@ test('saves timer text size from the settings dialog', () => {
     '#abcdef'
   );
 });
+
+describe('keyboard shortcuts in a text field', () => {
+  let field: HTMLInputElement;
+
+  beforeEach(() => {
+    jest.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+    field = document.createElement('input');
+    document.body.appendChild(field);
+    field.focus();
+  });
+
+  afterEach(() => {
+    field.remove();
+    jest.restoreAllMocks();
+  });
+
+  test('starts and pauses on alt+s while the caret is in a text field', () => {
+    render(<Pomodoro />);
+    fireEvent.keyDown(field, {altKey: true, code: 'KeyS'});
+    expect(screen.getByRole('button', {name: 'Pause'})).toBeInTheDocument();
+    expect(field).toHaveFocus();
+    fireEvent.keyDown(field, {altKey: true, code: 'KeyS'});
+    expect(screen.getByRole('button', {name: 'Start'})).toBeInTheDocument();
+  });
+
+  test('leaves AltGr and Cmd combinations to the text field', () => {
+    render(<Pomodoro />);
+    const typed = fireEvent.keyDown(field, {altKey: true, ctrlKey: true, code: 'KeyS'});
+    expect(typed).toBe(true);
+    fireEvent.keyDown(field, {altKey: true, metaKey: true, code: 'KeyS'});
+    fireEvent.keyDown(field, {code: 'KeyS'});
+    expect(screen.getByRole('button', {name: 'Start'})).toBeInTheDocument();
+  });
+
+  test('stops the alarm on alt+a without starting the timer', () => {
+    render(<Pomodoro />);
+    const handled = fireEvent.keyDown(field, {altKey: true, code: 'KeyA'});
+    expect(handled).toBe(false);
+    expect(screen.getByRole('button', {name: 'Start'})).toBeInTheDocument();
+  });
+});
