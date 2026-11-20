@@ -1,10 +1,15 @@
 import {
+  addEventTodo,
   addTodo,
   calendarEventUrl,
   clampDueParts,
   dueProgress,
   dueTodos,
+  eventPassedMs,
+  eventProgress,
+  eventStartMs,
   formatDueMinutes,
+  formatEventStamp,
   minDueHour,
   minDueMinute,
   parseDueMinutes,
@@ -14,7 +19,9 @@ import {
   renameTodo,
   sanitizeTodoText,
   stripDueTrigger,
-  toggleTodo
+  toggleTodo,
+  type TodoEvent,
+  type TodoItem
 } from './todos';
 
 test('accepts a short task and rejects empty or control text', () => {
@@ -136,5 +143,70 @@ describe('calendarEventUrl', () => {
 
   test('allows today', () => {
     expect(url('x', '2026-11-02', '')).not.toBeNull();
+  });
+});
+
+describe('event todos', () => {
+  const created = new Date(2026, 10, 20, 9, 0).getTime();
+  const ev = (date: string, time: string | null): TodoEvent => ({date, time, createdAt: created});
+
+  test('adds a # entry with its date and time and strips the trigger', () => {
+    expect(addEventTodo([], 'dentist #', '2026-11-22', '14:30', created, 'e1')).toEqual([
+      {
+        id: 'e1',
+        text: 'dentist',
+        done: false,
+        dueMinutes: null,
+        startMinutes: null,
+        alarmed: false,
+        event: {date: '2026-11-22', time: '14:30', createdAt: created}
+      }
+    ]);
+    expect(addEventTodo([], 'x #', '2026-11-22', '', created, 'e2')[0].event?.time).toBeNull();
+  });
+
+  test('rejects empty text, impossible dates and times, and a full list', () => {
+    const none: TodoItem[] = [];
+    expect(addEventTodo(none, ' # ', '2026-11-22', '', created)).toBe(none);
+    expect(addEventTodo(none, 'x', '2026-02-30', '', created)).toBe(none);
+    expect(addEventTodo(none, 'x', '2026-11-22', '25:00', created)).toBe(none);
+    const full = Array.from({length: 40}, (_, index) => addTodo([], 'item', `id${index}`)[0]);
+    expect(addEventTodo(full, 'x', '2026-11-22', '', created)).toBe(full);
+  });
+
+  test('keeps a stored event and drops a broken one', () => {
+    const event = ev('2026-11-22', '14:30');
+    const base = {id: 'e1', text: 'dentist', done: false, dueMinutes: null, startMinutes: null, alarmed: false};
+    expect(parseTodoItem({id: 'e1', text: 'dentist', done: false, event})).toEqual({...base, event});
+    expect(parseTodoItem({id: 'e1', text: 'dentist', done: false, event: {...event, time: '9am'}})).toEqual(base);
+    expect(parseTodoItem({id: 'e1', text: 'dentist', done: false, event: {...event, date: '2026-13-01'}})?.event).toBeUndefined();
+    expect(parseTodoItem({id: 'e1', text: 'dentist', done: false, event: {...event, createdAt: -1}})?.event).toBeUndefined();
+    expect(
+      parseTodoItem({id: 'e1', text: 'dentist', done: false, dueMinutes: 600, startMinutes: 540, event})?.dueMinutes
+    ).toBeNull();
+  });
+
+  test('fills from the moment it was added until the event starts', () => {
+    const timed = ev('2026-11-20', '11:00');
+    expect(eventProgress(timed, created)).toBe(0);
+    expect(eventProgress(timed, new Date(2026, 10, 20, 10, 0).getTime())).toBeCloseTo(0.5);
+    expect(eventProgress(timed, new Date(2026, 10, 20, 11, 0).getTime())).toBe(1);
+    expect(eventPassedMs(timed)).toBe(new Date(2026, 10, 20, 11, 0).getTime());
+    const allDay = ev('2026-11-22', null);
+    expect(eventStartMs(allDay)).toBe(new Date(2026, 10, 22).getTime());
+    expect(eventPassedMs(allDay)).toBe(new Date(2026, 10, 23).getTime());
+    expect(eventProgress(ev('2026-11-20', null), created)).toBe(1);
+  });
+
+  test('writes the day as today, tomorrow, or a date in the chosen language', () => {
+    const now = new Date(2026, 10, 20, 9, 0);
+    expect(formatEventStamp(ev('2026-11-20', '14:30'), now, 'ko')).toBe('오늘 14:30');
+    expect(formatEventStamp(ev('2026-11-21', null), now, 'ko')).toBe('내일 종일');
+    expect(formatEventStamp(ev('2026-11-22', '09:00'), now, 'ko')).toBe('11월 22일 09:00');
+    expect(formatEventStamp(ev('2027-01-02', null), now, 'ko')).toBe('2027년 1월 2일 종일');
+    expect(formatEventStamp(ev('2026-11-20', '14:30'), now, 'en')).toBe('Today, 14:30');
+    expect(formatEventStamp(ev('2026-11-21', null), now, 'en')).toBe('Tomorrow, all day');
+    expect(formatEventStamp(ev('2026-11-22', '09:00'), now, 'en')).toBe('Nov 22, 09:00');
+    expect(formatEventStamp(ev('2027-01-02', null), now, 'en')).toBe('Jan 2, 2027, all day');
   });
 });

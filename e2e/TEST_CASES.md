@@ -504,7 +504,7 @@ async (page) => {
 
 ### TDO-15 일정을 캘린더로 연다 P0
 - 절차: `lunch #`, 날짜 내일, 시각 비움 → 제출. 이어서 같은 방식으로 시각 `14:30`.
-- 기대: 새 탭이 열리고(`context.waitForEvent('page')`) 주소가 `https://calendar.google.com/calendar/render`로 시작한다. 검색 파라미터 `action=TEMPLATE`, `text=lunch`. 시각이 없으면 `dates=<내일>/<모레>`(`YYYYMMDD`, 하루 종일), 있으면 `dates=<내일>T143000/<내일>T153000`(1시간). 제출 후 입력칸이 비워지고 **할 일 목록에는 쌓이지 않는다**. 새 탭은 닫는다.
+- 기대: 새 탭이 열리고(`context.waitForEvent('page')`) 주소가 `https://calendar.google.com/calendar/render`로 시작한다. 검색 파라미터 `action=TEMPLATE`, `text=lunch`. 시각이 없으면 `dates=<내일>/<모레>`(`YYYYMMDD`, 하루 종일), 있으면 `dates=<내일>T143000/<내일>T153000`(1시간). 제출 후 입력칸이 비워지고 **할 일 목록에 `lunch` 항목이 남는다**(TDO-19). 새 탭은 닫는다.
 
 ### TDO-16 일정 거부 P1
 - 절차: (a) 제목이 `#`뿐일 때 제출. (b) 날짜를 어제로 직접 입력하고 제출. (c) 날짜를 지운 채 제출.
@@ -513,6 +513,11 @@ async (page) => {
 ### TDO-17 깨진 저장값 P2
 - 절차: `todoList`를 `not json`, `[{"id":"!!","text":"x","done":false}]`로 시드하고 reload.
 - 기대: 에러 없이 빈 목록으로 시작한다.
+
+### TDO-19 목록에 남은 일정 P0 🖼
+- 준비: 시계 설치(⏱) 2026-11-20 09:00. 할 일을 `#`로 넣는다: 오늘 17:00, 내일 종일, 12일 뒤 09:00, 오늘 11:00. 캘린더 새 탭은 `context.route`로 막고 닫는다.
+- 절차: `runFor`로 15:00까지 흘린다. 오늘 11:00 일정 하나는 체크한다. reload.
+- 기대: 각 항목 뒤에 `오늘 17:00`, `내일 종일`, `12월 2일 09:00`, `오늘 11:00`(영어 `Today, 17:00`, `Tomorrow, all day`, `Dec 2, 09:00`). 막대 이름은 `<글자> 일정`(영어 `<text> event`). 15:00에 17:00 일정은 75%, 내일 종일은 40%, 12일 뒤는 2% 근처. 지난 11:00 일정은 체크 전 100%·`data-state=over`, 체크 후 `done`. 종일 일정은 그날이 끝나야 `over`. 일정에는 할 일 알람 토스트와 ntfy가 없다. `todoList`에 `event: {date, time, createdAt}`가 저장되고 reload 뒤에도 같다. 해가 다른 일정은 연도가 붙는다(`2027년 1월 2일 종일`).
 
 ### TDO-18 설정 P2
 - 절차: 할 일 설정에서 Font Size 20 저장.

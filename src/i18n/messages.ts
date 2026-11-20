@@ -93,6 +93,11 @@ export const ko = {
   'todo.editAria': '{text} 수정',
   'todo.deleteAria': '{text} 삭제',
   'todo.dueAria': '{text} 마감',
+  'todo.eventAria': '{text} 일정',
+  'todo.today': '오늘',
+  'todo.tomorrow': '내일',
+  'todo.allDay': '종일',
+  'todo.eventStamp': '{day} {time}',
 
   'alarm.title': '할 일 알람',
   'alarm.itemAria': '할 일 알람 {message}',
@@ -204,6 +209,11 @@ export const en: Record<MessageKey, string> = {
   'todo.editAria': 'Edit {text}',
   'todo.deleteAria': 'Delete {text}',
   'todo.dueAria': '{text} deadline',
+  'todo.eventAria': '{text} event',
+  'todo.today': 'Today',
+  'todo.tomorrow': 'Tomorrow',
+  'todo.allDay': 'all day',
+  'todo.eventStamp': '{day}, {time}',
 
   'alarm.title': 'To-do alarm',
   'alarm.itemAria': 'To-do alarm: {message}',

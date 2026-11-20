@@ -42,7 +42,7 @@
 | Card | What it does |
 |---|---|
 | **Pomodoro** | Focus/break timer and today's focus history. Defaults: 25 min focus, 5 min short break, 15 min long break. |
-| **To-do** | Write what you want to finish today. `@` sets a deadline alert; `#` creates a Google Calendar event. |
+| **To-do** | Write what you want to finish today. `@` sets a deadline alert; `#` creates a Google Calendar event and keeps it on the list. |
 | **Weather** | City, temperature, and feels-like temperature for your location, refreshed every hour. |
 | **Clock** | Shows this device's time. |
 | **Quote** | Five short lines that rotate every minute. Refresh to skip ahead. |
@@ -68,7 +68,8 @@ Change the font size from the gear icon in each card header. The − / + buttons
 ## To-do: write it and it becomes a deadline or an event
 
 - **`@` sets a deadline.** Type `@` in the input to pick a deadline hour and minute. A time earlier than now can't be entered. An item with a deadline shows a bar that fills over time. If the time arrives and the item isn't done, the bar turns red, a notice stacks at the bottom right, and a Mixkit alert sound plays.
-- **`#` creates an event.** Type `#`, pick a date and time (leave the time blank for all-day), and press **Add to Calendar**. The Google Calendar event editor opens with the title and time filled in, using the account signed in to that browser, and you press save yourself. The event is not added to the to-do list, and the app never accesses your Google account.
+- **`#` creates an event.** Type `#`, pick a date and time (leave the time blank for all-day), and press **Add to Calendar**. The Google Calendar event editor opens with the title and time filled in, using the account signed in to that browser, and you press save yourself. The app never accesses your Google account.
+- **Events stay on the list too.** An event made with `#` is also added to the to-do list. Its day and time follow the text, like `Today, 14:30`, `Tomorrow, all day`, or `Dec 2, 09:00`, and a bar fills from when you added it until the event starts. It fills continuously rather than in hour or day steps. If the event has passed and you haven't checked it off, the bar turns red (for an all-day event, once that day ends). Events don't ring an alarm; Google Calendar handles reminders.
 - **Edit in place.** Double-click the text to edit it on that line. Enter saves and Esc cancels. Long text is ellipsized and shows in full on hover. Delete with the trash button. The list holds up to 40 items.
 
 ## Phone notifications too
@@ -185,3 +186,7 @@ This produces `src-tauri/target/release/momentum.exe`. Run it with the `MOMENTUM
 ### Icon
 
 The single source is `public/favicon.svg`. After editing it, run `npm run icons` to regenerate the tab icon, the PNGs for the manifest, and the app icon.
+
+## License
+
+[Apache License 2.0](LICENSE)

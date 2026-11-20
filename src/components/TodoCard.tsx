@@ -5,6 +5,7 @@ import {
 } from '../featureCard/cardSettings';
 import {useDisplaySettings} from '../featureCard/useDisplaySettings';
 import {
+  addEventTodo,
   addTodo,
   calendarEventUrl,
   clampDueParts,
@@ -12,7 +13,10 @@ import {
   currentMinutes,
   dueProgress,
   dueTodos,
+  eventPassedMs,
+  eventProgress,
   formatDueMinutes,
+  formatEventStamp,
   markAlarmed,
   minDueHour,
   minDueMinute,
@@ -26,7 +30,7 @@ import {
 } from '../todos/todos';
 import AlarmDialog from './AlarmDialog';
 import {TrashIcon} from './icons';
-import {useT} from '../i18n/i18n';
+import {useLang, useT} from '../i18n/i18n';
 import DisplaySettingsFields from './DisplaySettingsFields';
 import SettingsModal from './SettingsModal';
 import styles from './TodoCard.module.css';
@@ -48,6 +52,7 @@ function readClockPart(value: string, max: number): number | null {
 export default function TodoCard() {
   const settings = useDisplaySettings('todos', TODO_DEFAULTS);
   const t = useT();
+  const lang = useLang();
   const [items, setItems] = useState(() => readTodoList(localStorage));
   const [draft, setDraft] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -138,6 +143,7 @@ export default function TodoCard() {
         return;
       }
       window.open(url, '_blank', 'noopener,noreferrer');
+      setItems(current => addEventTodo(current, draft, eventDate, eventTime));
       setDraft('');
       return;
     }
@@ -284,11 +290,20 @@ export default function TodoCard() {
         <ul className={styles.list} style={{fontSize: `${settings.shown.fontSize}px`}}>
           {items.map(item => {
             const due = item.dueMinutes;
-            const ratio =
-              due === null
+            const event = item.event;
+            const ratio = event
+              ? eventProgress(event, now.getTime())
+              : due === null
                 ? 0
                 : dueProgress(item.startMinutes ?? 0, due, nowExact);
-            const overdue = due !== null && !item.done && nowMinutes >= due;
+            const overdue = event
+              ? !item.done && now.getTime() >= eventPassedMs(event)
+              : due !== null && !item.done && nowMinutes >= due;
+            const stamp = event
+              ? formatEventStamp(event, now, lang)
+              : due === null
+                ? null
+                : formatDueMinutes(due);
             return (
               <li key={item.id}>
                 <div className={styles.itemRow}>
@@ -325,9 +340,7 @@ export default function TodoCard() {
                         {item.text}
                       </span>
                     )}
-                    {due !== null ? (
-                      <span className={styles.dueStamp}>{formatDueMinutes(due)}</span>
-                    ) : null}
+                    {stamp !== null ? <span className={styles.dueStamp}>{stamp}</span> : null}
                   </div>
                   <button
                     className="icon-button"
@@ -338,11 +351,15 @@ export default function TodoCard() {
                     <TrashIcon />
                   </button>
                 </div>
-                {due !== null ? (
+                {stamp !== null ? (
                   <div
                     className={styles.track}
                     role="progressbar"
-                    aria-label={t('todo.dueAria', {text: item.text})}
+                    aria-label={
+                      event
+                        ? t('todo.eventAria', {text: item.text})
+                        : t('todo.dueAria', {text: item.text})
+                    }
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={Math.round(ratio * 100)}

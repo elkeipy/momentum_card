@@ -141,7 +141,7 @@ test('stacks a toast for each overdue todo', () => {
   expect(screen.getByRole('status', {name: '할 일 알람 mail'})).toBeInTheDocument();
 });
 
-test('opens a prefilled Google Calendar link for a # entry without adding a todo', () => {
+test('opens a prefilled Google Calendar link for a # entry and keeps it on the list', () => {
   const open = jest.spyOn(window, 'open').mockImplementation(() => null);
   render(<TodoCard />);
   fireEvent.change(screen.getByLabelText('할 일 추가'), {target: {value: '치과 #'}});
@@ -153,6 +153,11 @@ test('opens a prefilled Google Calendar link for a # entry without adding a todo
   expect(link.searchParams.get('text')).toBe('치과');
   expect(link.searchParams.get('dates')).toBe('29990102/29990103');
   expect(open.mock.calls[0][2]).toBe('noopener,noreferrer');
-  expect(screen.getByText('할 일을 추가하면 여기에 쌓인다.')).toBeInTheDocument();
+  expect(screen.getByText('치과')).toBeInTheDocument();
+  expect(screen.getByText('2999년 1월 2일 종일')).toBeInTheDocument();
+  expect(screen.getByRole('progressbar', {name: '치과 일정'})).toHaveAttribute('aria-valuenow', '0');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
   expect(screen.getByLabelText('할 일 추가')).toHaveValue('');
+  const stored = JSON.parse(localStorage.getItem('todoList') ?? '[]');
+  expect(stored[0].event).toMatchObject({date: '2999-01-02', time: null});
 });

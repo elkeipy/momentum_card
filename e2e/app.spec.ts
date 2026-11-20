@@ -334,6 +334,25 @@ test.describe('with an English browser', () => {
   });
 });
 
+test('keeps a # event on the list with its day and a bar', async ({page}) => {
+  await page.context().route('https://calendar.google.com/**', route =>
+    route.fulfill({status: 200, body: 'ok'})
+  );
+  await page.goto('/');
+  const card = page.getByRole('region', {name: '할 일'});
+  await card.getByLabel('할 일 추가').fill('치과 #');
+  await card.getByLabel('일정 날짜').fill('2999-01-02');
+  await card.getByLabel('일정 시각 (비우면 종일)').fill('14:30');
+  const popup = page.context().waitForEvent('page');
+  await card.getByRole('button', {name: '캘린더에 추가'}).click();
+  await (await popup).close();
+  await expect(card.getByText('치과', {exact: true})).toBeVisible();
+  await expect(card.getByText('2999년 1월 2일 14:30')).toBeVisible();
+  await expect(card.getByRole('progressbar', {name: '치과 일정'})).toHaveAttribute('aria-valuenow', '0');
+  await page.reload();
+  await expect(card.getByText('2999년 1월 2일 14:30')).toBeVisible();
+});
+
 test('saves an ntfy topic from the header', async ({page}) => {
   await page.goto('/');
   await page.getByRole('button', {name: '푸시 알림'}).click();

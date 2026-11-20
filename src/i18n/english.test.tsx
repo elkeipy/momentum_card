@@ -32,6 +32,21 @@ test('shows the to-do card in English', () => {
   expect(screen.getByLabelText('Deadline minute')).toBeInTheDocument();
 });
 
+test('shows a # event in English with its day and bar', () => {
+  setLang('en', false);
+  const now = new Date();
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+  localStorage.setItem(
+    'todoList',
+    JSON.stringify([
+      {id: 'e1', text: 'dentist', done: false, event: {date: today, time: '23:59', createdAt: now.getTime() - 1000}}
+    ])
+  );
+  render(<TodoCard />);
+  expect(screen.getByText('Today, 23:59')).toBeInTheDocument();
+  expect(screen.getByRole('progressbar', {name: 'dentist event'})).toBeInTheDocument();
+});
+
 test('shows the quote card in English', () => {
   setLang('en', false);
   render(<QuoteCard />);
