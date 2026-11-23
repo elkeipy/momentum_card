@@ -110,48 +110,50 @@ export default function WordCard() {
 
   return (
     <div className={styles.root}>
-      <p className={styles.word} style={{fontSize: `${settings.shown.fontSize}px`}}>
-        {selected || t('word.none')}
-      </p>
-      <p className={selected ? styles.definition : styles.empty}>
-        {selected ? (definition ?? t('word.notFound')) : t('word.emptyHint')}
-      </p>
-      {words.length > 0 ? (
-        <RemainBar
-          durationMs={intervalMs}
-          startedAt={startedAt}
-          label={t('word.remaining')}
-          refreshLabel={t('word.refresh')}
-          onRefresh={refresh}
-        />
-      ) : null}
-      <form
-        className={styles.form}
-        onSubmit={event => {
-          event.preventDefault();
-          saveWord();
-        }}
-      >
-        <label htmlFor="new-word">{t('word.addLabel')}</label>
-        <div className={styles.join}>
-          <input
-            id="new-word"
-            value={draft}
-            onChange={event => setDraft(event.target.value)}
-            placeholder="english"
+      <div className={styles.fixed}>
+        <p className={styles.word} style={{fontSize: `${settings.shown.fontSize}px`}}>
+          {selected || t('word.none')}
+        </p>
+        <p className={selected ? styles.definition : styles.empty}>
+          {selected ? (definition ?? t('word.notFound')) : t('word.emptyHint')}
+        </p>
+        {words.length > 0 ? (
+          <RemainBar
+            durationMs={intervalMs}
+            startedAt={startedAt}
+            label={t('word.remaining')}
+            refreshLabel={t('word.refresh')}
+            onRefresh={refresh}
           />
-          <button className="app-button" type="submit">
-            {t('word.add')}
-          </button>
-        </div>
-      </form>
-      <button
-        className={`text-button ${styles.listToggle}`}
-        type="button"
-        onClick={() => setShowAll(current => !current)}
-      >
-        {t('word.all')}
-      </button>
+        ) : null}
+        <form
+          className={styles.form}
+          onSubmit={event => {
+            event.preventDefault();
+            saveWord();
+          }}
+        >
+          <label htmlFor="new-word">{t('word.addLabel')}</label>
+          <div className={styles.join}>
+            <input
+              id="new-word"
+              value={draft}
+              onChange={event => setDraft(event.target.value)}
+              placeholder="english"
+            />
+            <button className="app-button" type="submit">
+              {t('word.add')}
+            </button>
+          </div>
+        </form>
+        <button
+          className={`text-button ${styles.listToggle}`}
+          type="button"
+          onClick={() => setShowAll(current => !current)}
+        >
+          {t('word.all')}
+        </button>
+      </div>
       {showAll ? (
         <ul className={styles.list}>
           {words.map((word, wordIndex) => (

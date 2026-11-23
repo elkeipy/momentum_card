@@ -46,7 +46,7 @@
 | **Weather** | City, temperature, and feels-like temperature for your location, refreshed every hour. |
 | **Clock** | Shows this device's time. |
 | **Quote** | Five short lines that rotate every minute. Refresh to skip ahead. |
-| **Words** | An English word and its meaning, shuffled every minute. The list holds up to 20 words. |
+| **Words** | An English word and its meaning, shuffled every minute. The list holds up to 20 words, and only the full list scrolls. |
 
 Change the font size from the gear icon in each card header. The − / + buttons preview the value on the card before you save. Quote and Word also let you change the refresh interval.
 

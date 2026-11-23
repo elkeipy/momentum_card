@@ -270,6 +270,45 @@ test('focuses the todo field with alt+t', async ({page}) => {
   await expect(page.getByLabel('할 일 추가')).toBeFocused();
 });
 
+for (const layout of ['in the default grid', 'as a placed card']) {
+  test(`scrolls only the word list while the word and add field stay put ${layout}`, async ({page}) => {
+    await page.addInitScript(placed => {
+      const letters = 'abcdefghijklmnopqrst';
+      const words = Array.from(letters).map(letter => 'w' + letter.repeat(3));
+      localStorage.setItem('wordList', JSON.stringify(words));
+      if (placed) {
+        localStorage.setItem(
+          'feature-card:words',
+          JSON.stringify({x: 24, y: 100, width: 420, height: 600, pinned: false, placed: true})
+        );
+      }
+    }, layout === 'as a placed card');
+    await page.goto('/');
+    const card = page.getByRole('region', {name: '단어'});
+    await card.getByRole('button', {name: '전체 목록'}).click();
+    const list = card.locator('ul');
+    const body = card.locator('[class*="body"]');
+    const field = card.getByLabel('단어 추가');
+
+    const sizes = await list.evaluate(el => ({scroll: el.scrollHeight, client: el.clientHeight}));
+    expect(sizes.scroll).toBeGreaterThan(sizes.client);
+    expect(sizes.client).toBeGreaterThanOrEqual(130);
+    const bodySizes = await body.evaluate(el => ({scroll: el.scrollHeight, client: el.clientHeight}));
+    expect(bodySizes.scroll).toBeLessThanOrEqual(bodySizes.client + 1);
+
+    const before = await field.boundingBox();
+    await list.evaluate(el => {
+      el.scrollTop = el.scrollHeight;
+    });
+    const after = await field.boundingBox();
+    expect(after?.y).toBe(before?.y);
+    expect(await list.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+    expect(await body.evaluate(el => el.scrollTop)).toBe(0);
+    await expect(card.getByRole('button', {name: 'wttt 삭제'})).toBeVisible();
+    await expect(card.getByLabel('단어 추가')).toBeVisible();
+  });
+}
+
 test('runs alt+s from the todo field and releases the field with escape', async ({page}) => {
   await page.goto('/');
   const field = page.getByLabel('할 일 추가');

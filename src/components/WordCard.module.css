@@ -2,6 +2,14 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
+}
+
+/* 단어, 뜻, 추가 칸은 고정이고 전체 목록만 따로 스크롤된다. */
+.fixed {
+  display: flex;
+  flex: none;
+  flex-direction: column;
 }
 
 .word {
@@ -61,9 +69,16 @@
   margin-top: 12px;
 }
 
+/* 목록이 길어도 카드가 늘어나지 않도록 flex-basis를 길이 0으로 둔다. 카드를 키우면 남는 높이를 채운다.
+   단축형 flex: 1 1 0은 0%로 풀려 높이가 정해지지 않은 카드에서는 내용 크기가 되므로 쓰지 않는다. */
 .list {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0px;
+  min-height: 132px;
   margin: 12px 0 0;
   padding: 0;
+  overflow: auto;
   list-style: none;
 }
 
