@@ -10,6 +10,7 @@ import {isLang, LANGS, setLang, t, useLang, useT} from '../i18n/i18n';
 import NtfySettings from '../notify/NtfySettings';
 import {applyTheme, isThemeId, readTheme, THEMES, type ThemeId} from '../theme/theme';
 import type {CardLayout} from '../featureCard/cardLayout';
+import {pinStoredCards} from '../featureCard/pinCards';
 import {
   readTodayFocusHistory,
   summarizePeriodMinutes,
@@ -31,32 +32,42 @@ type CardSpec = {
 
 const CARDS: CardSpec[] = [
   {
-    id: 'weather',    layout: {x: 24, y: 96, width: 420, height: 168, pinned: false},
+    id: 'weather',
+    layout: {x: 24, y: 96, width: 420, height: 168, pinned: false},
     content: <Weather />
   },
   {
-    id: 'clock',    layout: {x: 460, y: 96, width: 420, height: 168, pinned: false},
+    id: 'clock',
+    layout: {x: 460, y: 96, width: 420, height: 168, pinned: false},
     content: <Clock />
   },
   {
-    id: 'pomodoro',    layout: {x: 24, y: 280, width: 640, height: 520, pinned: false},
+    id: 'pomodoro',
+    layout: {x: 24, y: 280, width: 640, height: 520, pinned: false},
     content: <Pomodoro />
   },
   {
-    id: 'quote',    layout: {x: 680, y: 280, width: 420, height: 220, pinned: false},
+    id: 'quote',
+    layout: {x: 680, y: 280, width: 420, height: 220, pinned: false},
     content: <QuoteCard />
   },
   {
-    id: 'words',    layout: {x: 680, y: 516, width: 420, height: 280, pinned: false},
+    id: 'words',
+    layout: {x: 680, y: 516, width: 420, height: 280, pinned: false},
     content: <WordCard />
   },
   {
-    id: 'todos',    layout: {x: 680, y: 812, width: 420, height: 320, pinned: false},
+    id: 'todos',
+    layout: {x: 680, y: 812, width: 420, height: 320, pinned: false},
     content: <TodoCard />
   }
 ];
 
 const HISTORY_REFRESH_MS = 5000;
+
+const DEFAULT_LAYOUTS = Object.fromEntries(
+  CARDS.map(card => [card.id, card.layout])
+) as Record<CardId, CardLayout>;
 
 function formatDay(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -257,6 +268,22 @@ export default function Board() {
                   </button>
                 );
               })}
+              <button
+                type="button"
+                className="app-button"
+                role="menuitem"
+                onClick={() => pinStoredCards(true, DEFAULT_LAYOUTS)}
+              >
+                {t('card.pinAll')}
+              </button>
+              <button
+                type="button"
+                className="app-button"
+                role="menuitem"
+                onClick={() => pinStoredCards(false, DEFAULT_LAYOUTS)}
+              >
+                {t('card.unpinAll')}
+              </button>
             </div>
           ) : null}
         </div>

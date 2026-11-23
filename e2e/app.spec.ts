@@ -76,6 +76,22 @@ test('starts and pauses the pomodoro timer', async ({page}) => {
   await expect(bar).toHaveAttribute('aria-valuenow', filled ?? '0');
 });
 
+test('counts a repeated word under the one on screen', async ({page}) => {
+  await page.goto('/');
+  const input = page.getByLabel('단어 추가');
+  await input.fill('focus');
+  await input.press('Enter');
+  await expect(page.getByRole('progressbar', {name: 'focus 연습'})).toHaveAttribute(
+    'aria-valuenow',
+    '1'
+  );
+  await expect(page.getByText('1/20')).toBeVisible();
+  await input.fill('focus');
+  await input.press('Enter');
+  const word = page.getByRole('region', {name: '단어'}).locator('p').first();
+  await expect(word).toHaveClass(/punch/);
+});
+
 test('pins a card and shows quote and word cards', async ({page}) => {
   await page.goto('/');
   const pin = page.getByRole('button', {name: '날씨 고정'});
@@ -85,9 +101,17 @@ test('pins a card and shows quote and word cards', async ({page}) => {
     'data-pinned',
     'true'
   );
-  await expect(
-    page.getByRole('progressbar', {name: '명언 남은 시간'})
-  ).toBeVisible();
+  await page.getByRole('button', {name: '카드 목록'}).click();
+  await page.getByRole('menuitem', {name: '모두 해제'}).click();
+  await expect(page.getByRole('region', {name: '날씨'})).toHaveAttribute(
+    'data-pinned',
+    'false'
+  );
+  await page.getByRole('menuitem', {name: '모두 고정'}).click();
+  for (const name of ['날씨', '시계', '뽀모도로', '명언', '단어', '할 일']) {
+    await expect(page.getByRole('region', {name})).toHaveAttribute('data-pinned', 'true');
+  }
+  await expect(page.getByRole('progressbar', {name: '명언 남은 시간'})).toBeVisible();
   await expect(page.getByRole('button', {name: '명언 새로고침'})).toBeVisible();
   await expect(page.getByRole('progressbar', {name: '단어 남은 시간'})).toBeVisible();
   await expect(page.getByRole('region', {name: '단어'})).toContainText(
@@ -124,16 +148,16 @@ test('summarizes today and restores a closed card', async ({page}) => {
   await weatherToggle.click();
   const weather = page.getByRole('region', {name: '날씨'});
   await expect(weather).toBeVisible();
-  const weatherZ = await weather.evaluate(element => Number(getComputedStyle(element).zIndex) || 0);
+  const weatherZ = await weather.evaluate(
+    element => Number(getComputedStyle(element).zIndex) || 0
+  );
   const pomodoroZ = await page
     .getByRole('region', {name: '뽀모도로'})
     .evaluate(element => Number(getComputedStyle(element).zIndex) || 0);
   expect(weatherZ).toBeGreaterThan(pomodoroZ);
 });
 
-test('keeps cards below the top bar so their headers stay draggable', async ({
-  page
-}) => {
+test('keeps cards below the top bar so their headers stay draggable', async ({page}) => {
   await page.addInitScript(() => {
     localStorage.setItem(
       'feature-card:weather',
@@ -150,8 +174,10 @@ test('keeps cards below the top bar so their headers stay draggable', async ({
   await page.goto('/');
   const weather = page.getByRole('region', {name: '날씨'});
   const mast = page.locator('header.mast');
-  const mastBottom = () => mast.evaluate(element => element.getBoundingClientRect().bottom);
-  const weatherTop = () => weather.evaluate(element => element.getBoundingClientRect().top);
+  const mastBottom = () =>
+    mast.evaluate(element => element.getBoundingClientRect().bottom);
+  const weatherTop = () =>
+    weather.evaluate(element => element.getBoundingClientRect().top);
   await expect(weather).toBeVisible();
   expect(await weatherTop()).toBeGreaterThanOrEqual(await mastBottom());
 
@@ -271,7 +297,9 @@ test('focuses the todo field with alt+t', async ({page}) => {
 });
 
 for (const layout of ['in the default grid', 'as a placed card']) {
-  test(`scrolls only the word list while the word and add field stay put ${layout}`, async ({page}) => {
+  test(`scrolls only the word list while the word and add field stay put ${layout}`, async ({
+    page
+  }) => {
     await page.addInitScript(placed => {
       const letters = 'abcdefghijklmnopqrst';
       const words = Array.from(letters).map(letter => 'w' + letter.repeat(3));
@@ -279,7 +307,14 @@ for (const layout of ['in the default grid', 'as a placed card']) {
       if (placed) {
         localStorage.setItem(
           'feature-card:words',
-          JSON.stringify({x: 24, y: 100, width: 420, height: 600, pinned: false, placed: true})
+          JSON.stringify({
+            x: 24,
+            y: 100,
+            width: 420,
+            height: 600,
+            pinned: false,
+            placed: true
+          })
         );
       }
     }, layout === 'as a placed card');
@@ -290,10 +325,16 @@ for (const layout of ['in the default grid', 'as a placed card']) {
     const body = card.locator('[class*="body"]');
     const field = card.getByLabel('단어 추가');
 
-    const sizes = await list.evaluate(el => ({scroll: el.scrollHeight, client: el.clientHeight}));
+    const sizes = await list.evaluate(el => ({
+      scroll: el.scrollHeight,
+      client: el.clientHeight
+    }));
     expect(sizes.scroll).toBeGreaterThan(sizes.client);
     expect(sizes.client).toBeGreaterThanOrEqual(130);
-    const bodySizes = await body.evaluate(el => ({scroll: el.scrollHeight, client: el.clientHeight}));
+    const bodySizes = await body.evaluate(el => ({
+      scroll: el.scrollHeight,
+      client: el.clientHeight
+    }));
     expect(bodySizes.scroll).toBeLessThanOrEqual(bodySizes.client + 1);
 
     const before = await field.boundingBox();
@@ -309,7 +350,9 @@ for (const layout of ['in the default grid', 'as a placed card']) {
   });
 }
 
-test('runs alt+s from the todo field and releases the field with escape', async ({page}) => {
+test('runs alt+s from the todo field and releases the field with escape', async ({
+  page
+}) => {
   await page.goto('/');
   const field = page.getByLabel('할 일 추가');
   await field.click();
@@ -367,7 +410,9 @@ test('switches the interface to English and remembers it', async ({page}) => {
     await expect(page.getByRole('region', {name, exact: true})).toBeVisible();
   }
   await expect(page.getByRole('button', {name: 'Card list'})).toBeVisible();
-  await expect(page.getByRole('region', {name: 'Weather'})).toContainText('Feels like: 20.1°C');
+  await expect(page.getByRole('region', {name: 'Weather'})).toContainText(
+    'Feels like: 20.1°C'
+  );
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await page.reload();
   await expect(page.getByRole('region', {name: 'Pomodoro'})).toBeVisible();
@@ -385,14 +430,18 @@ test.describe('with an English browser', () => {
     await expect(page.getByRole('region', {name: 'To-do'})).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.getByText(/^Focus today: 0 min · /)).toBeVisible();
-    await expect(page.getByRole('region', {name: 'Clock'})).toContainText(/\d{1,2}:\d{2}:\d{2}\s?(AM|PM)/);
+    await expect(page.getByRole('region', {name: 'Clock'})).toContainText(
+      /\d{1,2}:\d{2}:\d{2}\s?(AM|PM)/
+    );
   });
 });
 
 test('keeps a # event on the list with its day and a bar', async ({page}) => {
-  await page.context().route('https://calendar.google.com/**', route =>
-    route.fulfill({status: 200, body: 'ok'})
-  );
+  await page
+    .context()
+    .route('https://calendar.google.com/**', route =>
+      route.fulfill({status: 200, body: 'ok'})
+    );
   await page.goto('/');
   const card = page.getByRole('region', {name: '할 일'});
   await card.getByLabel('할 일 추가').fill('치과 #');
@@ -403,7 +452,10 @@ test('keeps a # event on the list with its day and a bar', async ({page}) => {
   await (await popup).close();
   await expect(card.getByText('치과', {exact: true})).toBeVisible();
   await expect(card.getByText('2999년 1월 2일 14:30')).toBeVisible();
-  await expect(card.getByRole('progressbar', {name: '치과 일정'})).toHaveAttribute('aria-valuenow', '0');
+  await expect(card.getByRole('progressbar', {name: '치과 일정'})).toHaveAttribute(
+    'aria-valuenow',
+    '0'
+  );
   await page.reload();
   await expect(card.getByText('2999년 1월 2일 14:30')).toBeVisible();
 });

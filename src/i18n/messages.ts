@@ -3,7 +3,7 @@
 export const ko = {
   'lang.label': '언어',
   'theme.label': '테마',
-  'cardList': '카드 목록',
+  cardList: '카드 목록',
 
   'card.weather': '날씨',
   'card.clock': '시계',
@@ -13,6 +13,8 @@ export const ko = {
   'card.todos': '할 일',
   'card.settings': '{title} 설정',
   'card.pin': '{title} 고정',
+  'card.pinAll': '모두 고정',
+  'card.unpinAll': '모두 해제',
   'card.close': '{title} 닫기',
 
   'theme.default': '기본',
@@ -26,9 +28,9 @@ export const ko = {
   'theme.liquid': '리퀴드 글래스',
   'theme.icons3d': '3D 아이콘',
 
-  'today': '오늘 집중 {focus}{lost} · {day}',
+  today: '오늘 집중 {focus}{lost} · {day}',
   'today.lost': ', 놓친 {lost}',
-  'minutes': '{n}분',
+  minutes: '{n}분',
   'span.sec': '{n}초',
   'span.min': '{n}분',
   'span.minSec': '{m}분{s}초',
@@ -75,6 +77,8 @@ export const ko = {
   'word.all': '전체 목록',
   'word.deleteAria': '{word} 삭제',
   'word.delete': '삭제',
+  'word.practice': '{word} 연습',
+  'word.reps': '연습 횟수',
 
   'todo.summary': '남은 {remaining} · 전체 {total}',
   'todo.addLabel': '할 일 추가',
@@ -119,7 +123,7 @@ export type MessageKey = keyof typeof ko;
 export const en: Record<MessageKey, string> = {
   'lang.label': 'Language',
   'theme.label': 'Theme',
-  'cardList': 'Card list',
+  cardList: 'Card list',
 
   'card.weather': 'Weather',
   'card.clock': 'Clock',
@@ -129,6 +133,8 @@ export const en: Record<MessageKey, string> = {
   'card.todos': 'To-do',
   'card.settings': '{title} settings',
   'card.pin': 'Pin {title}',
+  'card.pinAll': 'Pin all',
+  'card.unpinAll': 'Unpin all',
   'card.close': 'Close {title}',
 
   'theme.default': 'Default',
@@ -142,9 +148,9 @@ export const en: Record<MessageKey, string> = {
   'theme.liquid': 'Liquid Glass',
   'theme.icons3d': '3D Icons',
 
-  'today': 'Focus today: {focus}{lost} · {day}',
+  today: 'Focus today: {focus}{lost} · {day}',
   'today.lost': ', lost {lost}',
-  'minutes': '{n} min',
+  minutes: '{n} min',
   'span.sec': '{n} s',
   'span.min': '{n} min',
   'span.minSec': '{m} min {s} s',
@@ -176,7 +182,8 @@ export const en: Record<MessageKey, string> = {
   'weather.feels': 'Feels like: {value}',
   'weather.error': 'Could not load the weather.',
   'weather.noGeo': 'This browser does not support geolocation.',
-  'weather.denied': 'Location permission is required. Please check your browser permissions.',
+  'weather.denied':
+    'Location permission is required. Please check your browser permissions.',
 
   'quote.remaining': 'Quote time remaining',
   'quote.refresh': 'Refresh quote',
@@ -191,6 +198,8 @@ export const en: Record<MessageKey, string> = {
   'word.all': 'All words',
   'word.deleteAria': 'Delete {word}',
   'word.delete': 'Delete',
+  'word.practice': '{word} practice',
+  'word.reps': 'Practice count',
 
   'todo.summary': '{remaining} left · {total} total',
   'todo.addLabel': 'Add a to-do',

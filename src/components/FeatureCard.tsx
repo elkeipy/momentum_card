@@ -9,6 +9,7 @@ import {
   type ViewportSize
 } from '../featureCard/cardLayout';
 import {CardSettingsProvider} from '../featureCard/cardSettingsContext';
+import {featureCardKey, PIN_CARDS_EVENT} from '../featureCard/pinCards';
 import {useT} from '../i18n/i18n';
 import {CloseIcon, GearIcon, PinIcon} from './icons';
 import styles from './FeatureCard.module.css';
@@ -71,15 +72,11 @@ function boundCardLayout(layout: CardLayout): CardLayout {
 
 type StoredCard = CardLayout & {placed?: boolean};
 
-function storageKey(id: string): string {
-  return `feature-card:${id}`;
-}
-
 function readStoredCard(
   id: string,
   fallback: CardLayout
 ): {layout: CardLayout; placed: boolean} {
-  const raw = localStorage.getItem(storageKey(id));
+  const raw = localStorage.getItem(featureCardKey(id));
   if (!raw) {
     return {layout: fallback, placed: false};
   }
@@ -135,12 +132,21 @@ export default function FeatureCard({
   };
 
   useEffect(() => {
-    if (!placed && !layout.pinned && !localStorage.getItem(storageKey(id))) {
+    if (!placed && !layout.pinned && !localStorage.getItem(featureCardKey(id))) {
       return;
     }
     const record: StoredCard = {...layout, placed};
-    localStorage.setItem(storageKey(id), JSON.stringify(record));
+    localStorage.setItem(featureCardKey(id), JSON.stringify(record));
   }, [id, layout, placed]);
+
+  useEffect(() => {
+    const onPinCards = (event: Event) => {
+      const pinned = Boolean((event as CustomEvent<boolean>).detail);
+      setLayout(current => (current.pinned === pinned ? current : {...current, pinned}));
+    };
+    window.addEventListener(PIN_CARDS_EVENT, onPinCards);
+    return () => window.removeEventListener(PIN_CARDS_EVENT, onPinCards);
+  }, []);
 
   useEffect(() => {
     setLayout(current => boundCardLayout(current));
@@ -277,7 +283,9 @@ export default function FeatureCard({
               className="icon-button"
               aria-pressed={layout.pinned}
               aria-label={t('card.pin', {title})}
-              onClick={() => setLayout(current => ({...current, pinned: !current.pinned}))}
+              onClick={() =>
+                setLayout(current => ({...current, pinned: !current.pinned}))
+              }
             >
               <PinIcon filled={layout.pinned} />
             </button>

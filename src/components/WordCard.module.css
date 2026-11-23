@@ -19,6 +19,57 @@
   line-height: 24px;
 }
 
+.punch {
+  animation: wordPunch 180ms ease;
+}
+
+.gone {
+  animation: wordGone 180ms ease forwards;
+}
+
+@keyframes wordPunch {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes wordGone {
+  to {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.practice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.practiceBar {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  overflow: hidden;
+  background: var(--raised);
+  border-radius: 999px;
+}
+
+.practiceFill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 180ms ease;
+}
+
+.practiceCount {
+  flex: none;
+  color: var(--muted);
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+}
+
 .definition,
 .empty {
   margin: 4px 0 0;
@@ -89,6 +140,15 @@
   gap: 12px;
   min-height: 44px;
   border-top: 1px solid var(--rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .punch,
+  .gone,
+  .practiceFill {
+    animation: none;
+    transition: none;
+  }
 }
 
 .list li button:first-child {

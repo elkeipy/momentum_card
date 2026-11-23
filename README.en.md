@@ -46,9 +46,9 @@
 | **Weather** | City, temperature, and feels-like temperature for your location, refreshed every hour. |
 | **Clock** | Shows this device's time. |
 | **Quote** | Five short lines that rotate every minute. Refresh to skip ahead. |
-| **Words** | An English word and its meaning, shuffled every minute. The list holds up to 20 words, and only the full list scrolls. |
+| **Words** | An English word and its meaning, shuffled every minute. Typing a word already in the list counts one practice rep, and the word on screen gives a short scale. It leaves the list at the count you set (20 by default). The list holds up to 20 words, and only the full list scrolls. |
 
-Change the font size from the gear icon in each card header. The − / + buttons preview the value on the card before you save. Quote and Word also let you change the refresh interval.
+Change the font size from the gear icon in each card header. The − / + buttons preview the value on the card before you save. Quote and Word also let you change the refresh interval, and Word sets the practice count (1–100, default 20).
 
 ## Pomodoro: keep a record of how your focus was spent
 
@@ -79,7 +79,7 @@ Enter an [ntfy](https://ntfy.sh) topic under **Push notifications** at the top r
 ## Arrange the board your way
 
 - **Drag, resize, snap.** Drag a header to move a card and the bottom-right corner to resize it. An edge within 8 px of another card's edge, or of the gap spot next to it, snaps to that line. Positions are remembered.
-- **Pin, close, bring back.** Pinning locks moving and resizing. Closing only hides a card from the screen; turn it back on from **Card list** at the top right, and it comes to the front.
+- **Pin, close, bring back.** Pinning locks that card's move and resize. **Pin all** / **Unpin all** in **Card list** at the top right lock or unlock every card, including hidden ones. Closing only hides a card from the screen; turn it back on from Card list, and it comes to the front.
 - **Pick a language.** **Language** at the top right switches between English and Korean. At first it is Korean only when your browser's first language is Korean, and English otherwise. Your choice is remembered. The city name in the weather card, the clock format, and the push notification text follow it too.
 - **Ten themes.** Default, Skeuomorphism, Flat, Material, Neumorphism, Glassmorphism, Claymorphism, Neo-brutalism, Liquid Glass, and 3D Icons. Your choice is remembered.
 
@@ -98,7 +98,7 @@ Enter an [ntfy](https://ntfy.sh) topic under **Push notifications** at the top r
 
 ## Your data stays yours
 
-There are no accounts. Card layout, visible cards, timer settings, today's focus history, the word list, to-dos, the ntfy topic, the theme, and the language all live only in this browser's `localStorage`. Nothing syncs to other devices.
+There are no accounts. Card layout, visible cards, timer settings, today's focus history, the word list and practice count, to-dos, the ntfy topic, the theme, and the language all live only in this browser's `localStorage`. Nothing syncs to other devices.
 
 These are the only requests that leave your machine:
 
