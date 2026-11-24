@@ -116,3 +116,10 @@
 - 빌드: `npm run build` 성공 (ESLint warning 존재, 빌드 산출물 생성)
 - 배포: `npm run deploy` 성공
   - 결과: `Published`
+
+## 9) 추가 조치 (2026-11-24)
+- 쓰지 않는 예전 연습 코드 19개 파일과 의존성 13개를 삭제했다. 앞서 위험으로 꼽은 `react-router-dom`도 이때 함께 사라졌다. 운영 의존성은 `react`, `react-dom` 둘뿐이다.
+- 배포 번들에는 React 코드만 들어 있다.
+- `npm audit --omit=dev`: `found 0 vulnerabilities`. GitHub Dependabot 열린 경고도 0건이다.
+- 전체(`dev` 포함) `npm audit`는 46건(Critical 3 / High 23 / Moderate 11 / Low 9)이 남는다. 모두 `react-scripts@5.0.1`(CRA)의 빌드·개발 서버 도구에서 나오며 배포물에는 들어가지 않는다. 근본 해결은 CRA를 Vite 등으로 옮기는 것이다.
+- `npm audit fix --force`는 쓰지 않는다. CRA에서는 `react-scripts`를 내용 없는 `0.0.0`으로 내려 webpack, jest, eslint가 통째로 사라진다(실제로 겪었고 복구했다).

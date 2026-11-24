@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Board from './board/Board';
 import {applyTheme, readTheme} from './theme/theme';
-import './index.css';
+import './reset.css';
 import './theme/themes.css';
 
 applyTheme(readTheme(localStorage));

@@ -16,6 +16,7 @@
 - `깃에 올려` 라고 하면 적당한 메시지를 추가해서 git commit/push 해라
 - `배포해` 라고 하면 master 에 병합하고, 태그 추가하고, gh pages 배포해라
   - 먼저 `git fetch` 하고 `origin/master` 를 develop 에 머지해라. Dependabot PR 이 master 로 바로 머지되므로 develop 이 뒤처져 있으면 `--ff-only` 병합이 실패한다.
+- `npm audit fix --force` 는 쓰지 마라. CRA 라서 `react-scripts` 를 `0.0.0` 으로 내려 빌드 도구가 통째로 사라진다. 운영 의존성 점검은 `npm audit --omit=dev` 로 한다.
 
 ## 계획
 
