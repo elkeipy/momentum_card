@@ -27,6 +27,13 @@ test('keeps a card inside the viewport', () => {
   });
 });
 
+test('leaves a card where it is when the extent is unbounded', () => {
+  const layout = {x: 900, y: 700, width: 640, height: 520, pinned: false};
+  expect(clampCardLayout(layout, {width: Infinity, height: Infinity}, 80)).toEqual(
+    layout
+  );
+});
+
 test('keeps a card below the top inset', () => {
   const actual = clampCardLayout(
     {x: 10, y: 0, width: 300, height: 200, pinned: false},

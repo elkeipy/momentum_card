@@ -34,10 +34,30 @@ type DragState = {
   mode: 'move' | 'resize';
   others: CardRect[];
   gap: number;
+  extent: ViewportSize;
 };
 
-function viewportSize(): ViewportSize {
-  return {width: window.innerWidth, height: window.innerHeight};
+// 창이 작아져도 카드를 줄이거나 옮기지 않는다. 넘치는 만큼은 페이지가 스크롤된다.
+const UNBOUNDED: ViewportSize = {width: Infinity, height: Infinity};
+
+// 끌 때는 지금 스크롤되는 페이지 안에서만 움직인다.
+function pageExtent(): ViewportSize {
+  const root = document.documentElement;
+  return {
+    width: Math.max(window.innerWidth, root.scrollWidth),
+    height: Math.max(window.innerHeight, root.scrollHeight)
+  };
+}
+
+// 카드는 페이지에 놓인다. 스크롤한 만큼 더해 페이지 좌표로 바꾼다.
+function pageRect(element: Element): CardRect {
+  const rect = element.getBoundingClientRect();
+  return {
+    x: rect.left + window.scrollX,
+    y: rect.top + window.scrollY,
+    width: rect.width,
+    height: rect.height
+  };
 }
 
 function cardTopInset(): number {
@@ -60,14 +80,14 @@ function cardGap(): number {
 function otherCardRects(self: HTMLElement): CardRect[] {
   return Array.from(document.querySelectorAll(`.${styles.card}`))
     .filter(element => element !== self)
-    .map(element => {
-      const rect = element.getBoundingClientRect();
-      return {x: rect.left, y: rect.top, width: rect.width, height: rect.height};
-    });
+    .map(pageRect);
 }
 
-function boundCardLayout(layout: CardLayout): CardLayout {
-  return clampCardLayout(layout, viewportSize(), cardTopInset());
+function boundCardLayout(
+  layout: CardLayout,
+  extent: ViewportSize = UNBOUNDED
+): CardLayout {
+  return clampCardLayout(layout, extent, cardTopInset());
 }
 
 type StoredCard = CardLayout & {placed?: boolean};
@@ -113,22 +133,14 @@ export default function FeatureCard({
   const t = useT();
 
   const bringToFront = () => {
-    const rect = sectionRef.current?.getBoundingClientRect();
+    const rect = sectionRef.current ? pageRect(sectionRef.current) : null;
     zSeed += 1;
     setZIndex(zSeed);
     if (!rect) {
       return;
     }
     setPlaced(true);
-    setLayout(current =>
-      boundCardLayout({
-        ...current,
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height
-      })
-    );
+    setLayout(current => boundCardLayout({...current, ...rect}));
   };
 
   useEffect(() => {
@@ -159,15 +171,6 @@ export default function FeatureCard({
     bringToFront();
   }, [frontNonce]);
 
-  useEffect(() => {
-    if (!placed) {
-      return;
-    }
-    const onResize = () => setLayout(current => boundCardLayout(current));
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [placed]);
-
   const beginPointer =
     (mode: DragState['mode']) => (event: React.PointerEvent<HTMLElement>) => {
       if (layout.pinned || event.button !== 0) {
@@ -181,28 +184,23 @@ export default function FeatureCard({
       if (!section) {
         return;
       }
-      const rect = section.getBoundingClientRect();
+      const rect = pageRect(section);
       event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
         pointerId: event.pointerId,
         originX: event.clientX,
         originY: event.clientY,
-        startX: rect.left,
-        startY: rect.top,
+        startX: rect.x,
+        startY: rect.y,
         startWidth: rect.width,
         startHeight: rect.height,
         mode,
+        extent: pageExtent(),
         others: otherCardRects(section),
         gap: cardGap()
       };
       if (!placed) {
-        setLayout(current => ({
-          ...current,
-          x: rect.left,
-          y: rect.top,
-          width: rect.width,
-          height: rect.height
-        }));
+        setLayout(current => ({...current, ...rect}));
         setPlaced(true);
       }
       zSeed += 1;
@@ -231,7 +229,7 @@ export default function FeatureCard({
             height: drag.startHeight + dy
           };
     const snapped = snapCardRect(next, drag.others, drag.mode, drag.gap);
-    setLayout(current => boundCardLayout({...current, ...snapped}));
+    setLayout(current => boundCardLayout({...current, ...snapped}, drag.extent));
   };
 
   const endPointer = (event: React.PointerEvent<HTMLElement>) => {

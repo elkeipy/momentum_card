@@ -271,6 +271,30 @@ test('changes only the pomodoro history height with the card', async ({page}) =>
   expect(grownHistory.height).toBeGreaterThan(shrunkHistory.height + 80);
 });
 
+test('keeps cards as they are and scrolls the page when the window shrinks', async ({page}) => {
+  await page.setViewportSize({width: 1280, height: 900});
+  await page.goto('/');
+  const card = page.getByRole('region', {name: '날씨'});
+  const header = card.locator('header');
+  const box = await header.boundingBox();
+  if (!box) {
+    throw new Error('weather header missing');
+  }
+  await page.mouse.move(box.x + box.width / 2, box.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 300, box.y + 210, {steps: 5});
+  await page.mouse.up();
+  const before = await card.boundingBox();
+  await page.setViewportSize({width: 800, height: 600});
+  const after = await card.boundingBox();
+  expect(after).toEqual(before);
+  const scrolls = await page.evaluate(() => ({
+    x: document.documentElement.scrollWidth > window.innerWidth,
+    y: document.documentElement.scrollHeight > window.innerHeight
+  }));
+  expect(scrolls).toEqual({x: true, y: true});
+});
+
 test('switches the board theme and restores the default', async ({page}) => {
   await page.goto('/');
   const theme = page.getByLabel('테마');

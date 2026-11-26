@@ -14,7 +14,7 @@
 }
 
 .card[data-placed='true'] {
-  position: fixed;
+  position: absolute;
 }
 
 .card[data-tone='focus'] {
