@@ -1,6 +1,6 @@
 {
   "name": "momentum_card",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "private": true,
   "dependencies": {
     "react": "^19.3.1",
